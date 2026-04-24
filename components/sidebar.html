@@ -1,0 +1,42 @@
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-slate-900 dark:bg-black font-['Inter'] text-sm tracking-wide fixed left-0 top-0 h-full w-64 border-r border-slate-800 shadow-xl flex flex-col py-6 hidden md:flex z-50">
+  <!-- Logo Section at Top -->
+  <div class="px-6 mb-8 flex items-center gap-3">
+    <img alt="Chitose Logo" class="w-10 h-10 rounded bg-white p-1" src="./assets/logo_chitose.png"/>
+    <div>
+      <div class="text-lg font-black text-white uppercase tracking-wider">Supplier Portal</div>
+      <div class="text-xs text-indigo-400">Chitose</div>
+    </div>
+  </div>
+
+  <!-- Navigation Links -->
+  <div class="flex flex-col gap-2 flex-grow">
+    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./pages/dashboard.html">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Dashboard</span>
+    </a>
+    
+    <!-- Active Tab: Input -->
+    <a class="bg-indigo-600 text-white rounded-md mx-2 px-4 py-2 flex items-center gap-3 active:scale-95 origin-left" href="./pages/input.html">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_document</span>
+      <span>Input</span>
+    </a>
+    
+    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./pages/master-rekap.html">
+      <span class="material-symbols-outlined">analytics</span>
+      <span>Master Rekap</span>
+    </a>
+  </div>
+
+  <!-- Footer Links -->
+  <div class="mt-auto flex flex-col gap-2 border-t border-slate-800 pt-4">
+    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="#">
+      <span class="material-symbols-outlined">help</span>
+      <span>Support</span>
+    </a>
+    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="#">
+      <span class="material-symbols-outlined">logout</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</nav>

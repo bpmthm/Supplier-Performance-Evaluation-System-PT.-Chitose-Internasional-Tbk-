@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Supplier Portal - Smart Wizard Input</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline": "#767685", "on-error": "#ffffff", "primary-fixed-dim": "#bdc2ff",
+            "error": "#ba1a1a", "surface-container-high": "#e5e9eb", "primary-fixed": "#e0e0ff",
+            "on-secondary": "#ffffff", "on-primary-fixed-variant": "#2a36af", "on-tertiary-fixed-variant": "#434750",
+            "surface-container-lowest": "#ffffff", "on-primary-container": "#fffdff", "background": "#f7fafc",
+            "inverse-surface": "#2d3133", "on-background": "#181c1e", "on-primary-fixed": "#000667",
+            "surface-container-low": "#f1f4f6", "primary": "#434fc6", "surface-bright": "#f7fafc",
+            "secondary-container": "#cfe2f9", "on-surface-variant": "#454653", "on-tertiary": "#ffffff",
+            "on-surface": "#181c1e", "on-error-container": "#93000a", "surface-dim": "#d7dadc",
+            "secondary-fixed": "#d1e4fb", "on-tertiary-fixed": "#181b24", "on-tertiary-container": "#fffdff",
+            "tertiary-fixed-dim": "#c4c6d2", "surface-container": "#ebeef0", "on-secondary-container": "#526478",
+            "error-container": "#ffdad6", "inverse-primary": "#bdc2ff", "tertiary-container": "#72757f",
+            "secondary": "#4e6073", "tertiary-fixed": "#e0e2ee", "tertiary": "#595c66",
+            "outline-variant": "#c6c5d6", "surface-tint": "#4551c8", "primary-container": "#5d69e1",
+            "surface": "#f7fafc", "on-secondary-fixed": "#091d2e", "inverse-on-surface": "#eef1f3",
+            "on-primary": "#ffffff", "surface-container-highest": "#e0e3e5", "surface-variant": "#e0e3e5",
+            "secondary-fixed-dim": "#b5c8df", "on-secondary-fixed-variant": "#36485b", "primary-fixed-dim": "#bdc2ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"
+          },
+          "spacing": {
+            "margin-page": "40px", "lg": "32px", "gutter": "24px", "base": "4px",
+            "sm": "16px", "md": "24px", "xs": "8px", "xl": "48px"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"], "headline-md": ["Inter"], "headline-xl": ["Inter"],
+            "body-md": ["Inter"], "body-lg": ["Inter"], "headline-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+            "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { 
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f7fafc 0%, #f0f4f8 100%);
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out; }
+    .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
+    .animate-float { animation: float 3s ease-in-out infinite; }
+    .smooth-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .smooth-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(67, 79, 198, 0.15); }
+  </style>
+</head>
+<body class="bg-background text-on-background flex min-h-screen antialiased">
+
+<!-- SideNavBar -->
+<nav class="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 dark:bg-black font-['Inter'] text-sm tracking-wide fixed left-0 top-0 h-full w-64 border-r border-slate-700/50 shadow-2xl flex flex-col py-6 hidden md:flex z-50">
+  <!-- Logo Section at Top -->
+  <div class="px-6 mb-8 flex items-center gap-3 animate-fadeInUp">
+    <img alt="Chitose Logo" class="w-10 h-10 rounded bg-white p-1 hover:scale-110 transition-transform duration-300" src="../assets/logo_chitose.png"/>
+    <div>
+      <div class="text-lg font-black text-white uppercase tracking-wider">Supplier Portal</div>
+      <div class="text-xs text-indigo-400">Chitose</div>
+    </div>
+  </div>
+
+  <!-- Navigation Links -->
+  <div class="flex flex-col gap-2 flex-grow">
+    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./dashboard.html">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Dashboard</span>
+    </a>
+    
+    <!-- Active Tab: Input -->
+    <a class="bg-indigo-600 text-white rounded-md mx-2 px-4 py-2 flex items-center gap-3 active:scale-95 origin-left" href="./input.html">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_document</span>
+      <span>Input</span>
+    </a>
+    
+    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./master-rekap.html">
+      <span class="material-symbols-outlined">analytics</span>
+      <span>Master Rekap</span>
+    </a>
+  </div>
+
+  <!-- Footer Links -->
+  <div class="mt-auto flex flex-col gap-2 border-t border-slate-800 pt-4">
+    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="#">
+      <span class="material-symbols-outlined">help</span>
+      <span>Support</span>
+    </a>
+    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="#">
+      <span class="material-symbols-outlined">logout</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-64 flex flex-col min-h-screen">
+  <!-- TopNavBar -->
+  <header class="bg-white/95 backdrop-blur-sm dark:bg-gray-900/95 font-['Inter'] antialiased text-sm border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center h-16 px-6 w-full sticky top-0 z-40 shadow-sm">
+    <div class="flex items-center">
+      <div class="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent animate-fadeIn">Quality Input</div>
+    </div>
+    <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400 smooth-hover group">
+      <button class="hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors duration-200 p-2 rounded-full cursor-pointer active:opacity-80 hover:text-slate-900 dark:hover:text-slate-100 flex items-center justify-center">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <button class="hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors duration-200 p-2 rounded-full cursor-pointer active:opacity-80 hover:text-slate-900 dark:hover:text-slate-100 flex items-center justify-center">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+      <button class="hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors duration-200 p-2 rounded-full cursor-pointer active:opacity-80 hover:text-slate-900 dark:hover:text-slate-100 flex items-center justify-center">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Canvas Area -->
+  <main class="flex-1 w-full max-w-[1280px] mx-auto p-8 lg:p-margin-page">
+    <div class="mb-lg animate-fadeInUp">
+      <h1 class="font-headline-xl text-headline-xl bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">Smart Wizard</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-2">Complete the required quality control parameters.</p>
+    </div>
+
+    <!-- Stepper Component -->
+    <div class="w-full mb-xl animate-fadeInUp" style="animation-delay: 100ms;">
+      <div class="flex items-center">
+        <!-- Step 1: Completed -->
+        <div class="flex items-center relative animate-fadeInUp" style="animation-delay: 150ms;">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-indigo-600 text-on-primary flex items-center justify-center font-label-sm text-label-sm z-10 shadow-lg shadow-primary/50 group-hover:scale-110 transition-transform duration-300">
+            <span class="material-symbols-outlined text-[18px]">check</span>
+          </div>
+          <div class="ml-4 font-label-sm text-label-sm text-on-surface">Header</div>
+        </div>
+        <!-- Connector -->
+        <div class="flex-auto border-t-2 border-primary mx-4"></div>
+        <!-- Step 2: Active -->
+        <div class="flex items-center relative">
+          <div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container border-2 border-primary-container flex items-center justify-center font-label-sm text-label-sm z-10">2</div>
+          <div class="ml-4 font-label-sm text-label-sm text-primary">Division Input</div>
+        </div>
+        <!-- Connector -->
+        <div class="flex-auto border-t-2 border-surface-variant mx-4"></div>
+        <!-- Step 3: Pending -->
+        <div class="flex items-center relative">
+          <div class="w-10 h-10 rounded-full bg-surface-container-lowest text-on-surface-variant border-2 border-outline-variant flex items-center justify-center font-label-sm text-label-sm z-10">3</div>
+          <div class="ml-4 font-label-sm text-label-sm text-on-surface-variant">Review & Submit</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+      <!-- Left Column: Active Input (8/12) -->
+      <div class="lg:col-span-8">
+        <!-- QC Simple Card -->
+        <div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-8 h-full flex flex-col justify-center relative overflow-hidden">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <h3 class="font-headline-md text-headline-md text-on-surface">Quality Control Assessment</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant mt-1">Enter the calculated Not Good (NG) percentage for the current batch.</p>
+            </div>
+            <span class="material-symbols-outlined text-outline-variant text-[32px]">analytics</span>
+          </div>
+          <div class="mt-4">
+            <label class="block font-label-sm text-label-sm text-on-surface-variant mb-3 uppercase" for="ng-input">Raw Data Input (% NG)</label>
+            <div class="flex items-center gap-6">
+              <input class="block w-48 border-b-2 border-surface-variant focus:border-primary bg-transparent py-2 px-0 text-headline-xl font-headline-xl text-on-surface focus:ring-0 transition-colors" id="ng-input" placeholder="0.0" type="text" value="0.2"/>
+              <!-- Custom Success Badge (Live Feedback) -->
+              <div class="px-4 py-2 rounded-full font-label-sm text-label-sm flex items-center gap-2 transition-all duration-300" style="background-color: #e6f4ea; color: #137333;">
+                <span class="material-symbols-outlined text-[16px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                30 Poin - BAIK
+              </div>
+            </div>
+            <p class="text-xs text-outline mt-2 italic">Score automatically calculated based on defined thresholds.</p>
+          </div>
+          <div class="mt-xl pt-6 border-t border-surface-variant flex items-center justify-between">
+            <!-- Real-Time Scoring Footer -->
+            <div class="flex items-center gap-4 bg-surface-container-low px-4 py-2 rounded-lg border border-surface-variant">
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Running Score:</span>
+              <span class="font-headline-md text-headline-md text-primary">60</span>
+              <div class="h-4 w-px bg-outline-variant"></div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Grade:</span>
+              <span class="font-headline-md text-headline-md text-primary">C</span>
+            </div>
+            <div class="flex gap-4">
+              <button class="px-6 py-2 border border-outline font-label-sm text-label-sm rounded text-on-surface hover:bg-surface-container-low transition-colors h-[40px]">
+                Save Draft
+              </button>
+              <button class="px-6 py-2 bg-primary font-label-sm text-label-sm rounded text-on-primary hover:bg-primary/90 transition-colors h-[40px] flex items-center gap-2">
+                Continue
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Locked Divisions (4/12) -->
+      <div class="lg:col-span-4 flex flex-col gap-4">
+        <h3 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Other Divisions Preview</h3>
+        <!-- Locked Card 1 (PPIC) -->
+        <div class="bg-surface-container-low border border-surface-variant rounded-lg p-4 opacity-75 cursor-not-allowed">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[20px] text-outline">inventory_2</span>
+              <h4 class="font-headline-md text-[16px] leading-snug font-semibold text-on-surface">PPIC</h4>
+            </div>
+            <span class="material-symbols-outlined text-outline">lock</span>
+          </div>
+          <p class="font-body-md text-[13px] text-on-surface-variant leading-relaxed">Production Planning and Inventory Control data is restricted.</p>
+        </div>
+
+        <!-- Locked Accordion Card (Pricing/PCH) -->
+        <div class="bg-surface-container-low border border-surface-variant rounded-lg overflow-hidden opacity-80 cursor-not-allowed">
+          <div class="p-4 bg-surface-variant/30 flex items-center justify-between border-b border-surface-variant">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[20px] text-outline">expand_more</span>
+              <h4 class="font-headline-md text-[16px] leading-snug font-semibold text-on-surface">Harga / Biaya</h4>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold text-outline uppercase tracking-wider">Input by Purchasing</span>
+              <span class="material-symbols-outlined text-outline text-[18px]">lock</span>
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-3 bg-surface-container-lowest/50">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">money</span>Harga</span>
+              <span class="text-xs text-outline italic">Restricted</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">shopping_cart</span>MOQ</span>
+              <span class="text-xs text-outline italic">Restricted</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">payments</span>Term of Payment</span>
+              <span class="text-xs text-outline italic">Restricted</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Locked Card (HSE) -->
+        <div class="bg-surface-container-low border border-surface-variant rounded-lg p-4 opacity-75 cursor-not-allowed flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-outline">health_and_safety</span>
+            <div>
+              <h4 class="font-headline-md text-[16px] leading-snug font-semibold text-on-surface">HSE</h4>
+              <p class="font-body-md text-[12px] text-on-surface-variant mt-0.5">Health, Safety & Environment</p>
+            </div>
+          </div>
+          <div class="flex flex-col items-end">
+            <span class="material-symbols-outlined text-outline mb-1 text-[18px]">lock</span>
+            <span class="text-[10px] font-semibold text-outline uppercase tracking-wider">Input by HSE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

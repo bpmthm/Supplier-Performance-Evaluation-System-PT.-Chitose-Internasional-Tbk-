@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Supplier Health Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#454653",
+                        "primary-container": "#5d69e1",
+                        "on-secondary-fixed": "#091d2e",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#434750",
+                        "tertiary-container": "#72757f",
+                        "surface-bright": "#f7fafc",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#4551c8",
+                        "background": "#f7fafc",
+                        "surface-dim": "#d7dadc",
+                        "inverse-on-surface": "#eef1f3",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#fffdff",
+                        "on-secondary-container": "#526478",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#ebeef0",
+                        "on-primary-fixed-variant": "#2a36af",
+                        "on-background": "#181c1e",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#d1e4fb",
+                        "surface-container-high": "#e5e9eb",
+                        "tertiary-fixed": "#e0e2ee",
+                        "surface": "#f7fafc",
+                        "tertiary": "#595c66",
+                        "primary-fixed": "#e0e0ff",
+                        "outline": "#767685",
+                        "on-surface": "#181c1e",
+                        "inverse-primary": "#bdc2ff",
+                        "secondary-container": "#cfe2f9",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#000667",
+                        "on-secondary-fixed-variant": "#36485b",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-low": "#f1f4f6",
+                        "primary-fixed-dim": "#bdc2ff",
+                        "on-tertiary-fixed": "#181b24",
+                        "primary": "#434fc6",
+                        "secondary": "#4e6073",
+                        "surface-container-highest": "#e0e3e5",
+                        "outline-variant": "#c6c5d6",
+                        "secondary-fixed-dim": "#b5c8df",
+                        "on-primary-container": "#fffdff",
+                        "tertiary-fixed-dim": "#c4c6d2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "gutter": "24px",
+                        "md": "24px",
+                        "base": "4px",
+                        "lg": "32px",
+                        "xl": "48px",
+                        "sm": "16px",
+                        "margin-page": "40px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Smooth animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Utility animations */
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .animate-slideInLeft {
+            animation: slideInLeft 0.5s ease-out;
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Smooth hover transitions */
+        .smooth-hover {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        /* Focus states */
+        .focus-ring {
+            outline: none;
+            ring: 2px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background flex min-h-screen antialiased">
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl font-['Inter'] text-sm tracking-wide fixed left-0 top-0 h-full w-64 border-r border-slate-800 flex flex-col py-6 hidden md:flex z-50">
+<div class="px-6 mb-8 flex items-center gap-3 animate-fadeInUp">
+<img alt="Company Logo" class="w-8 h-8 rounded bg-white p-1 hover:scale-110 transition-transform duration-300" data-alt="minimalist modern corporate geometric logo mark in blue and grey" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYNR-zkTXKBVqYMGowFtscIh0j8F21HZGtjMToRWI29i9lRsRN9UIu2vsYQT4y5wHZvi6iQJaFSEYA9sMqrDmqIJC0AdTCm1RFK4d46VErBPEYomuyZl34GPxi18QbWoLiNLA6AxYhm3N6O2KCuimfwYKKcgAVL4f7m-23jFN_7BgUf3GvwgMaM08PYXvVpWdugG_88ZpNbg7dnKJ4h5NvwIEZLRDZDFUcBYJOGpDWPJhz9GuqcYyOev8rAfiAtTznlPOaiH7o3l8"/>
+<div>
+<div class="text-lg font-black text-white uppercase tracking-wider">Supplier Portal</div>
+<div class="text-xs text-indigo-400">Industrial Supply Co.</div>
+</div>
+</div>
+<div class="flex flex-col gap-2 flex-grow">
+<!-- Active Tab: Dashboard -->
+<a class="bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-lg mx-2 px-4 py-2.5 flex items-center gap-3 active:scale-95 origin-left transition-all duration-300 shadow-lg shadow-indigo-600/50 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform duration-300" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800/50 transition-all duration-150 active:scale-95 origin-left rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 group-hover:text-indigo-400 transition-all duration-300">edit_document</span>
+<span>Input</span>
+</a>
+<a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800/50 transition-all duration-150 active:scale-95 origin-left rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 group-hover:text-indigo-400 transition-all duration-300">analytics</span>
+<span>Master Rekap</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col gap-2 border-t border-slate-800 pt-4">
+<a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800/50 transition-all duration-150 active:scale-95 origin-left rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 group-hover:text-indigo-400 transition-all duration-300">help</span>
+<span>Support</span>
+</a>
+<a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800/50 transition-all duration-150 active:scale-95 origin-left rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 group-hover:text-indigo-400 transition-all duration-300">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-64 flex flex-col min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-white dark:bg-gray-900 font-['Inter'] antialiased text-sm border-b border-gray-200 dark:border-gray-800 flex justify-between items-center h-16 px-6 w-full sticky top-0 z-40 backdrop-blur-sm bg-white/95 shadow-sm">
+<div class="flex items-center animate-fadeIn">
+<div class="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">Supplier Health Command Center</div>
+</div>
+<div class="flex items-center gap-4 text-slate-500 dark:text-slate-400">
+<button class="hover:bg-slate-50 dark:hover:bg-gray-800 transition-all duration-300 p-2 rounded-full cursor-pointer active:opacity-80 hover:text-slate-900 dark:hover:text-slate-100 flex items-center justify-center group hover:scale-110">
+<span class="material-symbols-outlined group-hover:rotate-12 transition-transform duration-300">notifications</span>
+</button>
+<button class="hover:bg-slate-50 dark:hover:bg-gray-800 transition-all duration-300 p-2 rounded-full cursor-pointer active:opacity-80 hover:text-slate-900 dark:hover:text-slate-100 flex items-center justify-center group hover:scale-110">
+<span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">settings</span>
+</button>
+<button class="hover:bg-slate-50 dark:hover:bg-gray-800 transition-all duration-300 p-2 rounded-full cursor-pointer active:opacity-80 hover:text-slate-900 dark:hover:text-slate-100 flex items-center justify-center group hover:scale-110">
+<span class="material-symbols-outlined group-hover:scale-125 transition-transform duration-300" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Page Content -->
+<main class="flex-1 w-full max-w-[1280px] mx-auto p-8 lg:p-margin-page">
+<div class="mb-lg">
+<h1 class="font-headline-xl text-headline-xl bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent animate-fadeInUp">Supplier Health Command Center</h1>
+<p class="font-body-md text-body-md text-on-surface-variant animate-fadeInUp" style="animation-delay: 100ms;">Real-time overview of supplier performance and critical alerts.</p>
+</div>
+<!-- Top Row KPIs: Bento Grid Style -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter animate-fadeInUp" style="animation-delay: 200ms;">
+<!-- KPI 1: Total Supplier -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-md flex flex-col justify-between smooth-hover transition-all duration-300 hover:shadow-lg hover:border-primary/50 animate-fadeInUp group" style="animation-delay: 100ms;">
+<div class="flex justify-between items-start mb-sm">
+<div class="bg-gradient-to-br from-primary-container to-primary bg-opacity-20 p-2 rounded-DEFAULT text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined">factory</span>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary">NETWORK</span>
+</div>
+<div>
+<h3 class="font-headline-xl text-headline-xl text-on-surface">142</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Total Suppliers</p>
+</div>
+</div>
+<!-- KPI 2: Top Performer -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-md flex flex-col justify-between relative overflow-hidden smooth-hover transition-all duration-300 hover:shadow-lg hover:border-secondary/50 animate-fadeInUp group" style="animation-delay: 150ms;">
+<div class="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-secondary-container to-transparent opacity-30 rounded-bl-full group-hover:opacity-50 transition-opacity duration-300"></div>
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div class="bg-gradient-to-br from-secondary-container to-secondary p-2 rounded-DEFAULT text-on-secondary-container group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined">workspace_premium</span>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary bg-surface-container-high px-2 py-1 rounded-DEFAULT">GRADE A</span>
+</div>
+<div class="relative z-10">
+<h3 class="font-headline-xl text-headline-xl text-on-surface">38</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Top Performers</p>
+</div>
+</div>
+<!-- KPI 3: Critical Supplier -->
+<div class="bg-surface-container-lowest border border-error-container border-l-4 border-l-error rounded-lg p-md flex flex-col justify-between smooth-hover transition-all duration-300 hover:shadow-lg hover:shadow-error/20 animate-fadeInUp group" style="animation-delay: 200ms;">
+<div class="flex justify-between items-start mb-sm">
+<div class="bg-gradient-to-br from-error-container to-error p-2 rounded-DEFAULT text-error group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<span class="font-label-sm text-label-sm text-error">ATTENTION</span>
+</div>
+<div>
+<h3 class="font-headline-xl text-headline-xl text-error">12</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Critical Suppliers (Grade C)</p>
+</div>
+</div>
+<!-- KPI 4: Pending Input -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-md flex flex-col justify-between smooth-hover transition-all duration-300 hover:shadow-lg hover:border-tertiary/50 animate-fadeInUp group" style="animation-delay: 250ms;">
+<div class="flex justify-between items-start mb-sm">
+<div class="bg-gradient-to-br from-tertiary-container to-tertiary bg-opacity-20 p-2 rounded-DEFAULT text-tertiary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary">ACTION REQ</span>
+</div>
+<div>
+<h3 class="font-headline-xl text-headline-xl text-on-surface">8</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Pending Input</p>
+</div>
+</div>
+</div>
+<!-- Middle Row: Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mb-gutter animate-fadeInUp" style="animation-delay: 300ms;">
+<!-- Radar Chart Mockup -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-md smooth-hover transition-all duration-300 hover:shadow-lg group overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-center mb-md">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Division Performance</h3>
+<p class="text-label-sm text-on-surface-variant mt-1">Performance across key metrics</p>
+</div>
+<button class="text-primary hover:bg-surface-container p-1 rounded-DEFAULT transition-colors hover:scale-110 duration-300">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="relative w-full px-16 py-12">
+<div class="relative w-full aspect-square max-h-[280px] mx-auto flex items-center justify-center">
+<!-- SVG Radar Chart -->
+<svg class="w-full h-full" viewBox="0 0 200 200">
+<!-- Background Grid -->
+<defs>
+<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+<feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+<feMerge>
+<feMergeNode in="coloredBlur"/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+</filter>
+</defs>
+
+<!-- Concentric hexagons -->
+<polygon fill="none" points="100,30 160,60 160,120 100,150 40,120 40,60" stroke="#cbd5e1" stroke-width="1" opacity="0.3"></polygon>
+<polygon fill="none" points="100,50 140,75 140,125 100,150 60,125 60,75" stroke="#cbd5e1" stroke-width="0.8" opacity="0.2"></polygon>
+<polygon fill="none" points="100,70 120,85 120,115 100,130 80,115 80,85" stroke="#cbd5e1" stroke-width="0.8" opacity="0.15"></polygon>
+
+<!-- Axes -->
+<line x1="100" y1="100" x2="100" y2="30" stroke="#94a3b8" stroke-width="1" opacity="0.4"></line>
+<line x1="100" y1="100" x2="160" y2="60" stroke="#94a3b8" stroke-width="1" opacity="0.4"></line>
+<line x1="100" y1="100" x2="160" y2="120" stroke="#94a3b8" stroke-width="1" opacity="0.4"></line>
+<line x1="100" y1="100" x2="100" y2="170" stroke="#94a3b8" stroke-width="1" opacity="0.4"></line>
+<line x1="100" y1="100" x2="40" y2="120" stroke="#94a3b8" stroke-width="1" opacity="0.4"></line>
+<line x1="100" y1="100" x2="40" y2="60" stroke="#94a3b8" stroke-width="1" opacity="0.4"></line>
+
+<!-- Data Polygon with Gradient -->
+<polygon fill="url(#radarGradient)" fill-opacity="0.25" points="100,40 150,75 145,130 100,160 55,130 50,65" stroke="#434fc6" stroke-width="2.5" filter="url(#glow)"></polygon>
+
+<!-- Data Points -->
+<circle cx="100" cy="40" fill="#434fc6" r="3.5"></circle>
+<circle cx="150" cy="75" fill="#434fc6" r="3.5"></circle>
+<circle cx="145" cy="130" fill="#434fc6" r="3.5"></circle>
+<circle cx="100" cy="160" fill="#434fc6" r="3.5"></circle>
+<circle cx="55" cy="130" fill="#434fc6" r="3.5"></circle>
+<circle cx="50" cy="65" fill="#434fc6" r="3.5"></circle>
+
+<!-- Gradient Definition -->
+<defs>
+<linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:#434fc6;stop-opacity:1" />
+<stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+</linearGradient>
+</defs>
+</svg>
+</div>
+
+<!-- Axis Labels - Outside SVG -->
+<div class="absolute inset-x-0 top-0 flex justify-center items-start">
+<div class="text-center">
+<p class="text-label-sm font-semibold text-on-surface whitespace-nowrap">Quality</p>
+<p class="text-xs text-on-surface-variant font-medium">92%</p>
+</div>
+</div>
+
+<div class="absolute right-0 top-1/4 flex justify-center items-center">
+<div class="text-center pr-2">
+<p class="text-label-sm font-semibold text-on-surface whitespace-nowrap">Delivery</p>
+<p class="text-xs text-on-surface-variant font-medium">88%</p>
+</div>
+</div>
+
+<div class="absolute right-0 bottom-1/4 flex justify-center items-center">
+<div class="text-center pr-2">
+<p class="text-label-sm font-semibold text-on-surface whitespace-nowrap">Cost</p>
+<p class="text-xs text-on-surface-variant font-medium">85%</p>
+</div>
+</div>
+
+<div class="absolute inset-x-0 bottom-0 flex justify-center items-end">
+<div class="text-center">
+<p class="text-label-sm font-semibold text-on-surface whitespace-nowrap">Service</p>
+<p class="text-xs text-on-surface-variant font-medium">90%</p>
+</div>
+</div>
+
+<div class="absolute left-0 bottom-1/4 flex justify-center items-center">
+<div class="text-center pl-2">
+<p class="text-label-sm font-semibold text-on-surface whitespace-nowrap">Innovation</p>
+<p class="text-xs text-on-surface-variant font-medium">80%</p>
+</div>
+</div>
+
+<div class="absolute left-0 top-1/4 flex justify-center items-center">
+<div class="text-center pl-2">
+<p class="text-label-sm font-semibold text-on-surface whitespace-nowrap">Compliance</p>
+<p class="text-xs text-on-surface-variant font-medium">87%</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bar Chart Mockup -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-md">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Top 5 Score Increases</h3>
+<span class="font-label-sm text-label-sm text-tertiary bg-surface-container px-2 py-1 rounded-DEFAULT">THIS QUARTER</span>
+</div>
+<div class="space-y-4 mt-sm">
+<!-- Bar 1 -->
+<div>
+<div class="flex justify-between font-body-md text-body-md mb-1">
+<span class="text-on-surface font-semibold">Apex Industrial Metals</span>
+<span class="text-primary font-semibold">+18.5 pts</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<!-- Bar 2 -->
+<div>
+<div class="flex justify-between font-body-md text-body-md mb-1">
+<span class="text-on-surface font-semibold">Global Logistics Corp</span>
+<span class="text-primary font-semibold">+15.2 pts</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 70%"></div>
+</div>
+</div>
+<!-- Bar 3 -->
+<div>
+<div class="flex justify-between font-body-md text-body-md mb-1">
+<span class="text-on-surface font-semibold">TechSys Electronics</span>
+<span class="text-primary font-semibold">+12.8 pts</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 60%"></div>
+</div>
+</div>
+<!-- Bar 4 -->
+<div>
+<div class="flex justify-between font-body-md text-body-md mb-1">
+<span class="text-on-surface font-semibold">Northern Polymers</span>
+<span class="text-primary font-semibold">+10.1 pts</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 45%"></div>
+</div>
+</div>
+<!-- Bar 5 -->
+<div>
+<div class="flex justify-between font-body-md text-body-md mb-1">
+<span class="text-on-surface font-semibold">Precision Machining</span>
+<span class="text-primary font-semibold">+8.4 pts</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 35%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Warning Ticker (Bottom) -->
+<div class="bg-error-container border border-error bg-opacity-20 rounded-lg p-sm flex items-center gap-md">
+<div class="bg-error text-on-error p-1 rounded-DEFAULT flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">campaign</span>
+</div>
+<div class="overflow-hidden whitespace-nowrap w-full">
+<div class="font-body-md text-body-md text-on-error-container font-semibold truncate">
+                        CRITICAL ALERT: 3 Suppliers in Eastern Region dropping below Grade C thresholds. Immediate review required in "Master Rekap" module.
+                    </div>
+</div>
+<button class="shrink-0 text-error hover:bg-error hover:bg-opacity-10 px-3 py-1 rounded-DEFAULT font-label-sm text-label-sm transition-colors border border-error">
+                    VIEW DETAILS
+                </button>
+</div>
+</div>
+</main>
+</body></html>
