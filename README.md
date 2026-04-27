@@ -12,14 +12,6 @@ stitch_chitose_supplier_performance_dashboard/
 │   ├── dashboard.html        # Dashboard - Overview supplier health
 │   ├── input.html           # Smart Wizard - Input data kualitas
 │   └── master-rekap.html    # Master Rekap - Heatmap performa supplier
-├── industrial_supplier_portal/
-│   └── DESIGN.md            # File dokumentasi desain
-├── dashboard_supplier_health_command_center_modern_refinement/
-│   └── code.html            # File original dashboard
-├── master_rekap_the_interactive_heatmap_clean_theme/
-│   └── code.html            # File original master rekap
-└── smart_wizard_modern_unified_design/
-    └── code.html            # File original smart wizard
 ```
 
 ## 🎨 Fitur Utama
