@@ -32,20 +32,51 @@ async function getPenilaian(filters = {}) {
   }
 }
 
+// --- Fungsi Save Data Form (Pake jalur UPSERT) ---
 async function savePenilaian(data) {
   try {
-    const response = await fetch(`${API_BASE_URL}/penilaian`, {
-      method: 'POST',
+    const response = await fetch(`${API_BASE_URL}/penilaian/upsert`, {
+      method: 'POST', // Selalu pake POST karena UPSERT yang ngurusin logic-nya di BE
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const result = await response.json();
-    return result;
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.messages?.error || err.message || `HTTP Error ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
-    console.error('Error saving penilaian:', error);
+    console.error('Error saving data:', error);
+    throw error;
+  }
+}
+// --- Fungsi Khusus Upload File PPIC ---
+async function uploadPpicFile(file, supplierId, periode) {
+  try {
+    const formData = new FormData();
+    formData.append('ppic_file', file);
+    formData.append('supplier_id', supplierId);
+    formData.append('periode', periode);
+
+    // Kalo pake FormData, JANGAN set 'Content-Type' manual di headers.
+    // Browser bakal otomatis ngeset jadi 'multipart/form-data' plus masukin boundary-nya.
+    const response = await fetch(`${API_BASE_URL}/penilaian/upload-ppic`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.messages?.error || `HTTP Error ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error uploading PPIC:', error);
     throw error;
   }
 }
