@@ -161,3 +161,22 @@ function getGradeLabel(grade) {
   if (grade === 'C') return 'Kurang (C)';
   return 'N/A';
 }
+
+// Endpoint khusus buat narik QTY dari SAP
+async function getQtyDariSAP(kodeVendor, periode) {
+  try {
+    // Di input.html, format periode itu "YYYY-MM" (contoh: 2026-03), kita pecah dulu
+    const [tahun, bulan] = periode.split('-');
+    
+    // Nembak ke endpoint CI4
+    const url = `${API_BASE_URL}/supplier/get-qty?kode_vendor=${kodeVendor}&bulan=${bulan}&tahun=${tahun}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+    
+  } catch (error) {
+    console.error('Gagal narik QTY dari SAP:', error);
+    return null;
+  }
+}

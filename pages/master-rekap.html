@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Supplier Portal - Master Rekap</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -41,295 +43,264 @@
             "body-md": ["Inter"], "body-lg": ["Inter"], "headline-lg": ["Inter"]
           },
           "fontSize": {
-            "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
-            "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
-            "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-            "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-            "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
           }
         }
       }
     }
   </script>
   <style>
-    body { 
+    body {
       font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #f7fafc 0%, #f0f4f8 100%);
     }
-    
+
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    
+
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
-    
+
     @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
     }
-    
-    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out; }
-    .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
-    .animate-float { animation: float 3s ease-in-out infinite; }
-    .smooth-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .smooth-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(67, 79, 198, 0.15); }
+
+    .animate-fadeInUp {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .animate-fadeIn {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .smooth-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .smooth-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(67, 79, 198, 0.15);
+    }
   </style>
 </head>
+
 <body class="bg-background text-on-background flex min-h-screen antialiased">
 
-<!-- SideNavBar -->
-<nav class="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 dark:bg-black font-['Inter'] text-sm tracking-wide fixed left-0 top-0 h-full w-64 border-r border-slate-700/50 shadow-2xl flex flex-col py-6 hidden md:flex z-50">
-  <!-- Logo Section at Top -->
-  <div class="px-6 mb-8 flex items-center gap-3 animate-fadeInUp">
-    <img alt="Chitose Logo" class="w-10 h-10 rounded bg-white p-1 hover:scale-110 transition-transform duration-300" src="../assets/logo_chitose.png"/>
-    <div>
-      <div class="text-lg font-black text-white uppercase tracking-wider">Supplier Portal</div>
-      <div class="text-xs text-indigo-400">Chitose</div>
-    </div>
-  </div>
-
-  <!-- Navigation Links -->
-  <div class="flex flex-col gap-2 flex-grow">
-    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./dashboard.html">
-      <span class="material-symbols-outlined">dashboard</span>
-      <span>Dashboard</span>
-    </a>
-    
-    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./input.html">
-      <span class="material-symbols-outlined">edit_document</span>
-      <span>Input</span>
-    </a>
-    
-    <!-- Active Tab: Master Rekap -->
-    <a class="bg-indigo-600 text-white rounded-md mx-2 px-4 py-2 flex items-center gap-3 active:scale-95 origin-left" href="./master-rekap.html">
-      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
-      <span>Master Rekap</span>
-    </a>
-  </div>
-
-  <!-- Footer Links -->
-  <div class="mt-auto flex flex-col gap-2 border-t border-slate-800 pt-4">
-    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="#">
-      <span class="material-symbols-outlined">help</span>
-      <span>Support</span>
-    </a>
-    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="#">
-      <span class="material-symbols-outlined">logout</span>
-      <span>Logout</span>
-    </a>
-  </div>
-</nav>
-
-<!-- Main Content Area -->
-<div class="flex-1 md:ml-64 flex flex-col min-h-screen">
-  <!-- TopNavBar -->
-  <header class="docked full-width top-0 h-16 border-b border-gray-200/50 dark:border-slate-800 flex justify-between items-center px-6 w-full sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
-    <div class="flex items-center">
-      <span class="text-lg font-bold bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent animate-fadeIn mr-8">Master Rekap</span>
-    </div>
-    <div class="flex items-center space-x-6 smooth-hover group">
-      <div class="relative hidden md:block">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-        <input class="pl-10 pr-4 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none w-64" placeholder="Search..." type="text"/>
-      </div>
-      <div class="flex items-center space-x-4 text-primary dark:text-indigo-400">
-        <button class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
-          <span class="material-symbols-outlined">notifications</span>
-        </button>
-        <button class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
-          <span class="material-symbols-outlined">help_outline</span>
-        </button>
-        <button class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
-          <span class="material-symbols-outlined">settings</span>
-        </button>
-        <div class="w-8 h-8 rounded-full bg-surface-variant border border-outline overflow-hidden ml-2">
-          <img alt="User avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC724qIeyrSkls5cSaWTRN-_7P9N79dK0AYsjnIzDIj__KdbJy0lMDI1A-H7mugzjDyyVc3HZukQuBILp6lAmwpFeiCE_Tznz3Z-rg81L0OhdgtPJJkYpkPLjsTJZd68X2iB_Q95u0cWlnsU5q0qiCJHkIhwDEWX0wy1ZIJwRfKyeTEXGvF7NBcNaG8keDbCNyLPlpUKO3DfmF498eUZSCHI1MJIFdY8dbBIFuIwHO8BRuCumj5Mo9FS8bwRfH3DifroWKgNTqNVqg"/>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Page Content -->
-  <main class="flex-1 p-margin-page overflow-y-auto">
-    <!-- Page Header & Actions -->
-    <div class="flex justify-between items-end mb-lg animate-fadeInUp">
+  <!-- SideNavBar -->
+  <nav
+    class="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 dark:bg-black font-['Inter'] text-sm tracking-wide fixed left-0 top-0 h-full w-64 border-r border-slate-700/50 shadow-2xl flex flex-col py-6 hidden md:flex z-50">
+    <!-- Logo Section at Top -->
+    <div class="px-6 mb-8 flex items-center gap-3 animate-fadeInUp">
+      <img alt="Chitose Logo" class="w-10 h-10 rounded bg-white p-1 hover:scale-110 transition-transform duration-300"
+        src="../assets/logo_chitose.png" />
       <div>
-        <h2 class="font-headline-xl text-headline-xl bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent mb-xs">Master Rekap: Interactive Heatmap</h2>
-        <p class="font-body-md text-body-md text-on-surface-variant">Comprehensive supplier performance evaluation based on key logistics metrics.</p>
+        <div class="text-lg font-black text-white uppercase tracking-wider">Supplier Portal</div>
+        <div class="text-xs text-indigo-400">Chitose</div>
       </div>
-      <button class="flex items-center bg-gradient-to-r from-primary to-indigo-600 text-on-primary px-4 h-10 rounded-DEFAULT font-label-sm text-label-sm uppercase hover:shadow-lg hover:shadow-primary/50 transition-all duration-300 shadow-sm smooth-hover animate-fadeInUp" style="animation-delay: 100ms;">
-        <span class="material-symbols-outlined mr-2 text-[18px] group-hover:scale-110 transition-transform duration-300">picture_as_pdf</span>
-        Print PDF Report
-      </button>
     </div>
 
-    <!-- Heatmap Legend & Filters -->
-    <div class="bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl p-sm mb-lg flex items-center justify-between shadow-sm smooth-hover animate-fadeInUp" style="animation-delay: 150ms;">
-      <div class="flex space-x-6 items-center">
-        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Performance Heatmap:</span>
-        <div class="flex items-center space-x-2">
-          <div class="w-4 h-4 rounded-sm bg-gradient-to-br from-error-container to-red-200 border border-error/20"></div>
-          <span class="font-body-md text-body-md text-on-surface">Kurang (Poor)</span>
+    <!-- Navigation Links -->
+    <div class="flex flex-col gap-2 flex-grow" id="nav-links">
+      <a id="nav-dashboard"
+        class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left"
+        href="./dashboard.html">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+
+      <a id="nav-input"
+        class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left"
+        href="./input.html">
+        <span class="material-symbols-outlined">edit_document</span>
+        <span>Input</span>
+      </a>
+
+      <!-- Active Tab: Master Rekap -->
+      <a id="nav-rekap"
+        class="bg-indigo-600 text-white rounded-md mx-2 px-4 py-2 flex items-center gap-3 active:scale-95 origin-left"
+        href="./master-rekap.html">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+        <span>Master Rekap</span>
+      </a>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="mt-auto flex flex-col gap-2 border-t border-slate-800 pt-4">
+      <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left"
+        href="#">
+        <span class="material-symbols-outlined">help</span>
+        <span>Support</span>
+      </a>
+      <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left"
+        href="#">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Logout</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
+    <!-- TopNavBar -->
+    <header
+      class="docked full-width top-0 h-16 border-b border-gray-200/50 dark:border-slate-800 flex justify-between items-center px-6 w-full sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
+      <div class="flex items-center">
+        <span
+          class="text-lg font-bold bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent animate-fadeIn mr-8">Master
+          Rekap</span>
+      </div>
+      <div class="flex items-center space-x-6 smooth-hover group">
+        <div class="relative hidden md:block">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+          <input
+            class="pl-10 pr-4 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none w-64"
+            placeholder="Search..." type="text" />
         </div>
-        <div class="flex items-center space-x-2">
-          <div class="w-4 h-4 rounded-sm bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-300/50"></div>
-          <span class="font-body-md text-body-md text-on-surface">Cukup (Fair)</span>
+        <div class="flex items-center space-x-4 text-primary dark:text-indigo-400">
+          <button
+            class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button
+            class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
+            <span class="material-symbols-outlined">help_outline</span>
+          </button>
+          <button
+            class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="w-8 h-8 rounded-full bg-surface-variant border border-outline overflow-hidden ml-2">
+            <img alt="User avatar" class="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuC724qIeyrSkls5cSaWTRN-_7P9N79dK0AYsjnIzDIj__KdbJy0lMDI1A-H7mugzjDyyVc3HZukQuBILp6lAmwpFeiCE_Tznz3Z-rg81L0OhdgtPJJkYpkPLjsTJZd68X2iB_Q95u0cWlnsU5q0qiCJHkIhwDEWX0wy1ZIJwRfKyeTEXGvF7NBcNaG8keDbCNyLPlpUKO3DfmF498eUZSCHI1MJIFdY8dbBIFuIwHO8BRuCumj5Mo9FS8bwRfH3DifroWKgNTqNVqg" />
+          </div>
         </div>
-        <div class="flex items-center space-x-2">
-          <div class="w-4 h-4 rounded-sm bg-secondary-container border border-secondary/20"></div>
-          <span class="font-body-md text-body-md text-on-surface">Baik (Good)</span>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="flex-1 p-margin-page overflow-y-auto">
+      <!-- Page Header & Actions -->
+      <div class="flex justify-between items-end mb-lg animate-fadeInUp">
+        <div>
+          <h2
+            class="font-headline-xl text-headline-xl bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent mb-xs">
+            Master Rekap: Interactive Heatmap</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant">Comprehensive supplier performance evaluation
+            based on key logistics metrics.</p>
+        </div>
+        <button
+          class="flex items-center bg-gradient-to-r from-primary to-indigo-600 text-on-primary px-4 h-10 rounded-DEFAULT font-label-sm text-label-sm uppercase hover:shadow-lg hover:shadow-primary/50 transition-all duration-300 shadow-sm smooth-hover animate-fadeInUp"
+          style="animation-delay: 100ms;">
+          <span
+            class="material-symbols-outlined mr-2 text-[18px] group-hover:scale-110 transition-transform duration-300">picture_as_pdf</span>
+          Print PDF Report
+        </button>
+      </div>
+
+      <!-- Heatmap Legend & Filters -->
+      <div
+        class="bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl p-sm mb-lg flex items-center justify-between shadow-sm smooth-hover animate-fadeInUp"
+        style="animation-delay: 150ms;">
+        <div class="flex space-x-6 items-center">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Performance Heatmap:</span>
+          <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 rounded-sm bg-gradient-to-br from-error-container to-red-200 border border-error/20">
+            </div>
+            <span class="font-body-md text-body-md text-on-surface">Kurang (Poor)</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 rounded-sm bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-300/50">
+            </div>
+            <span class="font-body-md text-body-md text-on-surface">Cukup (Fair)</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 rounded-sm bg-green-500/50 border border-green-500/50"></div>
+            <span class="font-body-md text-body-md text-on-surface">Baik (Good)</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-6">
+          <select data-select="periode" id="periode-select"
+            class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
+            <!-- Diisi oleh JS -->
+          </select>
         </div>
       </div>
-      <div class="flex items-center space-x-6">
-        <select class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-8 py-1.5 focus:border-primary outline-none">
-          <option>Desember 2026</option>
-          <option>November 2026</option>
-          <option>October 2026</option>
-          <option>September 2026</option>
-          <option>August 2026</option>
-          <option>July 2026</option>
-          <option>June 2026</option>
-          <option>May 2026</option>
-          <option>April 2026</option>
-          <option>March 2026</option>
-          <option>February 2026</option>
-          <option>January 2026</option>
-        </select>
+
+      <!-- Fusion Table Container -->
+      <div
+        class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-fadeInUp"
+        style="animation-delay: 200ms;">
+        <table data-table="heatmap" class="w-full text-left border-collapse">
+          <thead>
+            <tr
+              class="bg-gradient-to-r from-surface-container-low to-surface-container-lowest border-b border-gray-200">
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase w-12"></th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Supplier Name</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Category</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">QC</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PPIC</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PCH</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">HSE</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Total Score</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Grade</th>
+            </tr>
+          </thead>
+          <tbody id="heatmap-tbody" class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
+            <!-- Loading state -->
+            <tr id="loading-row">
+              <td colspan="8" class="px-sm py-10 text-center text-on-surface-variant">
+                <div class="flex flex-col items-center gap-3">
+                  <span class="material-symbols-outlined text-[36px] animate-spin text-primary">autorenew</span>
+                  <span class="text-sm">Memuat data dari database...</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
 
-    <!-- Fusion Table Container -->
-    <div class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-fadeInUp" style="animation-delay: 200ms;">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-gradient-to-r from-surface-container-low to-surface-container-lowest border-b border-gray-200">
-            <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase w-12"></th>
-            <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Supplier Name</th>
-            <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Category</th>
-            <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Quality Score</th>
-            <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Delivery Time</th>
-            <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Cost Efficiency</th>
-            <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-right">Total Index</th>
-          </tr>
-        </thead>
-        <tbody class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
-          <!-- Row 1 (Baik) -->
-          <tr class="bg-secondary-container/20 hover:bg-secondary-container/40 transition-colors cursor-pointer group">
-            <td class="px-sm py-4 text-center">
-              <span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">chevron_right</span>
-            </td>
-            <td class="px-sm py-4 font-semibold">Alpha Logistics Inc.</td>
-            <td class="px-sm py-4">Freight Forwarding</td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container font-medium">92</div>
-            </td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container font-medium">88</div>
-            </td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-amber-900 font-medium border border-yellow-300/30">75</div>
-            </td>
-            <td class="px-sm py-4 text-right">
-              <div class="flex items-center justify-end space-x-2">
-                <span class="font-headline-md text-headline-md text-on-surface">85.0</span>
-                <span class="material-symbols-outlined text-[20px] text-green-700">trending_up</span>
-              </div>
-            </td>
-          </tr>
-          
-          <!-- Row 2 (Cukup) -->
-          <tr class="bg-yellow-50/40 hover:bg-yellow-100/60 transition-colors cursor-pointer group">
-            <td class="px-sm py-4 text-center">
-              <span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">chevron_right</span>
-            </td>
-            <td class="px-sm py-4 font-semibold">Global Freight Solutions</td>
-            <td class="px-sm py-4">Last Mile Delivery</td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-amber-900 font-medium border border-yellow-300/30">78</div>
-            </td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-error-container text-on-error-container font-medium">55</div>
-            </td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container font-medium">82</div>
-            </td>
-            <td class="px-sm py-4 text-right">
-              <div class="flex items-center justify-end space-x-2">
-                <span class="font-headline-md text-headline-md text-on-surface">71.6</span>
-                <span class="material-symbols-outlined text-[20px] text-outline">remove</span>
-              </div>
-            </td>
-          </tr>
-          
-          <!-- Row 3 (Kurang) -->
-          <tr class="bg-error-container/20 hover:bg-error-container/30 transition-colors cursor-pointer border-l-4 border-l-error">
-            <td class="px-sm py-4 text-center">
-              <span class="material-symbols-outlined text-error transform rotate-90 transition-transform">chevron_right</span>
-            </td>
-            <td class="px-sm py-4 font-semibold text-error">Omega Supply Chain</td>
-            <td class="px-sm py-4">Warehousing</td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-error-container text-on-error-container font-medium border border-error/30">45</div>
-            </td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-amber-900 font-medium border border-yellow-300/30">60</div>
-            </td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-error-container text-on-error-container font-medium border border-error/30">42</div>
-            </td>
-            <td class="px-sm py-4 text-right">
-              <div class="flex items-center justify-end space-x-2">
-                <span class="font-headline-md text-headline-md text-on-surface">49.0</span>
-                <span class="material-symbols-outlined text-[20px] text-error">trending_down</span>
-              </div>
-            </td>
-          </tr>
-          
-          <!-- Row 4 (Baik) -->
-          <tr class="bg-secondary-container/20 hover:bg-secondary-container/40 transition-colors cursor-pointer group">
-            <td class="px-sm py-4 text-center">
-              <span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">chevron_right</span>
-            </td>
-            <td class="px-sm py-4 font-semibold">Nexus Transit</td>
-            <td class="px-sm py-4">Air Freight</td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container font-medium">95</div>
-            </td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container font-medium">98</div>
-            </td>
-            <td class="px-sm py-4 text-center">
-              <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container font-medium">85</div>
-            </td>
-            <td class="px-sm py-4 text-right">
-              <div class="flex items-center justify-end space-x-2">
-                <span class="font-headline-md text-headline-md text-on-surface">92.6</span>
-                <span class="material-symbols-outlined text-[20px] text-green-700">trending_up</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="mt-4 flex justify-between items-center text-body-sm text-on-surface-variant">
-      <span>Showing 1 to 4 of 24 suppliers</span>
-      <div class="flex space-x-2">
-        <button class="px-3 py-1 border border-outline-variant rounded hover:bg-surface-container-low disabled:opacity-50" disabled="">Prev</button>
-        <button class="px-3 py-1 border border-outline-variant rounded hover:bg-surface-container-low bg-surface-container">1</button>
-        <button class="px-3 py-1 border border-outline-variant rounded hover:bg-surface-container-low">2</button>
-        <button class="px-3 py-1 border border-outline-variant rounded hover:bg-surface-container-low">3</button>
-        <button class="px-3 py-1 border border-outline-variant rounded hover:bg-surface-container-low">Next</button>
+      <!-- Info count -->
+      <div class="mt-4 flex justify-between items-center text-body-sm text-on-surface-variant">
+        <span id="record-count">Memuat data...</span>
       </div>
-    </div>
-  </main>
-</div>
+    </main>
+  </div>
 
+  <script src="../js/api.js"></script>
+  <script src="../js/master-rekap.js"></script>
 </body>
+
 </html>

@@ -96,17 +96,17 @@
 
   <!-- Navigation Links -->
   <div class="flex flex-col gap-2 flex-grow">
-    <a class="bg-indigo-600 text-white rounded-md mx-2 px-4 py-2 flex items-center gap-3 active:scale-95 origin-left" href="./dashboard.html">
+    <a id="nav-dashboard" class="bg-indigo-600 text-white rounded-md mx-2 px-4 py-2 flex items-center gap-3 active:scale-95 origin-left" href="./dashboard.html">
       <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
       <span>Dashboard</span>
     </a>
     
-    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./input.html">
+    <a id="nav-input" class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./input.html">
       <span class="material-symbols-outlined">edit_document</span>
       <span>Input</span>
     </a>
     
-    <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./master-rekap.html">
+    <a id="nav-rekap" class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left" href="./master-rekap.html">
       <span class="material-symbols-outlined">analytics</span>
       <span>Master Rekap</span>
     </a>
@@ -399,5 +399,19 @@
   </main>
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams  = new URLSearchParams(window.location.search);
+    const activeRole = urlParams.get('role') || 'GUEST';
+    
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navInput     = document.getElementById('nav-input');
+    const navRekap     = document.getElementById('nav-rekap');
+
+    if (navDashboard) navDashboard.href = `./dashboard.html?role=${activeRole}`;
+    if (navInput)     navInput.href     = `./input.html?role=${activeRole}`;
+    if (navRekap)     navRekap.href     = `./master-rekap.html?role=${activeRole}`;
+  });
+</script>
 </body>
 </html>
