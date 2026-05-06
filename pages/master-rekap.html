@@ -230,11 +230,23 @@
         </button>
       </div>
 
+      <!-- Tabs Switcher -->
+      <div class="flex space-x-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl max-w-md mb-6 animate-fadeInUp">
+        <button id="tab-monthly" class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+          <span>Rekap Bulanan</span>
+        </button>
+        <button id="tab-compare" class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">calculate</span>
+          <span>Rerata 2 Periode</span>
+        </button>
+      </div>
+
       <!-- Heatmap Legend & Filters -->
       <div
-        class="bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl p-sm mb-lg flex items-center justify-between shadow-sm smooth-hover animate-fadeInUp"
+        class="bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl p-sm mb-lg flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm smooth-hover animate-fadeInUp"
         style="animation-delay: 150ms;">
-        <div class="flex space-x-6 items-center">
+        <div class="flex flex-wrap gap-x-6 gap-y-2 items-center">
           <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Performance Heatmap:</span>
           <div class="flex items-center space-x-2">
             <div class="w-4 h-4 rounded-sm bg-gradient-to-br from-error-container to-red-200 border border-error/20">
@@ -251,11 +263,36 @@
             <span class="font-body-md text-body-md text-on-surface">Baik (Good)</span>
           </div>
         </div>
-        <div class="flex items-center space-x-6">
+
+        <!-- Filter Bulanan Form -->
+        <div id="filter-monthly-container" class="flex items-center space-x-4">
+          <span class="text-sm text-slate-500 font-medium">Pilih Periode:</span>
           <select data-select="periode" id="periode-select"
             class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
             <!-- Diisi oleh JS -->
           </select>
+        </div>
+
+        <!-- Filter Perbandingan Form (Hidden by default) -->
+        <div id="filter-compare-container" class="hidden flex flex-wrap items-center gap-4">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-slate-500 font-medium">Periode 1:</span>
+            <select id="periode-awal"
+              class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
+              <!-- Diisi oleh JS -->
+            </select>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-slate-500 font-medium">Periode 2:</span>
+            <select id="periode-akhir"
+              class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
+              <!-- Diisi oleh JS -->
+            </select>
+          </div>
+          <button id="btn-bandingkan" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-[16px]">calculate</span>
+            <span>Hitung Rerata</span>
+          </button>
         </div>
       </div>
 
@@ -263,7 +300,9 @@
       <div
         class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-fadeInUp"
         style="animation-delay: 200ms;">
-        <table data-table="heatmap" class="w-full text-left border-collapse">
+        
+        <!-- Table 1: Rekap Bulanan -->
+        <table id="table-monthly" data-table="heatmap" class="w-full text-left border-collapse">
           <thead>
             <tr
               class="bg-gradient-to-r from-surface-container-low to-surface-container-lowest border-b border-gray-200">
@@ -290,6 +329,33 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Table 2: Perbandingan 2 Bulan (Hidden by default) -->
+        <table id="table-compare" class="w-full text-left border-collapse hidden">
+          <thead>
+            <tr
+              class="bg-gradient-to-r from-surface-container-low to-surface-container-lowest border-b border-gray-200">
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase w-12"></th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Supplier Name</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Category</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">QC Average</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PPIC Average</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PCH Average</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">HSE Average</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Avg Total Score</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Avg Grade</th>
+            </tr>
+          </thead>
+          <tbody id="compare-tbody" class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
+            <!-- Loading state / instructions -->
+            <tr>
+              <td colspan="9" class="px-sm py-10 text-center text-on-surface-variant">
+                Silakan pilih dua periode di atas dan klik tombol Hitung Rerata.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
       </div>
 
       <!-- Info count -->

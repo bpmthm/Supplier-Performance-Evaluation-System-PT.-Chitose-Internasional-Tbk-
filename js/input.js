@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyRoleAccess();
     forwardRoleToNavLinks();
     setupPeriodeDropdown();
-    
+
     const suppliers = await getSuppliers();
     populateSupplierDropdown(suppliers);
     setupFormInputs();
@@ -27,10 +27,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 // --- Helper: Toggle loading state di form ---
 function setLoadingState(loading) {
   isFetching = loading;
-  const saveDraftBtn  = document.querySelector('[data-button="save-draft"]');
-  const continueBtn   = document.querySelector('[data-button="continue"]');
+  const saveDraftBtn = document.querySelector('[data-button="save-draft"]');
+  const continueBtn = document.querySelector('[data-button="continue"]');
   const supplierSelect = document.querySelector('[data-input="supplier-select"]');
-  const periodeSelect  = document.querySelector('[data-input="periode-select"]');
+  const periodeSelect = document.querySelector('[data-input="periode-select"]');
 
   // Tombol & dropdown di-disable saat loading
   [saveDraftBtn, continueBtn, supplierSelect, periodeSelect].forEach(el => {
@@ -252,12 +252,12 @@ function setupFormInputs() {
   // 1. QC Inputs (Qty Kirim & Reject logic)
   const qcTerima = document.querySelector('[data-input="qc-qty-terima"]');
   const qcReject = document.querySelector('[data-input="qc-qty-reject"]');
-  
+
   const calculateNG = () => {
     const terima = parseFloat(qcTerima?.value) || 0;
     const reject = parseFloat(qcReject?.value) || 0;
     const total = terima + reject;
-    
+
     formData.qc_qty_terima = terima;
     formData.qc_qty_reject = reject;
 
@@ -309,7 +309,7 @@ function setupFormInputs() {
     });
 
     // Tangkep file pas diklik biasa
-    fileInput.addEventListener('change', function() {
+    fileInput.addEventListener('change', function () {
       if (this.files.length) handleFileSelection(this.files[0]);
     });
 
@@ -330,13 +330,13 @@ function setupFormInputs() {
         alert('Cuma nerima file Excel (.xlsx atau .csv) ya Pi!');
         return;
       }
-      
+
       formData.ppic_file = file; // Simpen file buat dikirim ke BE nanti
-      
+
       // Update UI Preview
       fileNameDisplay.textContent = file.name;
       fileSizeDisplay.textContent = (file.size / 1024).toFixed(1) + ' KB';
-      
+
       dropZone.classList.add('hidden');
       filePreview.classList.remove('hidden');
 
@@ -362,7 +362,7 @@ function setupButtons() {
   if (saveBtn) saveBtn.addEventListener('click', saveDraft);
 
   const continueBtn = document.querySelector('[data-button="continue"]');
-  if (continueBtn) continueBtn.addEventListener('click', submitPenilaian); 
+  if (continueBtn) continueBtn.addEventListener('click', submitPenilaian);
 }
 
 function updateFormFeedback() {
@@ -370,9 +370,9 @@ function updateFormFeedback() {
   const ng = formData.qc_ng_percent;
   let qcScore = 0;
   if (ng !== undefined && ng !== null) {
-    if (ng < 0.5) qcScore = 30; 
-    else if (ng < 1.0) qcScore = 15; 
-    else qcScore = 10;
+    if (ng < 0.4) qcScore = 30;
+    else if (ng > 0.5) qcScore = 15;
+    else if (ng > 1) qcScore = 10;
   }
   formData.qc_score = qcScore;
 
@@ -380,29 +380,30 @@ function updateFormFeedback() {
   const ot = formData.ppic_ot_percent;
   let ppicScore = 0;
   if (ot !== undefined && ot !== null) {
-    if (ot >= 90) ppicScore = 30; 
-    else if (ot >= 71) ppicScore = 15; 
+    if (ot >= 90) ppicScore = 30;
+    else if (ot >= 71) ppicScore = 15;
     else ppicScore = 10;
   }
   formData.ppic_score = ppicScore;
 
-  // --- Calculate PCH (Maks 30) ---
+  // --- Calculate PCH (Maks 30: Harga 10 + MOQ 10 + TOP 5 + Pelayanan 5) ---
   let pchScore = 0;
   if (formData.pch_harga === 'BAIK') pchScore += 10; else if (formData.pch_harga === 'CUKUP') pchScore += 5; else if (formData.pch_harga === 'KURANG') pchScore += 3;
   if (formData.pch_moq === 'BAIK') pchScore += 10; else if (formData.pch_moq === 'CUKUP') pchScore += 5; else if (formData.pch_moq === 'KURANG') pchScore += 3;
+  if (formData.pch_top === 'BAIK') pchScore += 5; else if (formData.pch_top === 'CUKUP') pchScore += 3; else if (formData.pch_top === 'KURANG') pchScore += 1;
   if (formData.pch_pelayanan === 'BAIK') pchScore += 5; else if (formData.pch_pelayanan === 'CUKUP') pchScore += 3; else if (formData.pch_pelayanan === 'KURANG') pchScore += 1;
   formData.pch_score = pchScore;
 
   // --- Calculate HSE (Maks 10) ---
   let hseScore = 0;
-  if (formData.hse_uji_emisi === 'BAIK') hseScore += 5; else if (formData.hse_uji_emisi === 'CUKUP') hseScore += 3; else if (formData.hse_uji_emisi === 'KURANG') hseScore += 1;
-  if (formData.hse_apd === 'BAIK') hseScore += 5; else if (formData.hse_apd === 'CUKUP') hseScore += 3; else if (formData.hse_apd === 'KURANG') hseScore += 1;
+  if (formData.hse_uji_emisi === 'BAIK') hseScore += 5; else if (formData.hse_uji_emisi === 'CUKUP') hseScore += 3; else if (formData.hse_uji_emisi === 'KURANG') hseScore += 0;
+  if (formData.hse_apd === 'BAIK') hseScore += 5; else if (formData.hse_apd === 'CUKUP') hseScore += 3; else if (formData.hse_apd === 'KURANG') hseScore += 0;
   formData.hse_score = hseScore;
 
   // --- UPDATE TOTAL & GRADE ---
   const total = qcScore + ppicScore + pchScore + hseScore;
   const grade = total >= 90 ? 'A' : (total >= 70 ? 'B' : 'C');
-  
+
   // Custom Grade Label biar orang ga kaget kalo divisi lain belom isi
   let gradeText = grade;
   let isiDivisi = 0;
@@ -421,8 +422,8 @@ function updateFormFeedback() {
   // --- UPDATE BADGES (UI) ---
   updateBadge('qc', ng, qcScore, 30);
   updateBadgePpic(ot, ppicScore); // PPIC punya logic badge sendiri
-  updateBadge('pch', (formData.pch_harga || formData.pch_moq || formData.pch_pelayanan || formData.pch_top) ? 'isi' : null, pchScore, 25);
-  updateBadge('hse', (formData.hse_uji_emisi || formData.hse_apd) ? 'isi' : null, formData.hse_score, 10);
+  updateBadge('pch', (formData.pch_harga || formData.pch_moq || formData.pch_top || formData.pch_pelayanan) ? 'isi' : null, pchScore, 30);
+  updateBadge('hse', (formData.hse_uji_emisi || formData.hse_apd) ? 'isi' : null, hseScore, 10);
 }
 
 function updateBadge(divisi, checkVar, score, maxScore) {
@@ -463,11 +464,12 @@ function updateBadgePpic(ot, ppicScore) {
     return;
   }
 
-  // Data tersimpan dari DB — tampilkan OT% saja
-  badge.textContent = `OT: ${parseFloat(ot).toFixed(2)}%`;
-  const pct = parseFloat(ot) / 100;
-  if (pct >= 0.8) badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-green-100 text-green-800 uppercase tracking-wide';
-  else if (pct >= 0.6) badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 uppercase tracking-wide';
+  // Data tersimpan dari DB — tampilkan OT% saja, warna sesuai threshold persen
+  const otFloat = parseFloat(ot);
+  badge.textContent = `OT: ${otFloat.toFixed(2)}%`;
+  // ot adalah angka persen (misal 83.96), threshold: >= 90 hijau, >= 71 kuning, < 71 merah
+  if (otFloat >= 90) badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-green-100 text-green-800 uppercase tracking-wide';
+  else if (otFloat >= 71) badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-yellow-100 text-yellow-800 uppercase tracking-wide';
   else badge.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-800 uppercase tracking-wide';
 }
 
@@ -508,10 +510,10 @@ function filterPayloadByRole(data) {
 
   if (!activeRole || activeRole === 'GUEST') return data;
 
-  const filtered = { 
-    supplier_id: data.supplier_id, 
-    periode: data.periode, 
-    status_final: data.status_final 
+  const filtered = {
+    supplier_id: data.supplier_id,
+    periode: data.periode,
+    status_final: data.status_final
   };
 
   if (activeRole === 'QC') {
@@ -540,7 +542,7 @@ async function saveDraft() {
     showToast('Pilih supplier dulu sebelum menyimpan draft.', 'warning');
     return;
   }
-  
+
   const dataToSave = filterPayloadByRole({ ...formData, status_final: 'DRAFT' });
   try {
     const result = await savePenilaian(dataToSave);
@@ -601,11 +603,11 @@ function populateFormData(penilaian) {
   const qcRejectEl = document.querySelector('[data-input="qc-qty-reject"]');
   if (qcTerimaEl) qcTerimaEl.value = penilaian.qc_qty_terima !== null ? penilaian.qc_qty_terima : '';
   if (qcRejectEl) qcRejectEl.value = penilaian.qc_qty_reject !== null ? penilaian.qc_qty_reject : '';
-  
+
   formData.qc_qty_terima = penilaian.qc_qty_terima !== null ? parseFloat(penilaian.qc_qty_terima) : null;
   formData.qc_qty_reject = penilaian.qc_qty_reject !== null ? parseFloat(penilaian.qc_qty_reject) : null;
   formData.qc_ng_percent = penilaian.qc_ng_percent !== null ? parseFloat(penilaian.qc_ng_percent) : null;
-  
+
   if (formData.qc_ng_percent !== null) {
     document.querySelector('[data-display="qc-ng-percent"]').value = `${formData.qc_ng_percent}%`;
   } else {
@@ -633,7 +635,7 @@ function resetForm() {
   document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
   const qcNgDisplay = document.querySelector('[data-display="qc-ng-percent"]');
   if (qcNgDisplay) qcNgDisplay.value = `0.00%`;
-  
+
   formData = { supplier_id: currentSupplier, periode: currentPeriode };
   updateFormFeedback();
 }
@@ -653,13 +655,13 @@ function showSubmitModal(ppicResult = null) {
   // --- Nama supplier dari dropdown ---
   const supplierSelect = document.querySelector('[data-input="supplier-select"]');
   const selectedOption = supplierSelect?.options[supplierSelect.selectedIndex];
-  const supplierText   = selectedOption?.textContent?.trim() || '—';
+  const supplierText = selectedOption?.textContent?.trim() || '—';
   const [kode, ...namaParts] = supplierText.split(' - ');
   const namaDB = namaParts.join(' - ');
 
   // --- Nama vendor dari Excel (jika ada PPIC result) ---
   const namaExcel = ppicResult?.excel_nama_vendor || null;
-  const kodeExcel = ppicResult?.excel_kode_vendor  || null;
+  const kodeExcel = ppicResult?.excel_kode_vendor || null;
 
   document.getElementById('modal-supplier-name').textContent = namaExcel || namaDB || '—';
   document.getElementById('modal-supplier-kode').textContent = kodeExcel
@@ -668,12 +670,12 @@ function showSubmitModal(ppicResult = null) {
   document.getElementById('modal-periode').textContent = formatPeriode(currentPeriode);
 
   // --- Skor breakdown ---
-  const qcScore   = formData.qc_score   ?? 0;
-  const ppicScore = formData.ppic_score  ?? 0;
-  const pchScore  = formData.pch_score   ?? 0;
-  const hseScore  = formData.hse_score   ?? 0;
-  const total     = qcScore + ppicScore + pchScore + hseScore;
-  const grade     = total >= 90 ? 'A' : (total >= 70 ? 'B' : 'C');
+  const qcScore = formData.qc_score ?? 0;
+  const ppicScore = formData.ppic_score ?? 0;
+  const pchScore = formData.pch_score ?? 0;
+  const hseScore = formData.hse_score ?? 0;
+  const total = qcScore + ppicScore + pchScore + hseScore;
+  const grade = total >= 90 ? 'A' : (total >= 70 ? 'B' : 'C');
 
   // PPIC detail dari Excel result
   let ppicDetail = '';
@@ -692,10 +694,10 @@ function showSubmitModal(ppicResult = null) {
   }
 
   const rows = [
-    { label: 'Quality Control (QC)', icon: 'analytics',       color: 'blue',   score: qcScore,   max: 30, detail: qcDetail },
-    { label: 'PPIC / Delivery',       icon: 'inventory_2',     color: 'amber',  score: ppicScore, max: 30, detail: ppicDetail },
-    { label: 'Purchasing',            icon: 'payments',        color: 'emerald',score: pchScore,  max: 30, detail: '' },
-    { label: 'Health & Safety',       icon: 'health_and_safety',color: 'rose',  score: formData.hse_score ?? 0,  max: 10, detail: '' },
+    { label: 'Quality Control (QC)', icon: 'analytics', color: 'blue', score: qcScore, max: 30, detail: qcDetail },
+    { label: 'PPIC / Delivery', icon: 'inventory_2', color: 'amber', score: ppicScore, max: 30, detail: ppicDetail },
+    { label: 'Purchasing', icon: 'payments', color: 'emerald', score: pchScore, max: 30, detail: '' },
+    { label: 'Health & Safety', icon: 'health_and_safety', color: 'rose', score: formData.hse_score ?? 0, max: 10, detail: '' },
   ];
 
   const breakdownEl = document.getElementById('modal-breakdown');
@@ -762,7 +764,7 @@ function showToast(message, type = 'success') {
   const colors = {
     success: 'bg-green-600',
     warning: 'bg-amber-500',
-    error:   'bg-red-600',
+    error: 'bg-red-600',
   };
   const icons = { success: 'check_circle', warning: 'warning', error: 'error' };
 
@@ -780,14 +782,14 @@ function showToast(message, type = 'success') {
 
 /** Forward ?role= ke semua link navbar */
 function forwardRoleToNavLinks() {
-  const urlParams  = new URLSearchParams(window.location.search);
+  const urlParams = new URLSearchParams(window.location.search);
   const activeRole = urlParams.get('role') || 'GUEST';
-  
+
   const navDashboard = document.getElementById('nav-dashboard');
-  const navInput     = document.getElementById('nav-input');
-  const navRekap     = document.getElementById('nav-rekap');
+  const navInput = document.getElementById('nav-input');
+  const navRekap = document.getElementById('nav-rekap');
 
   if (navDashboard) navDashboard.href = `./dashboard.html?role=${activeRole}`;
-  if (navInput)     navInput.href     = `./input.html?role=${activeRole}`;
-  if (navRekap)     navRekap.href     = `./master-rekap.html?role=${activeRole}`;
+  if (navInput) navInput.href = `./input.html?role=${activeRole}`;
+  if (navRekap) navRekap.href = `./master-rekap.html?role=${activeRole}`;
 }
