@@ -245,34 +245,6 @@
             </div>
           </div>
 
-          <!-- 3. TOP -->
-          <div>
-            <label class="block font-label-sm text-[12px] text-on-surface-variant mb-3 uppercase tracking-wide font-bold">Term of Payment (TOP)</label>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <label class="flex items-start gap-3 p-3 border border-surface-variant rounded-xl cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all">
-                <input type="radio" name="pch_top" value="BAIK" class="mt-1 text-emerald-600 focus:ring-emerald-500">
-                <div class="flex flex-col">
-                  <span class="text-[13px] font-semibold text-slate-800">Term of Payment >= 60 Hari</span>
-                  <span class="text-[11px] text-emerald-600 font-bold mt-1">BAIK (5 Poin)</span>
-                </div>
-              </label>
-              <label class="flex items-start gap-3 p-3 border border-surface-variant rounded-xl cursor-pointer hover:bg-yellow-50 hover:border-yellow-200 transition-all">
-                <input type="radio" name="pch_top" value="CUKUP" class="mt-1 text-emerald-600 focus:ring-emerald-500">
-                <div class="flex flex-col">
-                  <span class="text-[13px] font-semibold text-slate-800">Term of Payment 30 - 45 Hari</span>
-                  <span class="text-[11px] text-yellow-600 font-bold mt-1">CUKUP (3 Poin)</span>
-                </div>
-              </label>
-              <label class="flex items-start gap-3 p-3 border border-surface-variant rounded-xl cursor-pointer hover:bg-rose-50 hover:border-rose-200 transition-all">
-                <input type="radio" name="pch_top" value="KURANG" class="mt-1 text-emerald-600 focus:ring-emerald-500">
-                <div class="flex flex-col">
-                  <span class="text-[13px] font-semibold text-slate-800">Term of Payment < 30 Hari</span>
-                  <span class="text-[11px] text-rose-600 font-bold mt-1">KURANG (1 Poin)</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
           <!-- 4. Pelayanan -->
           <div>
             <label class="block font-label-sm text-[12px] text-on-surface-variant mb-3 uppercase tracking-wide font-bold">Pelayanan</label>
@@ -322,21 +294,14 @@
                 <input type="radio" name="hse_uji_emisi" value="BAIK" class="text-emerald-600 focus:ring-emerald-500 flex-shrink-0">
                 <div class="flex justify-between items-center w-full">
                   <span class="text-[13px] font-semibold text-slate-800">Ada Dokumen Uji Emisi Kendaraan</span>
-                  <span class="text-[11px] text-emerald-600 font-bold ml-2 flex-shrink-0">BAIK (5 Poin)</span>
-                </div>
-              </label>
-              <label class="flex items-center gap-3 p-3 border border-surface-variant rounded-xl cursor-pointer hover:bg-yellow-50 hover:border-yellow-200 transition-all">
-                <input type="radio" name="hse_uji_emisi" value="CUKUP" class="text-emerald-600 focus:ring-emerald-500 flex-shrink-0">
-                <div class="flex justify-between items-center w-full">
-                  <span class="text-[13px] font-semibold text-slate-800">Tdk ada Dokumen Uji emisi untuk kendaraan</span>
-                  <span class="text-[11px] text-yellow-600 font-bold ml-2 flex-shrink-0">CUKUP (3 Poin)</span>
+                  <span class="text-[11px] text-emerald-600 font-bold ml-2 flex-shrink-0">BAIK (100 Poin)</span>
                 </div>
               </label>
               <label class="flex items-center gap-3 p-3 border border-surface-variant rounded-xl cursor-pointer hover:bg-rose-50 hover:border-rose-200 transition-all">
                 <input type="radio" name="hse_uji_emisi" value="KURANG" class="text-emerald-600 focus:ring-emerald-500 flex-shrink-0">
                 <div class="flex justify-between items-center w-full">
-                  <span class="text-[13px] font-semibold text-slate-800">Tdk ada Dokumen Uji emisi & Kendaraan terlihat kurang terawat</span>
-                  <span class="text-[11px] text-rose-600 font-bold ml-2 flex-shrink-0">KURANG (1 Poin)</span>
+                  <span class="text-[13px] font-semibold text-slate-800">Tidak memiliki Dokumen Uji emisi untuk kendaraan</span>
+                  <span class="text-[11px] text-rose-600 font-bold ml-2 flex-shrink-0">KURANG (50 Poin)</span>
                 </div>
               </label>
             </div>
@@ -349,21 +314,14 @@
                 <input type="radio" name="hse_apd" value="BAIK" class="text-emerald-600 focus:ring-emerald-500 flex-shrink-0">
                 <div class="flex justify-between items-center w-full">
                   <span class="text-[13px] font-semibold text-slate-800">Menggunakan APD Lengkap (Sepatu, Helm, Pakaian Formal)</span>
-                  <span class="text-[11px] text-emerald-600 font-bold ml-2 flex-shrink-0">BAIK (5 Poin)</span>
-                </div>
-              </label>
-              <label class="flex items-center gap-3 p-3 border border-surface-variant rounded-xl cursor-pointer hover:bg-yellow-50 hover:border-yellow-200 transition-all">
-                <input type="radio" name="hse_apd" value="CUKUP" class="text-emerald-600 focus:ring-emerald-500 flex-shrink-0">
-                <div class="flex justify-between items-center w-full">
-                  <span class="text-[13px] font-semibold text-slate-800">Tidak lengkap menggunakan APD (Sepatu, Helm, Pakaian Formal)</span>
-                  <span class="text-[11px] text-yellow-600 font-bold ml-2 flex-shrink-0">CUKUP (3 Poin)</span>
+                  <span class="text-[11px] text-emerald-600 font-bold ml-2 flex-shrink-0">BAIK (100 Poin)</span>
                 </div>
               </label>
               <label class="flex items-center gap-3 p-3 border border-surface-variant rounded-xl cursor-pointer hover:bg-rose-50 hover:border-rose-200 transition-all">
                 <input type="radio" name="hse_apd" value="KURANG" class="text-emerald-600 focus:ring-emerald-500 flex-shrink-0">
                 <div class="flex justify-between items-center w-full">
                   <span class="text-[13px] font-semibold text-slate-800">Tidak Menggunakan APD</span>
-                  <span class="text-[11px] text-rose-600 font-bold ml-2 flex-shrink-0">KURANG (1 Poin)</span>
+                  <span class="text-[11px] text-rose-600 font-bold ml-2 flex-shrink-0">KURANG (50 Poin)</span>
                 </div>
               </label>
             </div>

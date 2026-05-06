@@ -390,7 +390,6 @@ function updateFormFeedback() {
   let pchScore = 0;
   if (formData.pch_harga === 'BAIK') pchScore += 10; else if (formData.pch_harga === 'CUKUP') pchScore += 5; else if (formData.pch_harga === 'KURANG') pchScore += 3;
   if (formData.pch_moq === 'BAIK') pchScore += 10; else if (formData.pch_moq === 'CUKUP') pchScore += 5; else if (formData.pch_moq === 'KURANG') pchScore += 3;
-  if (formData.pch_top === 'BAIK') pchScore += 5; else if (formData.pch_top === 'CUKUP') pchScore += 3; else if (formData.pch_top === 'KURANG') pchScore += 1;
   if (formData.pch_pelayanan === 'BAIK') pchScore += 5; else if (formData.pch_pelayanan === 'CUKUP') pchScore += 3; else if (formData.pch_pelayanan === 'KURANG') pchScore += 1;
   formData.pch_score = pchScore;
 
@@ -422,7 +421,7 @@ function updateFormFeedback() {
   // --- UPDATE BADGES (UI) ---
   updateBadge('qc', ng, qcScore, 30);
   updateBadgePpic(ot, ppicScore); // PPIC punya logic badge sendiri
-  updateBadge('pch', (formData.pch_harga || formData.pch_moq || formData.pch_pelayanan || formData.pch_top) ? 'isi' : null, pchScore, 30);
+  updateBadge('pch', (formData.pch_harga || formData.pch_moq || formData.pch_pelayanan || formData.pch_top) ? 'isi' : null, pchScore, 25);
   updateBadge('hse', (formData.hse_uji_emisi || formData.hse_apd) ? 'isi' : null, formData.hse_score, 10);
 }
 
