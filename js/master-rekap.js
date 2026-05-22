@@ -218,44 +218,32 @@ function setupCompareDropdowns() {
 /** Setup logika navigasi tab switcher */
 function setupTabs() {
   const tabMonthly = document.getElementById('tab-monthly');
-  const tabCompare = document.getElementById('tab-compare');
   const tabEvaluasi = document.getElementById('tab-evaluasi');
 
   const filterMonthly = document.getElementById('filter-monthly-container');
-  const filterCompare = document.getElementById('filter-compare-container');
   const filterEvaluasi = document.getElementById('filter-evaluasi-container');
 
   const tableMonthly = document.getElementById('table-monthly');
-  const tableCompare = document.getElementById('table-compare');
   const tableEvaluasi = document.getElementById('table-evaluasi');
 
-  if (!tabMonthly || !tabCompare) return;
+  if (!tabMonthly) return;
 
   const CLS_ACTIVE = 'flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2';
   const CLS_INACTIVE = 'flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2';
 
   const deactivateAll = () => {
-    [tabMonthly, tabCompare, tabEvaluasi].forEach(t => { if (t) t.className = CLS_INACTIVE; });
-    [filterMonthly, filterCompare, filterEvaluasi].forEach(f => { if (f) f.classList.add('hidden'); });
-    [tableMonthly, tableCompare, tableEvaluasi].forEach(t => { if (t) t.classList.add('hidden'); });
+    [tabMonthly, tabEvaluasi].forEach(t => { if (t) t.className = CLS_INACTIVE; });
+    [filterMonthly, filterEvaluasi].forEach(f => { if (f) f.classList.add('hidden'); });
+    [tableMonthly, tableEvaluasi].forEach(t => { if (t) t.classList.add('hidden'); });
   };
 
   tabMonthly.addEventListener('click', () => {
     currentMode = 'monthly';
     deactivateAll();
     tabMonthly.className = CLS_ACTIVE;
-    filterMonthly.classList.remove('hidden');
-    tableMonthly.classList.remove('hidden');
+    if (filterMonthly) filterMonthly.classList.remove('hidden');
+    if (tableMonthly) tableMonthly.classList.remove('hidden');
     loadHeatmapData();
-  });
-
-  tabCompare.addEventListener('click', () => {
-    currentMode = 'compare';
-    deactivateAll();
-    tabCompare.className = CLS_ACTIVE;
-    filterCompare.classList.remove('hidden');
-    tableCompare.classList.remove('hidden');
-    doComparison();
   });
 
   if (tabEvaluasi) {
@@ -263,8 +251,8 @@ function setupTabs() {
       currentMode = 'evaluasi';
       deactivateAll();
       tabEvaluasi.className = CLS_ACTIVE;
-      filterEvaluasi.classList.remove('hidden');
-      tableEvaluasi.classList.remove('hidden');
+      if (filterEvaluasi) filterEvaluasi.classList.remove('hidden');
+      if (tableEvaluasi) tableEvaluasi.classList.remove('hidden');
     });
   }
 }
@@ -616,44 +604,87 @@ async function loadHeatmapData() {
 
 /** Terapkan Filter & Sort sebelum merender tabel */
 function applyFiltersAndRender() {
-  let filtered = [...rawMonthlyData];
+  if (currentMode === 'monthly') {
+    let filtered = [...rawMonthlyData];
 
-  // 1. Kategori Filter
-  if (categoryFilter) {
-    filtered = filtered.filter(v => v.jenis_bahan === categoryFilter);
+    // 1. Kategori Filter
+    if (categoryFilter) {
+      filtered = filtered.filter(v => v.jenis_bahan === categoryFilter);
+    }
+
+    // 2. Search Query
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(v => 
+        (v.nama_vendor && v.nama_vendor.toLowerCase().includes(q)) ||
+        (v.kode_vendor && String(v.kode_vendor).toLowerCase().includes(q))
+      );
+    }
+
+    // 3. Sorting
+    if (currentSortCol) {
+      filtered.sort((a, b) => {
+        let valA = a[currentSortCol];
+        let valB = b[currentSortCol];
+
+        if (currentSortCol === 'total_score') {
+          valA = parseFloat(valA) || 0;
+          valB = parseFloat(valB) || 0;
+        } else if (currentSortCol === 'grade') {
+          valA = valA || 'Z'; // Grade terburuk jika kosong
+          valB = valB || 'Z';
+        }
+        
+        if (valA < valB) return currentSortAsc ? -1 : 1;
+        if (valA > valB) return currentSortAsc ? 1 : -1;
+        return 0;
+      });
+    }
+
+    currentMonthlyData = filtered; // Simpan untuk modal
+    renderTable(filtered);
+  } else if (currentMode === 'evaluasi') {
+    const activeData = currentEvaluasiData.filter(d => d.status === 'success' && d.rata_rata);
+    let filtered = [...activeData];
+
+    // 1. Kategori Filter
+    if (categoryFilter) {
+      filtered = filtered.filter(v => v.jenis_bahan === categoryFilter);
+    }
+
+    // 2. Search Query
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(v => 
+        (v.nama_vendor && v.nama_vendor.toLowerCase().includes(q)) ||
+        (v.kode_vendor && String(v.kode_vendor).toLowerCase().includes(q))
+      );
+    }
+
+    // 3. Sorting
+    if (currentSortCol) {
+      filtered.sort((a, b) => {
+        const rA = a.rata_rata || {};
+        const rB = b.rata_rata || {};
+        let valA, valB;
+
+        if (currentSortCol === 'total_score') {
+          valA = parseFloat(rA.avg_total_score) || 0;
+          valB = parseFloat(rB.avg_total_score) || 0;
+        } else if (currentSortCol === 'grade') {
+          valA = rA.avg_grade || 'Z';
+          valB = rB.avg_grade || 'Z';
+        }
+
+        if (valA < valB) return currentSortAsc ? -1 : 1;
+        if (valA > valB) return currentSortAsc ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // Render kembali tabel evaluasi dengan data terfilter/tersortir
+    renderEvaluasiTable(filtered, currentEvaluasiPeriodeAwal, currentEvaluasiPeriodeAkhir);
   }
-
-  // 2. Search Query
-  if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    filtered = filtered.filter(v => 
-      (v.nama_vendor && v.nama_vendor.toLowerCase().includes(q)) ||
-      (v.kode_vendor && String(v.kode_vendor).toLowerCase().includes(q))
-    );
-  }
-
-  // 3. Sorting
-  if (currentSortCol) {
-    filtered.sort((a, b) => {
-      let valA = a[currentSortCol];
-      let valB = b[currentSortCol];
-
-      if (currentSortCol === 'total_score') {
-        valA = parseFloat(valA) || 0;
-        valB = parseFloat(valB) || 0;
-      } else if (currentSortCol === 'grade') {
-        valA = valA || 'Z'; // Grade terburuk jika kosong
-        valB = valB || 'Z';
-      }
-      
-      if (valA < valB) return currentSortAsc ? -1 : 1;
-      if (valA > valB) return currentSortAsc ? 1 : -1;
-      return 0;
-    });
-  }
-
-  currentMonthlyData = filtered; // Simpan untuk modal
-  renderTable(filtered);
 }
 
 /** Populate Dropdown Kategori dari raw data yang ditarik */
@@ -1679,9 +1710,16 @@ function setupSorting() {
   const iconTotal = document.getElementById('icon-sort-score');
   const iconGrade = document.getElementById('icon-sort-grade');
 
+  const sortEvalTotal = document.getElementById('sort-eval-total-score');
+  const sortEvalGrade = document.getElementById('sort-eval-grade');
+  const iconEvalTotal = document.getElementById('icon-sort-eval-score');
+  const iconEvalGrade = document.getElementById('icon-sort-eval-grade');
+
   const resetIcons = () => {
     if (iconTotal) iconTotal.textContent = 'unfold_more';
     if (iconGrade) iconGrade.textContent = 'unfold_more';
+    if (iconEvalTotal) iconEvalTotal.textContent = 'unfold_more';
+    if (iconEvalGrade) iconEvalGrade.textContent = 'unfold_more';
   };
 
   const handleSort = (col, iconEl) => {
@@ -1722,31 +1760,167 @@ function setupSorting() {
       applyFiltersAndRender();
     });
   }
+
+  // Bind Evaluasi Berkala Sorts
+  if (sortEvalTotal) {
+    sortEvalTotal.addEventListener('click', () => handleSort('total_score', iconEvalTotal));
+  }
+
+  if (sortEvalGrade) {
+    sortEvalGrade.addEventListener('click', () => {
+      if (currentSortCol !== 'grade') {
+        currentSortAsc = true; 
+        currentSortCol = 'grade';
+      } else {
+        currentSortAsc = !currentSortAsc;
+      }
+      resetIcons();
+      if (iconEvalGrade) {
+        iconEvalGrade.textContent = currentSortAsc ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
+        iconEvalGrade.style.opacity = '1';
+      }
+      applyFiltersAndRender();
+    });
+  }
 }
 
 function setupExport() {
   const btnExport = document.getElementById('btn-export-excel');
   if (!btnExport) return;
 
-  btnExport.addEventListener('click', () => {
-    if (currentMonthlyData.length === 0) {
-      alert('Tidak ada data untuk diexport pada periode ini.');
-      return;
+  btnExport.addEventListener('click', async () => {
+    let dataToExport = [];
+    let filename = '';
+    let title = '';
+    let periodeStr = '';
+    let headers = [];
+    let rows = [];
+
+    if (currentMode === 'monthly') {
+      dataToExport = currentMonthlyData;
+      if (dataToExport.length === 0) {
+        alert('Tidak ada data rekap bulanan untuk diexport.');
+        return;
+      }
+
+      filename = `Rekap_Vendor_${currentPeriode}.xlsx`;
+      title = `REKAP BULANAN PENILAIAN VENDOR - PERIODE ${formatPeriode(currentPeriode).toUpperCase()}`;
+      periodeStr = `Periode Penilaian: ${formatPeriode(currentPeriode)}`;
+      headers = ['No', 'Kode Vendor', 'Nama Vendor', 'Kategori', 'Score QC', 'Score PPIC', 'Score PCH', 'Score HSE', 'Total Score', 'Grade'];
+      
+      rows = dataToExport.map((v, idx) => [
+        idx + 1,
+        v.kode_vendor || '-',
+        v.nama_vendor || '-',
+        v.jenis_bahan || '-',
+        v.qc_score !== null && v.qc_score !== undefined ? parseFloat(v.qc_score).toFixed(1) : '0.0',
+        v.ppic_score !== null && v.ppic_score !== undefined ? parseFloat(v.ppic_score).toFixed(1) : '0.0',
+        v.pch_score !== null && v.pch_score !== undefined ? parseFloat(v.pch_score).toFixed(1) : '0.0',
+        v.hse_score !== null && v.hse_score !== undefined ? parseFloat(v.hse_score).toFixed(1) : '0.0',
+        v.total_score !== null && v.total_score !== undefined ? parseFloat(v.total_score).toFixed(1) : '0.0',
+        v.grade || '-'
+      ]);
+
+    } else if (currentMode === 'evaluasi') {
+      const activeData = currentEvaluasiData.filter(d => d.status === 'success' && d.rata_rata);
+      
+      // Terapkan filter dan sort yang sama persis
+      let filtered = [...activeData];
+      if (categoryFilter) {
+        filtered = filtered.filter(v => v.jenis_bahan === categoryFilter);
+      }
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(v => 
+          (v.nama_vendor && v.nama_vendor.toLowerCase().includes(q)) ||
+          (v.kode_vendor && String(v.kode_vendor).toLowerCase().includes(q))
+        );
+      }
+      if (currentSortCol) {
+        filtered.sort((a, b) => {
+          const rA = a.rata_rata || {};
+          const rB = b.rata_rata || {};
+          let valA, valB;
+          if (currentSortCol === 'total_score') {
+            valA = parseFloat(rA.avg_total_score) || 0;
+            valB = parseFloat(rB.avg_total_score) || 0;
+          } else if (currentSortCol === 'grade') {
+            valA = rA.avg_grade || 'Z';
+            valB = rB.avg_grade || 'Z';
+          }
+          if (valA < valB) return currentSortAsc ? -1 : 1;
+          if (valA > valB) return currentSortAsc ? 1 : -1;
+          return 0;
+        });
+      }
+
+      dataToExport = filtered;
+      if (dataToExport.length === 0) {
+        alert('Tidak ada data evaluasi berkala untuk diexport.');
+        return;
+      }
+
+      filename = `Evaluasi_Berkala_${currentEvaluasiPeriodeAwal}_sd_${currentEvaluasiPeriodeAkhir}.xlsx`;
+      title = `EVALUASI BERKALA PENILAIAN VENDOR`;
+      periodeStr = `Rentang Periode: ${formatPeriode(currentEvaluasiPeriodeAwal)} s/d ${formatPeriode(currentEvaluasiPeriodeAkhir)}`;
+      headers = ['No', 'Kode Vendor', 'Nama Vendor', 'Kategori', 'Rerata QC', 'Rerata PPIC', 'Rerata PCH', 'Rerata HSE', 'Rerata Total', 'Avg Grade'];
+
+      rows = dataToExport.map((d, idx) => {
+        const r = d.rata_rata || {};
+        return [
+          idx + 1,
+          d.kode_vendor || '-',
+          d.nama_vendor || '-',
+          d.jenis_bahan || '-',
+          r.avg_qc_score !== null && r.avg_qc_score !== undefined ? parseFloat(r.avg_qc_score).toFixed(1) : '0.0',
+          r.avg_ppic_score !== null && r.avg_ppic_score !== undefined ? parseFloat(r.avg_ppic_score).toFixed(1) : '0.0',
+          r.avg_pch_score !== null && r.avg_pch_score !== undefined ? parseFloat(r.avg_pch_score).toFixed(1) : '0.0',
+          r.avg_hse_score !== null && r.avg_hse_score !== undefined ? parseFloat(r.avg_hse_score).toFixed(1) : '0.0',
+          r.avg_total_score !== null && r.avg_total_score !== undefined ? parseFloat(r.avg_total_score).toFixed(1) : '0.0',
+          r.avg_grade || '-'
+        ];
+      });
     }
 
-    let csv = 'No,Kode Vendor,Nama Vendor,Kategori,Score QC,Score PPIC,Score PCH,Score HSE,Total Score,Grade\\n';
-    currentMonthlyData.forEach((v, idx) => {
-      // Escape koma pada nama
-      const name = v.nama_vendor ? '"' + v.nama_vendor.replace(/"/g, '""') + '"' : '-';
-      csv += `${idx + 1},${v.kode_vendor || '-'},${name},${v.jenis_bahan || '-'},${v.qc_score || 0},${v.ppic_score || 0},${v.pch_score || 0},${v.hse_score || 0},${v.total_score || 0},${v.grade || '-'}\\n`;
-    });
+    const originalContent = btnExport.innerHTML;
+    btnExport.disabled = true;
+    btnExport.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin mr-1">autorenew</span><span>Mengekspor...</span>`;
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Rekap_Vendor_${currentPeriode}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    try {
+      const response = await fetch(`${API_BASE_URL}/penilaian/export-excel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filename,
+          title,
+          periode: periodeStr,
+          headers,
+          rows
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal mengekspor data dari server');
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+
+    } catch (err) {
+      console.error('Export Error:', err);
+      alert('Terjadi kesalahan saat mengekspor ke Excel: ' + err.message);
+    } finally {
+      btnExport.disabled = false;
+      btnExport.innerHTML = originalContent;
+    }
   });
 }
