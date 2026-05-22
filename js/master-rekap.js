@@ -7,8 +7,7 @@
  * - Detail modal interaktif eksploratif & responsif (actual input data)
  */
 
-const urlParams = new URLSearchParams(window.location.search);
-const activeRole = (urlParams.get('role') || '').toUpperCase();
+const activeRole = getActiveRole();
 const allowedRoles = ['PCH', 'MANAGER', 'BOD', 'ADMIN'];
 
 let currentPeriode = '';
@@ -52,7 +51,7 @@ let currentEvaluasiData = []; // Array hasil ringkasan rata-rata per vendor
               Maaf, Anda tidak memiliki izin untuk melihat halaman ini. Akses ke <strong>Master Rekap</strong> secara eksklusif dibatasi untuk divisi <strong class="text-slate-700">Purchasing, Manager, dan BOD</strong>.
             </p>
             
-            <a href="dashboard.html?role=${activeRole || 'GUEST'}" 
+            <a href="dashboard.html" 
                class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white font-semibold rounded-2xl overflow-hidden shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 transition-all duration-300 hover:-translate-y-1">
               <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <span class="material-symbols-outlined text-[20px] relative z-10 transition-transform duration-300 group-hover:-translate-x-1">arrow_back</span>
@@ -138,11 +137,11 @@ function forwardRoleToNavLinks() {
   const navRekap = document.getElementById('nav-rekap');
   const navVendor = document.getElementById('nav-vendor');
 
-  if (navDashboard) navDashboard.href = `./dashboard.html?role=${activeRole}`;
-  if (navInput) navInput.href = `./input.html?role=${activeRole}`;
-  if (navDaily) navDaily.href = `./input-daily.html?role=${activeRole}`;
-  if (navRekap) navRekap.href = `./master-rekap.html?role=${activeRole}`;
-  if (navVendor) navVendor.href = `./master-vendor.html?role=${activeRole}`;
+  if (navDashboard) navDashboard.href = `./dashboard.html`;
+  if (navInput) navInput.href = `./input.html`;
+  if (navDaily) navDaily.href = `./input-daily.html`;
+  if (navRekap) navRekap.href = `./master-rekap.html`;
+  if (navVendor) navVendor.href = `./master-vendor.html`;
 }
 
 /** Auto-generate dropdown periode (6 bulan terakhir) */

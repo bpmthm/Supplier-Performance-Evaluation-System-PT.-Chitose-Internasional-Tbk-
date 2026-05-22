@@ -7,8 +7,7 @@
  * - Show recent inputs history feed
  */
 
-const urlParams = new URLSearchParams(window.location.search);
-const activeRole = (urlParams.get('role') || '').toUpperCase();
+const activeRole = getActiveRole();
 const allowedRoles = ['QC'];
 
 let selectedMaterial = null; // Cache chosen material
@@ -34,7 +33,7 @@ let selectedMaterial = null; // Cache chosen material
               Maaf, Anda tidak memiliki izin untuk melihat halaman ini. Akses ke halaman <strong>Input Daily QC</strong> secara eksklusif dibatasi untuk divisi <strong class="text-slate-700">Quality Control (QC)</strong>.
             </p>
             
-            <a href="dashboard.html?role=${activeRole || 'GUEST'}" 
+            <a href="dashboard.html" 
                class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white font-semibold rounded-2xl overflow-hidden shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 transition-all duration-300 hover:-translate-y-1">
               <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <span class="material-symbols-outlined text-[20px] relative z-10 transition-transform duration-300 group-hover:-translate-x-1">arrow_back</span>
@@ -89,9 +88,8 @@ function forwardRoleToNavLinks() {
   const links = document.querySelectorAll('#nav-links a');
   links.forEach(link => {
     const href = link.getAttribute('href');
-    if (href && href !== '#' && !href.includes('role=')) {
-      const separator = href.includes('?') ? '&' : '?';
-      link.setAttribute('href', `${href}${separator}role=${activeRole}`);
+    if (href && href !== '#') {
+      link.setAttribute('href', href.split('?')[0]);
     }
   });
 }

@@ -170,18 +170,11 @@
 <script src="../js/dashboard.js"></script>
 <script>
 (function(){
-  const p = new URLSearchParams(location.search);
-  const role = (p.get('role')||'GUEST').toUpperCase();
+  const role = getActiveRole();
 
-  // Forward role to all nav links
-  ['nav-dashboard','nav-input','nav-daily','nav-rekap','nav-vendor'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el) return;
-    const base = el.getAttribute('href').split('?')[0];
-    el.href = base+'?role='+role;
-  });
-  const al=document.getElementById('alert-link');
-  if(al) al.href='./master-rekap.html?role='+role;
+  // Keep nav URLs clean (no query param forwarding)
+  const al = document.getElementById('alert-link');
+  if (al) al.href = './master-rekap.html';
 
   // Role chip
   const chip=document.getElementById('role-chip');

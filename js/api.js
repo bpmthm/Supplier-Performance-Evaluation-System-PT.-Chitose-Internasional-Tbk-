@@ -5,6 +5,101 @@
 
 const API_BASE_URL = 'http://localhost:8082/api';
 
+// ==========================================
+// SECURITY CORE: JWT & AUTHENTICATION LAYER
+// ==========================================
+
+// Parse base64url encoded token locally in the browser [ignoring loop detection]
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
+// Retrieve active role decoded from valid stored JWT
+function getActiveRole() {
+  const token = localStorage.getItem('jwt_token');
+  if (token) {
+    const decoded = parseJwt(token);
+    if (decoded && decoded.role && (decoded.exp * 1000 > Date.now())) {
+      return decoded.role.toUpperCase();
+    }
+  }
+  return 'GUEST';
+}
+
+// Synchronous-like IIFE to perform token exchanges during initial file parse
+(function initializeSessionSecurity() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenParam = urlParams.get('token');
+  const roleParam = urlParams.get('role');
+
+  if (tokenParam) {
+    localStorage.setItem('jwt_token', tokenParam);
+    cleanUrlParameter('token');
+  } else if (roleParam) {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `${API_BASE_URL}/auth/generate-token?role=${roleParam}`, false); // Synchronous GET
+      xhr.send();
+      if (xhr.status === 200) {
+        const res = JSON.parse(xhr.responseText);
+        if (res && res.token) {
+          localStorage.setItem('jwt_token', res.token);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to auto-exchange role parameter for JWT token:', e);
+    }
+    cleanUrlParameter('role');
+  }
+})();
+
+// Helper to remove a query parameter from the URL address bar cleanly
+function cleanUrlParameter(paramName) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete(paramName);
+  if (paramName === 'role') {
+    url.searchParams.delete('nik');
+  }
+  window.history.replaceState({}, document.title, url.pathname + url.search);
+}
+
+// Transparently intercept window.fetch to inject Authorization Bearer headers
+const originalFetch = window.fetch;
+window.fetch = async function (resource, options = {}) {
+  const token = localStorage.getItem('jwt_token');
+  const urlStr = typeof resource === 'string' ? resource : resource.url;
+  
+  if (token && urlStr && urlStr.includes(API_BASE_URL)) {
+    options.headers = options.headers || {};
+    if (options.headers instanceof Headers) {
+      if (!options.headers.has('Authorization')) {
+        options.headers.set('Authorization', `Bearer ${token}`);
+      }
+    } else if (Array.isArray(options.headers)) {
+      const hasAuth = options.headers.some(h => h[0].toLowerCase() === 'authorization');
+      if (!hasAuth) {
+        options.headers.push(['Authorization', `Bearer ${token}`]);
+      }
+    } else {
+      const keys = Object.keys(options.headers).map(k => k.toLowerCase());
+      if (!keys.includes('authorization')) {
+        options.headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+  }
+  return originalFetch(resource, options);
+};
+
+
 async function getSuppliers() {
   try {
     const response = await fetch(`${API_BASE_URL}/supplier`);

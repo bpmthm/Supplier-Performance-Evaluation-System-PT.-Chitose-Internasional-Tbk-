@@ -324,9 +324,8 @@
               Menunggu Input</div>
           </div>
         </div>
-
         <div
-          class="bg-surface-container-lowest border border-surface-variant rounded-xl p-6 flex flex-col shadow-sm smooth-hover">
+          class="division-card bg-surface-container-lowest border border-surface-variant rounded-xl p-6 flex flex-col shadow-sm smooth-hover">
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-rose-100 text-rose-700 rounded-lg"><span
@@ -588,15 +587,10 @@
 
 <script>
 (function(){
-  const role=(new URLSearchParams(location.search).get('role')||'GUEST').toUpperCase();
-  ['nav-dashboard','nav-input','nav-daily','nav-rekap','nav-vendor'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el) return;
-    el.href=el.getAttribute('href').split('?')[0]+'?role='+role;
-  });
-  const chip=document.getElementById('role-chip');
-  const s={QC:['rgba(34,197,94,.1)','#16a34a'],PPIC:['rgba(245,158,11,.1)','#b45309'],PCH:['rgba(91,106,248,.1)','#4338ca'],HSE:['rgba(239,68,68,.1)','#dc2626']};
-  if(chip){chip.textContent=role;if(s[role]){chip.style.background=s[role][0];chip.style.color=s[role][1];}}
+  const role = getActiveRole();
+  const chip = document.getElementById('role-chip');
+  const s = {QC:['rgba(34,197,94,.1)','#16a34a'],PPIC:['rgba(245,158,11,.1)','#b45309'],PCH:['rgba(91,106,248,.1)','#4338ca'],HSE:['rgba(239,68,68,.1)','#dc2626']};
+  if (chip) {chip.textContent = role; if (s[role]) {chip.style.background = s[role][0]; chip.style.color = s[role][1];}}
 })();
 </script>
 

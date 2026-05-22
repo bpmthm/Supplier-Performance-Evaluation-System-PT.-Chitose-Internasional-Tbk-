@@ -473,8 +473,7 @@ function updateBadgePpic(ot, ppicScore) {
 }
 
 function applyRoleAccess() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const activeRole = urlParams.get('role');
+  const activeRole = getActiveRole();
 
   if (!activeRole || activeRole === 'GUEST') return;
 
@@ -504,8 +503,7 @@ function applyRoleAccess() {
 }
 
 function filterPayloadByRole(data) {
-  const urlParams = new URLSearchParams(window.location.search);
-  const activeRole = urlParams.get('role');
+  const activeRole = getActiveRole();
 
   if (!activeRole || activeRole === 'GUEST') return data;
 
@@ -781,18 +779,15 @@ function showToast(message, type = 'success') {
 
 /** Forward ?role= ke semua link navbar */
 function forwardRoleToNavLinks() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const activeRole = urlParams.get('role') || 'GUEST';
-
   const navDashboard = document.getElementById('nav-dashboard');
   const navInput = document.getElementById('nav-input');
   const navDaily = document.getElementById('nav-daily');
   const navRekap = document.getElementById('nav-rekap');
   const navVendor = document.getElementById('nav-vendor');
 
-  if (navDashboard) navDashboard.href = `./dashboard.html?role=${activeRole}`;
-  if (navInput) navInput.href = `./input.html?role=${activeRole}`;
-  if (navDaily) navDaily.href = `./input-daily.html?role=${activeRole}`;
-  if (navRekap) navRekap.href = `./master-rekap.html?role=${activeRole}`;
-  if (navVendor) navVendor.href = `./master-vendor.html?role=${activeRole}`;
+  if (navDashboard) navDashboard.href = `./dashboard.html`;
+  if (navInput) navInput.href = `./input.html`;
+  if (navDaily) navDaily.href = `./input-daily.html`;
+  if (navRekap) navRekap.href = `./master-rekap.html`;
+  if (navVendor) navVendor.href = `./master-vendor.html`;
 }

@@ -4,7 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const role = (new URLSearchParams(location.search).get('role') || 'GUEST').toUpperCase();
+  const role = getActiveRole();
 
   try {
     // Ambil data aktual (heatmap) periode berjalan seperti di Master Rekap

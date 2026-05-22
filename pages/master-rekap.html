@@ -401,12 +401,7 @@
 
   <script>
     (function () {
-      const role = (new URLSearchParams(location.search).get('role') || 'GUEST').toUpperCase();
-      ['nav-dashboard', 'nav-input', 'nav-daily', 'nav-rekap', 'nav-vendor'].forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.href = el.getAttribute('href').split('?')[0] + '?role=' + role;
-      });
+      const role = getActiveRole();
       const chip = document.getElementById('role-chip');
       const s = { QC: ['rgba(34,197,94,.1)', '#16a34a'], PPIC: ['rgba(245,158,11,.1)', '#b45309'], PCH: ['rgba(91,106,248,.1)', '#4338ca'], HSE: ['rgba(239,68,68,.1)', '#dc2626'] };
       if (chip) { chip.textContent = role; if (s[role]) { chip.style.background = s[role][0]; chip.style.color = s[role][1]; } }
@@ -415,14 +410,14 @@
 
   <script>
     (function () {
-      const role = (new URLSearchParams(location.search).get('role') || 'GUEST').toUpperCase();
+      const role = getActiveRole();
       const denied = document.getElementById('access-denied');
       const mainel = document.getElementById('main-content');
       if (role !== 'PCH') {
         if (denied) denied.classList.add('show');
         if (mainel) mainel.style.display = 'none';
         const back = document.getElementById('denied-back');
-        if (back) back.href = './dashboard.html?role=' + role;
+        if (back) back.href = './dashboard.html';
       }
     })();
   </script>
