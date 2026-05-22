@@ -7,16 +7,28 @@
  * - Detail modal interaktif eksploratif & responsif (actual input data)
  */
 
-const urlParams   = new URLSearchParams(window.location.search);
-const activeRole  = (urlParams.get('role') || '').toUpperCase();
+const urlParams = new URLSearchParams(window.location.search);
+const activeRole = (urlParams.get('role') || '').toUpperCase();
 const allowedRoles = ['PCH', 'MANAGER', 'BOD', 'ADMIN'];
 
 let currentPeriode = '';
-let currentMode = 'monthly'; // 'monthly' atau 'compare'
+let currentMode = 'monthly'; // 'monthly' | 'compare' | 'evaluasi'
 
 // Global states untuk menyimpan data aktif
 let currentMonthlyData = [];
+let rawMonthlyData = []; // Menyimpan data asli sebelum difilter
 let currentCompareData = { mapA: new Map(), mapB: new Map(), periodeA: '', periodeB: '' };
+
+// State untuk Filter & Sort
+let searchQuery = '';
+let categoryFilter = '';
+let currentSortCol = ''; 
+let currentSortAsc = false;
+
+// State untuk Evaluasi Berkala
+let currentEvaluasiPeriodeAwal = '';
+let currentEvaluasiPeriodeAkhir = '';
+let currentEvaluasiData = []; // Array hasil ringkasan rata-rata per vendor
 
 // ---- IIFE: jalankan role check SEBELUM DOM selesai ----
 (function enforceRoleAccess() {
@@ -49,12 +61,15 @@ let currentCompareData = { mapA: new Map(), mapB: new Map(), periodeA: '', perio
           </div>
         `;
       }
-      
+
       // Sembunyikan navbar rekap aktif agar tidak terlihat sedang di menu rekap
       const navRekap = document.getElementById('nav-rekap');
       if (navRekap) {
         navRekap.className = "text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left";
       }
+
+      // Tetap forward role ke nav links agar jika user klik link di sidebar parameter ?role= tidak hilang
+      forwardRoleToNavLinks();
     });
     return; // Hentikan eksekusi sisa script
   }
@@ -82,8 +97,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Setup tombol bandingkan
   setupCompareButton();
 
+  // Setup Evaluasi Berkala dropdowns, shortcut, & tombol load
+  setupEvaluasiBerkala();
+
   // Setup event listeners untuk click row (Detail Modal)
   setupRowDetailsClick();
+
+  // Setup fitur baru
+  setupFiltersAndSearch();
+  setupSorting();
+  setupExport();
 
   // Load data heatmap pertama kali
   await loadHeatmapData();
@@ -110,12 +133,16 @@ function injectCustomStyles() {
 /** Forward ?role= ke semua link navbar */
 function forwardRoleToNavLinks() {
   const navDashboard = document.getElementById('nav-dashboard');
-  const navInput     = document.getElementById('nav-input');
-  const navRekap     = document.getElementById('nav-rekap');
+  const navInput = document.getElementById('nav-input');
+  const navDaily = document.getElementById('nav-daily');
+  const navRekap = document.getElementById('nav-rekap');
+  const navVendor = document.getElementById('nav-vendor');
 
   if (navDashboard) navDashboard.href = `./dashboard.html?role=${activeRole}`;
-  if (navInput)     navInput.href     = `./input.html?role=${activeRole}`;
-  if (navRekap)     navRekap.href     = `./master-rekap.html?role=${activeRole}`;
+  if (navInput) navInput.href = `./input.html?role=${activeRole}`;
+  if (navDaily) navDaily.href = `./input-daily.html?role=${activeRole}`;
+  if (navRekap) navRekap.href = `./master-rekap.html?role=${activeRole}`;
+  if (navVendor) navVendor.href = `./master-vendor.html?role=${activeRole}`;
 }
 
 /** Auto-generate dropdown periode (6 bulan terakhir) */
@@ -123,17 +150,17 @@ function setupPeriodeDropdown() {
   const select = document.querySelector('[data-select="periode"]');
   if (!select) return;
 
-  const today      = new Date();
-  const monthNames = ['Januari','Februari','Maret','April','Mei','Juni',
-                      'Juli','Agustus','September','Oktober','November','Desember'];
+  const today = new Date();
+  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
   select.innerHTML = '';
   for (let i = 0; i <= 5; i++) {
-    const d     = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
     const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const label = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-    const opt   = document.createElement('option');
-    opt.value       = value;
+    const opt = document.createElement('option');
+    opt.value = value;
     opt.textContent = label;
     select.appendChild(opt);
   }
@@ -154,27 +181,27 @@ function setupCompareDropdowns() {
   const selectAkhir = document.getElementById('periode-akhir');
   if (!selectAwal || !selectAkhir) return;
 
-  const today      = new Date();
-  const monthNames = ['Januari','Februari','Maret','April','Mei','Juni',
-                      'Juli','Agustus','September','Oktober','November','Desember'];
+  const today = new Date();
+  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
   selectAwal.innerHTML = '';
   selectAkhir.innerHTML = '';
 
   for (let i = 0; i <= 5; i++) {
-    const d     = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
     const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const label = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
 
     // Option untuk periode awal
-    const optA   = document.createElement('option');
-    optA.value       = value;
+    const optA = document.createElement('option');
+    optA.value = value;
     optA.textContent = label;
     selectAwal.appendChild(optA);
 
     // Option untuk periode akhir
-    const optB   = document.createElement('option');
-    optB.value       = value;
+    const optB = document.createElement('option');
+    optB.value = value;
     optB.textContent = label;
     selectAkhir.appendChild(optB);
   }
@@ -192,52 +219,54 @@ function setupCompareDropdowns() {
 function setupTabs() {
   const tabMonthly = document.getElementById('tab-monthly');
   const tabCompare = document.getElementById('tab-compare');
+  const tabEvaluasi = document.getElementById('tab-evaluasi');
 
   const filterMonthly = document.getElementById('filter-monthly-container');
   const filterCompare = document.getElementById('filter-compare-container');
+  const filterEvaluasi = document.getElementById('filter-evaluasi-container');
 
   const tableMonthly = document.getElementById('table-monthly');
   const tableCompare = document.getElementById('table-compare');
+  const tableEvaluasi = document.getElementById('table-evaluasi');
 
   if (!tabMonthly || !tabCompare) return;
 
+  const CLS_ACTIVE = 'flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2';
+  const CLS_INACTIVE = 'flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2';
+
+  const deactivateAll = () => {
+    [tabMonthly, tabCompare, tabEvaluasi].forEach(t => { if (t) t.className = CLS_INACTIVE; });
+    [filterMonthly, filterCompare, filterEvaluasi].forEach(f => { if (f) f.classList.add('hidden'); });
+    [tableMonthly, tableCompare, tableEvaluasi].forEach(t => { if (t) t.classList.add('hidden'); });
+  };
+
   tabMonthly.addEventListener('click', () => {
     currentMode = 'monthly';
-    
-    // Style tabs aktif/nonaktif
-    tabMonthly.className = "flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2";
-    tabCompare.className = "flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2";
-
-    // Show/hide filter containers
+    deactivateAll();
+    tabMonthly.className = CLS_ACTIVE;
     filterMonthly.classList.remove('hidden');
-    filterCompare.classList.add('hidden');
-
-    // Show/hide tables
     tableMonthly.classList.remove('hidden');
-    tableCompare.classList.add('hidden');
-
-    // Reload data heatmap bulanan
     loadHeatmapData();
   });
 
   tabCompare.addEventListener('click', () => {
     currentMode = 'compare';
-
-    // Style tabs aktif/nonaktif
-    tabCompare.className = "flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2";
-    tabMonthly.className = "flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2";
-
-    // Show/hide filter containers
+    deactivateAll();
+    tabCompare.className = CLS_ACTIVE;
     filterCompare.classList.remove('hidden');
-    filterMonthly.classList.add('hidden');
-
-    // Show/hide tables
     tableCompare.classList.remove('hidden');
-    tableMonthly.classList.add('hidden');
-
-    // Jalankan perbandingan data
     doComparison();
   });
+
+  if (tabEvaluasi) {
+    tabEvaluasi.addEventListener('click', () => {
+      currentMode = 'evaluasi';
+      deactivateAll();
+      tabEvaluasi.className = CLS_ACTIVE;
+      filterEvaluasi.classList.remove('hidden');
+      tableEvaluasi.classList.remove('hidden');
+    });
+  }
 }
 
 function setupCompareButton() {
@@ -255,7 +284,7 @@ function setupRowDetailsClick() {
     tbodyMonthly.addEventListener('click', (e) => {
       const row = e.target.closest('tr');
       if (!row || row.id === 'loading-row') return;
-      
+
       const rowId = row.dataset.rowId;
       if (rowId) {
         const item = currentMonthlyData.find(d => String(d.id) === String(rowId));
@@ -574,13 +603,80 @@ async function loadHeatmapData() {
   showLoading(true);
   try {
     const data = await getHeatmapData(currentPeriode);
-    currentMonthlyData = data; // Simpan ke state global untuk detail modal
-    renderTable(data);
+    rawMonthlyData = data;
+    updateCategoryDropdown();
+    applyFiltersAndRender();
   } catch (err) {
     console.error('Error loading heatmap:', err);
     showError();
   } finally {
     showLoading(false);
+  }
+}
+
+/** Terapkan Filter & Sort sebelum merender tabel */
+function applyFiltersAndRender() {
+  let filtered = [...rawMonthlyData];
+
+  // 1. Kategori Filter
+  if (categoryFilter) {
+    filtered = filtered.filter(v => v.jenis_bahan === categoryFilter);
+  }
+
+  // 2. Search Query
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(v => 
+      (v.nama_vendor && v.nama_vendor.toLowerCase().includes(q)) ||
+      (v.kode_vendor && String(v.kode_vendor).toLowerCase().includes(q))
+    );
+  }
+
+  // 3. Sorting
+  if (currentSortCol) {
+    filtered.sort((a, b) => {
+      let valA = a[currentSortCol];
+      let valB = b[currentSortCol];
+
+      if (currentSortCol === 'total_score') {
+        valA = parseFloat(valA) || 0;
+        valB = parseFloat(valB) || 0;
+      } else if (currentSortCol === 'grade') {
+        valA = valA || 'Z'; // Grade terburuk jika kosong
+        valB = valB || 'Z';
+      }
+      
+      if (valA < valB) return currentSortAsc ? -1 : 1;
+      if (valA > valB) return currentSortAsc ? 1 : -1;
+      return 0;
+    });
+  }
+
+  currentMonthlyData = filtered; // Simpan untuk modal
+  renderTable(filtered);
+}
+
+/** Populate Dropdown Kategori dari raw data yang ditarik */
+function updateCategoryDropdown() {
+  const select = document.getElementById('kategori-select');
+  if (!select) return;
+
+  const uniqueCategories = [...new Set(rawMonthlyData.map(v => v.jenis_bahan).filter(Boolean))].sort();
+  
+  // Simpan value yang sedang dipilih (jika ada)
+  const currentVal = select.value;
+  
+  select.innerHTML = '<option value="">Semua Kategori</option>';
+  uniqueCategories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    select.appendChild(opt);
+  });
+
+  // Kembalikan pilihan jika masih relevan
+  if (uniqueCategories.includes(currentVal)) {
+    select.value = currentVal;
   }
 }
 
@@ -738,17 +834,17 @@ function openSingleDetailModal(item) {
 
   const modalHtml = `
     <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 md:p-6 animate-fadeIn font-['Inter']">
-      <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-fadeInUp">
+      <div class="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh] animate-fadeInUp">
         
         <!-- Header -->
-        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50/50 dark:bg-slate-800/30">
+        <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-violet-50 to-indigo-50">
           <div>
-            <div class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Rincian Evaluasi Aktual</div>
-            <h3 class="text-2xl font-black text-slate-800 dark:text-white leading-tight">${item.nama_vendor}</h3>
+            <div class="text-[11px] font-bold text-violet-600 uppercase tracking-widest mb-1">Rincian Evaluasi Aktual</div>
+            <h3 class="text-2xl font-black text-slate-800 leading-tight">${item.nama_vendor}</h3>
             <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
-              <span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded font-medium">Kode: ${item.kode_vendor}</span>
-              <span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded font-medium">Kategori: ${item.jenis_bahan}</span>
-              <span class="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+              <span class="bg-slate-100 px-3 py-1.5 rounded-lg font-semibold border border-slate-200">Kode: ${item.kode_vendor}</span>
+              <span class="bg-slate-100 px-3 py-1.5 rounded-lg font-semibold border border-slate-200">Kategori: ${item.jenis_bahan}</span>
+              <span class="bg-violet-50 text-violet-800 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 border border-violet-200">
                 <span class="material-symbols-outlined text-[14px]">calendar_today</span>
                 ${formatPeriode(item.periode)}
               </span>
@@ -756,13 +852,13 @@ function openSingleDetailModal(item) {
           </div>
           <div class="flex items-center gap-4 self-stretch md:self-auto justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
             <div class="text-center">
-              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Skor Total</div>
-              <div class="text-3xl font-black text-slate-800 dark:text-white">${item.total_score ?? '-'}<span class="text-sm text-slate-400 font-semibold">/100</span></div>
+              <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Skor Total</div>
+              <div class="text-3xl font-black text-slate-800">${item.total_score ?? '-'}<span class="text-sm text-slate-400 font-semibold">/100</span></div>
             </div>
             <div class="w-14 h-14 rounded-2xl flex flex-col items-center justify-center font-black text-2xl text-white shadow-md shadow-indigo-600/10" style="background-color: ${gradeColor}">
               ${item.grade ?? '-'}
             </div>
-            <button id="close-modal-btn" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <button id="close-modal-btn" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
               <span class="material-symbols-outlined text-[24px]">close</span>
             </button>
           </div>
@@ -773,100 +869,100 @@ function openSingleDetailModal(item) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <!-- Quality Control (QC) Card -->
-            <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+            <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between">
               <div>
                 <div class="flex justify-between items-center mb-4">
                   <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center">
+                    <span class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">verified</span>
                     </span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200">Quality Control (QC)</span>
+                    <span class="font-bold text-slate-800">Quality Control (QC)</span>
                   </div>
                   <span class="text-sm font-black text-green-600">${item.qc_score ?? 0} <span class="text-xs text-slate-400 font-medium">/ 30 Pts</span></span>
                 </div>
                 <div class="space-y-2.5 text-sm">
-                  <div class="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-2">
+                  <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                     <span class="text-slate-500">Qty Barang Diterima (OK)</span>
-                    <span class="font-semibold text-slate-800 dark:text-slate-200">${formatNumber(item.qc_qty_terima)} Pcs</span>
+                    <span class="font-semibold text-slate-800">${formatNumber(item.qc_qty_terima)} Pcs</span>
                   </div>
-                  <div class="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-2">
+                  <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                     <span class="text-slate-500">Qty Barang Reject (NG)</span>
-                    <span class="font-semibold text-red-600 dark:text-red-400">${formatNumber(item.qc_qty_reject)} Pcs</span>
+                    <span class="font-semibold text-red-600">${formatNumber(item.qc_qty_reject)} Pcs</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="text-slate-500">Persentase NG (%)</span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200">${item.qc_ng_percent !== null ? parseFloat(item.qc_ng_percent).toFixed(2) + '%' : '-'}</span>
+                    <span class="font-bold text-slate-800">${item.qc_ng_percent !== null ? parseFloat(item.qc_ng_percent).toFixed(2) + '%' : '-'}</span>
                   </div>
                 </div>
               </div>
-              <div class="mt-4 pt-3 border-t border-slate-50 dark:border-slate-800 text-[11px] text-slate-400">
-                Kriteria Score: 0% = 30 poin | &le;1% = 15 poin | &gt;1% = 10 poin
+              <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
+                Kriteria Score: &lt;0.5% = 30 poin | 0.5%-0.99% = 15 poin | &ge;1% = 10 poin
               </div>
             </div>
 
             <!-- PPIC Card -->
-            <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+            <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between">
               <div>
                 <div class="flex justify-between items-center mb-4">
                   <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                    <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">schedule</span>
                     </span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200">PPIC (On-Time Delivery)</span>
+                    <span class="font-bold text-slate-800">PPIC (On-Time Delivery)</span>
                   </div>
                   <span class="text-sm font-black text-blue-600">${item.ppic_score ?? 0} <span class="text-xs text-slate-400 font-medium">/ 30 Pts</span></span>
                 </div>
                 <div class="space-y-2.5 text-sm">
                   <div class="flex justify-between items-center">
                     <span class="text-slate-500">Persentase On-Time Delivery</span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200">${item.ppic_ot_percent !== null ? parseFloat(item.ppic_ot_percent).toFixed(2) + '%' : '-'}</span>
+                    <span class="font-bold text-slate-800">${item.ppic_ot_percent !== null ? parseFloat(item.ppic_ot_percent).toFixed(2) + '%' : '-'}</span>
                   </div>
                 </div>
               </div>
-              <div class="mt-4 pt-3 border-t border-slate-50 dark:border-slate-800 text-[11px] text-slate-400">
-                Kriteria Score: &ge;90% = 30 poin | &ge;71% = 15 poin | &le;70% = 10 poin
+              <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
+                Kriteria Score: &ge;90% = 30 poin | &ge;71% = 15 poin | &lt;71% = 10 poin
               </div>
             </div>
 
             <!-- Purchasing (PCH) Card -->
-            <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between md:col-span-2">
+            <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between md:col-span-2">
               <div>
                 <div class="flex justify-between items-center mb-4">
                   <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                    <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
                     </span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200">Purchasing (PCH)</span>
+                    <span class="font-bold text-slate-800">Purchasing (PCH)</span>
                   </div>
                   <span class="text-sm font-black text-amber-600">${item.pch_score ?? 0} <span class="text-xs text-slate-400 font-medium">/ 30 Pts</span></span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl flex flex-col justify-between gap-1.5">
+                  <div class="p-3 bg-slate-50 rounded-xl flex flex-col justify-between gap-1.5">
                     <span class="text-xs text-slate-500 font-semibold">Kesesuaian Harga (Max 10)</span>
                     <div class="flex justify-between items-center">
                       ${formatEnum(item.pch_harga)}
-                      <span class="font-bold text-slate-700 dark:text-slate-300 text-xs">${item.pch_harga === 'BAIK' ? '10' : item.pch_harga === 'CUKUP' ? '5' : '3'} Pts</span>
+                      <span class="font-bold text-slate-700 text-xs">${item.pch_harga === 'BAIK' ? '10' : item.pch_harga === 'CUKUP' ? '5' : '3'} Pts</span>
                     </div>
                   </div>
-                  <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl flex flex-col justify-between gap-1.5">
+                  <div class="p-3 bg-slate-50 rounded-xl flex flex-col justify-between gap-1.5">
                     <span class="text-xs text-slate-500 font-semibold">Kesesuaian MOQ (Max 10)</span>
                     <div class="flex justify-between items-center">
                       ${formatEnum(item.pch_moq)}
-                      <span class="font-bold text-slate-700 dark:text-slate-300 text-xs">${item.pch_moq === 'BAIK' ? '10' : item.pch_moq === 'CUKUP' ? '5' : '3'} Pts</span>
+                      <span class="font-bold text-slate-700 text-xs">${item.pch_moq === 'BAIK' ? '10' : item.pch_moq === 'CUKUP' ? '5' : '3'} Pts</span>
                     </div>
                   </div>
-                  <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl flex flex-col justify-between gap-1.5">
+                  <div class="p-3 bg-slate-50 rounded-xl flex flex-col justify-between gap-1.5">
                     <span class="text-xs text-slate-500 font-semibold">Term of Payment (Max 5)</span>
                     <div class="flex justify-between items-center">
                       ${formatEnum(item.pch_top)}
-                      <span class="font-bold text-slate-700 dark:text-slate-300 text-xs">${item.pch_top === 'BAIK' ? '5' : item.pch_top === 'CUKUP' ? '3' : '1'} Pts</span>
+                      <span class="font-bold text-slate-700 text-xs">${item.pch_top === 'BAIK' ? '5' : item.pch_top === 'CUKUP' ? '3' : '1'} Pts</span>
                     </div>
                   </div>
-                  <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl flex flex-col justify-between gap-1.5">
+                  <div class="p-3 bg-slate-50 rounded-xl flex flex-col justify-between gap-1.5">
                     <span class="text-xs text-slate-500 font-semibold">Kualitas Pelayanan (Max 5)</span>
                     <div class="flex justify-between items-center">
                       ${formatEnum(item.pch_pelayanan)}
-                      <span class="font-bold text-slate-700 dark:text-slate-300 text-xs">${item.pch_pelayanan === 'BAIK' ? '5' : item.pch_pelayanan === 'CUKUP' ? '3' : '1'} Pts</span>
+                      <span class="font-bold text-slate-700 text-xs">${item.pch_pelayanan === 'BAIK' ? '5' : item.pch_pelayanan === 'CUKUP' ? '3' : '1'} Pts</span>
                     </div>
                   </div>
                 </div>
@@ -874,30 +970,30 @@ function openSingleDetailModal(item) {
             </div>
 
             <!-- HSE Card -->
-            <div class="p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between md:col-span-2">
+            <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between md:col-span-2">
               <div>
                 <div class="flex justify-between items-center mb-4">
                   <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                    <span class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">shield</span>
                     </span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200">Health, Safety, & Environment (HSE)</span>
+                    <span class="font-bold text-slate-800">Health, Safety, & Environment (HSE)</span>
                   </div>
                   <span class="text-sm font-black text-teal-600">${item.hse_score ?? 0} <span class="text-xs text-slate-400 font-medium">/ 10 Pts</span></span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl flex justify-between items-center">
+                  <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
                     <span class="text-xs text-slate-500 font-semibold">Uji Emisi Kendaraan (Max 5)</span>
                     <div class="flex items-center gap-2">
                       ${formatEnum(item.hse_uji_emisi)}
-                      <span class="font-bold text-slate-700 dark:text-slate-300 text-xs">${item.hse_uji_emisi === 'BAIK' ? '5' : item.hse_uji_emisi === 'CUKUP' ? '3' : '1'} Pts</span>
+                      <span class="font-bold text-slate-700 text-xs">${item.hse_uji_emisi === 'BAIK' ? '5' : item.hse_uji_emisi === 'CUKUP' ? '3' : '1'} Pts</span>
                     </div>
                   </div>
-                  <div class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl flex justify-between items-center">
+                  <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
                     <span class="text-xs text-slate-500 font-semibold">Penggunaan APD Driver (Max 5)</span>
                     <div class="flex items-center gap-2">
                       ${formatEnum(item.hse_apd)}
-                      <span class="font-bold text-slate-700 dark:text-slate-300 text-xs">${item.hse_apd === 'BAIK' ? '5' : item.hse_apd === 'CUKUP' ? '3' : '1'} Pts</span>
+                      <span class="font-bold text-slate-700 text-xs">${item.hse_apd === 'BAIK' ? '5' : item.hse_apd === 'CUKUP' ? '3' : '1'} Pts</span>
                     </div>
                   </div>
                 </div>
@@ -908,8 +1004,8 @@ function openSingleDetailModal(item) {
         </div>
 
         <!-- Footer -->
-        <div class="p-6 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-          <button id="close-modal-footer-btn" class="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold rounded-xl text-sm shadow-md hover:opacity-90 active:scale-95 transition-all">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+          <button id="close-modal-footer-btn" class="px-6 py-2.5 bg-slate-900 text-white font-bold rounded-xl text-sm shadow-md hover:opacity-90 active:scale-95 transition-all">
             Tutup Rincian
           </button>
         </div>
@@ -981,7 +1077,7 @@ function openCompareDetailModal(kodeVendor, itemA, itemB) {
     }
 
     const formattedAvg = isFloat ? avg.toFixed(2) : avg.toFixed(1).replace('.0', '');
-    return `<span class="text-indigo-600 dark:text-indigo-400 font-black text-sm">${formattedAvg}${suffix}</span>`;
+    return `<span class="text-indigo-600 font-black text-sm">${formattedAvg}${suffix}</span>`;
   };
 
   // Hitung rerata total_score untuk Grade
@@ -1022,20 +1118,20 @@ function openCompareDetailModal(kodeVendor, itemA, itemB) {
 
   const modalHtml = `
     <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 md:p-6 animate-fadeIn font-['Inter']">
-      <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-fadeInUp">
+      <div class="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh] animate-fadeInUp">
         
         <!-- Header -->
-        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50/50 dark:bg-slate-800/30">
+        <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-violet-50 to-indigo-50">
           <div>
-            <div class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Rincian Rerata & Performa 2 Periode</div>
-            <h3 class="text-2xl font-black text-slate-800 dark:text-white leading-tight">${name}</h3>
+            <div class="text-[11px] font-bold text-violet-600 uppercase tracking-widest mb-1">Rincian Rerata & Performa 2 Periode</div>
+            <h3 class="text-2xl font-black text-slate-800 leading-tight">${name}</h3>
             <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
-              <span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded font-medium">Kode: ${kodeVendor}</span>
-              <span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded font-medium">Kategori: ${category}</span>
+              <span class="bg-slate-100 px-3 py-1.5 rounded-lg font-semibold border border-slate-200">Kode: ${kodeVendor}</span>
+              <span class="bg-slate-100 px-3 py-1.5 rounded-lg font-semibold border border-slate-200">Kategori: ${category}</span>
             </div>
           </div>
           <div class="flex items-center gap-4 self-stretch md:self-auto justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
-            <button id="close-modal-btn" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <button id="close-modal-btn" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
               <span class="material-symbols-outlined text-[24px]">close</span>
             </button>
           </div>
@@ -1043,133 +1139,133 @@ function openCompareDetailModal(kodeVendor, itemA, itemB) {
 
         <!-- Scrollable Comparison Table -->
         <div class="p-6 overflow-y-auto space-y-6">
-          <div class="border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="bg-slate-50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-500 uppercase">
+                <tr class="bg-slate-50 border-b border-slate-700 text-xs font-bold text-slate-500 uppercase">
                   <th class="px-4 py-3">Kriteria Evaluasi</th>
-                  <th class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20 w-[25%]">${labelA}</th>
-                  <th class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 w-[25%]">${labelB}</th>
+                  <th class="px-4 py-3 text-center bg-slate-50/50 w-[25%]">${labelA}</th>
+                  <th class="px-4 py-3 text-center bg-indigo-50/30 w-[25%]">${labelB}</th>
                   <th class="px-4 py-3 text-center w-[18%]">Rerata (Average)</th>
                 </tr>
               </thead>
-              <tbody class="text-sm text-slate-600 dark:text-slate-300 divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody class="text-sm text-slate-600 divide-y divide-slate-100">
                 
                 <!-- SUMMARY SECTION -->
                 <tr class="bg-indigo-50/20 font-bold">
-                  <td class="px-4 py-3.5 text-indigo-900 dark:text-indigo-400">GRADE KESELURUHAN</td>
-                  <td class="px-4 py-3.5 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA ? getGradeBadge(itemA.grade) : 'N/A'}</td>
-                  <td class="px-4 py-3.5 text-center bg-indigo-50/40 dark:bg-indigo-950/10">${itemB ? getGradeBadge(itemB.grade) : 'N/A'}</td>
+                  <td class="px-4 py-3.5 text-indigo-900">GRADE KESELURUHAN</td>
+                  <td class="px-4 py-3.5 text-center bg-slate-50/50">${itemA ? getGradeBadge(itemA.grade) : 'N/A'}</td>
+                  <td class="px-4 py-3.5 text-center bg-indigo-50/30">${itemB ? getGradeBadge(itemB.grade) : 'N/A'}</td>
                   <td class="px-4 py-3.5 text-center">${getAverageGradeBadge(itemA?.grade, itemB?.grade, avgGrade)}</td>
                 </tr>
                 <tr class="font-bold">
-                  <td class="px-4 py-3.5 text-slate-800 dark:text-slate-200">SKOR TOTAL (Max 100)</td>
-                  <td class="px-4 py-3.5 text-center bg-slate-100/50 dark:bg-slate-800/20 text-slate-800 dark:text-slate-200 text-lg">${itemA ? itemA.total_score : 'N/A'}</td>
-                  <td class="px-4 py-3.5 text-center bg-indigo-50/40 dark:bg-indigo-950/10 text-slate-900 dark:text-white text-lg">${itemB ? itemB.total_score : 'N/A'}</td>
+                  <td class="px-4 py-3.5 text-slate-800 font-bold">SKOR TOTAL (Max 100)</td>
+                  <td class="px-4 py-3.5 text-center bg-slate-50/50 text-slate-800 text-lg">${itemA ? itemA.total_score : 'N/A'}</td>
+                  <td class="px-4 py-3.5 text-center bg-indigo-50/30 text-slate-800 text-lg">${itemB ? itemB.total_score : 'N/A'}</td>
                   <td class="px-4 py-3.5 text-center">${getAverageSpan(itemA?.total_score, itemB?.total_score)}</td>
                 </tr>
 
                 <!-- DIVISION 1: QC -->
-                <tr class="bg-slate-50/30 font-bold text-slate-700 dark:text-slate-300">
+                <tr class="bg-slate-50 font-bold text-slate-500">
                   <td colspan="4" class="px-4 py-2 text-xs uppercase tracking-wider">Quality Control (QC)</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Poin QC (Max 30)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20 font-semibold">${itemA ? itemA.qc_score : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 font-bold">${itemB ? itemB.qc_score : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50 font-semibold">${itemA ? itemA.qc_score : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30 font-bold">${itemB ? itemB.qc_score : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.qc_score, itemB?.qc_score)}</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Qty Barang Diterima (OK)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA ? formatNumber(itemA.qc_qty_terima) + ' Pcs' : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 font-semibold text-slate-850">${itemB ? formatNumber(itemB.qc_qty_terima) + ' Pcs' : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA ? formatNumber(itemA.qc_qty_terima) + ' Pcs' : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30 font-semibold text-slate-850">${itemB ? formatNumber(itemB.qc_qty_terima) + ' Pcs' : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.qc_qty_terima, itemB?.qc_qty_terima, ' Pcs')}</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Qty Barang Reject (NG)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20 text-red-600 dark:text-red-400">${itemA ? formatNumber(itemA.qc_qty_reject) + ' Pcs' : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 text-red-600 dark:text-red-400 font-semibold">${itemB ? formatNumber(itemB.qc_qty_reject) + ' Pcs' : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50 text-red-600">${itemA ? formatNumber(itemA.qc_qty_reject) + ' Pcs' : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30 text-red-600 font-semibold">${itemB ? formatNumber(itemB.qc_qty_reject) + ' Pcs' : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.qc_qty_reject, itemB?.qc_qty_reject, ' Pcs')}</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Persentase NG (%)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA && itemA.qc_ng_percent !== null ? parseFloat(itemA.qc_ng_percent).toFixed(2) + '%' : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 font-semibold">${itemB && itemB.qc_ng_percent !== null ? parseFloat(itemB.qc_ng_percent).toFixed(2) + '%' : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA && itemA.qc_ng_percent !== null ? parseFloat(itemA.qc_ng_percent).toFixed(2) + '%' : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30 font-semibold">${itemB && itemB.qc_ng_percent !== null ? parseFloat(itemB.qc_ng_percent).toFixed(2) + '%' : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.qc_ng_percent, itemB?.qc_ng_percent, '%', true)}</td>
                 </tr>
 
                 <!-- DIVISION 2: PPIC -->
-                <tr class="bg-slate-50/30 font-bold text-slate-700 dark:text-slate-300">
+                <tr class="bg-slate-50 font-bold text-slate-500">
                   <td colspan="4" class="px-4 py-2 text-xs uppercase tracking-wider">PPIC (On-Time Delivery)</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Poin PPIC (Max 30)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20 font-semibold">${itemA ? itemA.ppic_score : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 font-bold">${itemB ? itemB.ppic_score : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50 font-semibold">${itemA ? itemA.ppic_score : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30 font-bold">${itemB ? itemB.ppic_score : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.ppic_score, itemB?.ppic_score)}</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">On-Time Delivery (%)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA && itemA.ppic_ot_percent !== null ? parseFloat(itemA.ppic_ot_percent).toFixed(2) + '%' : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 font-semibold">${itemB && itemB.ppic_ot_percent !== null ? parseFloat(itemB.ppic_ot_percent).toFixed(2) + '%' : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA && itemA.ppic_ot_percent !== null ? parseFloat(itemA.ppic_ot_percent).toFixed(2) + '%' : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30 font-semibold">${itemB && itemB.ppic_ot_percent !== null ? parseFloat(itemB.ppic_ot_percent).toFixed(2) + '%' : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.ppic_ot_percent, itemB?.ppic_ot_percent, '%', true)}</td>
                 </tr>
 
                 <!-- DIVISION 3: PCH -->
-                <tr class="bg-slate-50/30 font-bold text-slate-700 dark:text-slate-300">
+                <tr class="bg-slate-50 font-bold text-slate-500">
                   <td colspan="4" class="px-4 py-2 text-xs uppercase tracking-wider">Purchasing (PCH)</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Poin PCH (Max 30)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20 font-semibold">${itemA ? itemA.pch_score : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 font-bold">${itemB ? itemB.pch_score : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50 font-semibold">${itemA ? itemA.pch_score : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30 font-bold">${itemB ? itemB.pch_score : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.pch_score, itemB?.pch_score)}</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Kesesuaian Harga (Max 10)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA ? getEnumBadge(itemA.pch_harga) : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10">${itemB ? getEnumBadge(itemB.pch_harga) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA ? getEnumBadge(itemA.pch_harga) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30">${itemB ? getEnumBadge(itemB.pch_harga) : '-'}</td>
                   <td class="px-4 py-3 text-center">-</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Kesesuaian MOQ (Max 10)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA ? getEnumBadge(itemA.pch_moq) : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10">${itemB ? getEnumBadge(itemB.pch_moq) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA ? getEnumBadge(itemA.pch_moq) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30">${itemB ? getEnumBadge(itemB.pch_moq) : '-'}</td>
                   <td class="px-4 py-3 text-center">-</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Term of Payment (Max 5)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA ? getEnumBadge(itemA.pch_top) : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10">${itemB ? getEnumBadge(itemB.pch_top) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA ? getEnumBadge(itemA.pch_top) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30">${itemB ? getEnumBadge(itemB.pch_top) : '-'}</td>
                   <td class="px-4 py-3 text-center">-</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Kualitas Pelayanan (Max 5)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA ? getEnumBadge(itemA.pch_pelayanan) : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10">${itemB ? getEnumBadge(itemB.pch_pelayanan) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA ? getEnumBadge(itemA.pch_pelayanan) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30">${itemB ? getEnumBadge(itemB.pch_pelayanan) : '-'}</td>
                   <td class="px-4 py-3 text-center">-</td>
                 </tr>
 
                 <!-- DIVISION 4: HSE -->
-                <tr class="bg-slate-50/30 font-bold text-slate-700 dark:text-slate-300">
+                <tr class="bg-slate-50 font-bold text-slate-500">
                   <td colspan="4" class="px-4 py-2 text-xs uppercase tracking-wider">Health, Safety, & Environment (HSE)</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Poin HSE (Max 10)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20 font-semibold">${itemA ? itemA.hse_score : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10 font-bold">${itemB ? itemB.hse_score : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50 font-semibold">${itemA ? itemA.hse_score : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30 font-bold">${itemB ? itemB.hse_score : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.hse_score, itemB?.hse_score)}</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Uji Emisi Kendaraan (Max 5)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA ? getEnumBadge(itemA.hse_uji_emisi) : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10">${itemB ? getEnumBadge(itemB.hse_uji_emisi) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA ? getEnumBadge(itemA.hse_uji_emisi) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30">${itemB ? getEnumBadge(itemB.hse_uji_emisi) : '-'}</td>
                   <td class="px-4 py-3 text-center">-</td>
                 </tr>
                 <tr>
                   <td class="px-4 py-3 pl-8 text-slate-500">Penggunaan APD Driver (Max 5)</td>
-                  <td class="px-4 py-3 text-center bg-slate-100/50 dark:bg-slate-800/20">${itemA ? getEnumBadge(itemA.hse_apd) : '-'}</td>
-                  <td class="px-4 py-3 text-center bg-indigo-50/40 dark:bg-indigo-950/10">${itemB ? getEnumBadge(itemB.hse_apd) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-slate-50/50">${itemA ? getEnumBadge(itemA.hse_apd) : '-'}</td>
+                  <td class="px-4 py-3 text-center bg-indigo-50/30">${itemB ? getEnumBadge(itemB.hse_apd) : '-'}</td>
                   <td class="px-4 py-3 text-center">-</td>
                 </tr>
 
@@ -1179,8 +1275,8 @@ function openCompareDetailModal(kodeVendor, itemA, itemB) {
         </div>
 
         <!-- Footer -->
-        <div class="p-6 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-          <button id="close-modal-footer-btn" class="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold rounded-xl text-sm shadow-md hover:opacity-90 active:scale-95 transition-all">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+          <button id="close-modal-footer-btn" class="px-6 py-2.5 bg-slate-900 text-white font-bold rounded-xl text-sm shadow-md hover:opacity-90 active:scale-95 transition-all">
             Tutup Detail Rerata
           </button>
         </div>
@@ -1201,5 +1297,456 @@ function openCompareDetailModal(kodeVendor, itemA, itemB) {
   document.getElementById('close-modal-footer-btn')?.addEventListener('click', closeModal);
   document.getElementById('detail-modal')?.addEventListener('click', (e) => {
     if (e.target.id === 'detail-modal') closeModal();
+  });
+}
+
+// ============================================================
+//  EVALUASI BERKALA — Setup, Load, Render, Modal
+// ============================================================
+
+/** Setup dropdown awal/akhir (12 bulan), tombol shortcut 6 bln / 1 tahun */
+function setupEvaluasiBerkala() {
+  const selAwal = document.getElementById('evaluasi-periode-awal');
+  const selAkhir = document.getElementById('evaluasi-periode-akhir');
+  if (!selAwal || !selAkhir) return;
+
+  const today = new Date();
+  const names = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+  selAwal.innerHTML = '';
+  selAkhir.innerHTML = '';
+
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const lbl = `${names[d.getMonth()]} ${d.getFullYear()}`;
+    selAwal.insertAdjacentHTML('beforeend', `<option value="${val}">${lbl}</option>`);
+    selAkhir.insertAdjacentHTML('beforeend', `<option value="${val}">${lbl}</option>`);
+  }
+
+  // Default: awal = 6 bulan lalu, akhir = bulan lalu
+  selAwal.selectedIndex = 5;
+  selAkhir.selectedIndex = 1;
+
+  const setShortcut = (nBulan) => {
+    selAwal.selectedIndex = Math.min(nBulan - 1, selAwal.options.length - 1);
+    selAkhir.selectedIndex = 1;
+  };
+
+  document.getElementById('btn-shortcut-6m')?.addEventListener('click', () => setShortcut(6));
+  document.getElementById('btn-shortcut-1y')?.addEventListener('click', () => setShortcut(12));
+  document.getElementById('btn-load-evaluasi')?.addEventListener('click', loadEvaluasiData);
+}
+
+/** Ambil ringkasan rata-rata semua vendor dalam rentang, lalu render tabel */
+async function loadEvaluasiData() {
+  const selAwal = document.getElementById('evaluasi-periode-awal');
+  const selAkhir = document.getElementById('evaluasi-periode-akhir');
+  const tbody = document.getElementById('evaluasi-tbody');
+  const count = document.getElementById('record-count');
+  if (!selAwal || !selAkhir || !tbody) return;
+
+  const pAwal = selAwal.value;
+  const pAkhir = selAkhir.value;
+
+  if (pAwal > pAkhir) {
+    tbody.innerHTML = `<tr><td colspan="10" class="px-sm py-8 text-center text-amber-600">
+      <span class="material-symbols-outlined text-[32px]">warning</span><br>
+      Periode "Dari" tidak boleh lebih baru dari "Sampai".
+    </td></tr>`;
+    return;
+  }
+
+  currentEvaluasiPeriodeAwal = pAwal;
+  currentEvaluasiPeriodeAkhir = pAkhir;
+
+  tbody.innerHTML = `<tr><td colspan="10" class="px-sm py-10 text-center text-on-surface-variant">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <span class="material-symbols-outlined" style="font-size:36px;color:#7c3aed;animation:spin 1s linear infinite">autorenew</span>
+      <span style="font-size:14px">Memuat data evaluasi berkala...</span>
+    </div></td></tr>`;
+
+  try {
+    const vendorList = await getHeatmapData(pAkhir);
+    const vendors = (vendorList && vendorList.length > 0) ? vendorList : (await getHeatmapData(pAwal) || []);
+
+    if (!vendors.length) {
+      tbody.innerHTML = `<tr><td colspan="10" class="px-sm py-10 text-center text-on-surface-variant">
+        <span class="material-symbols-outlined" style="font-size:36px">inbox</span><br>
+        Tidak ada vendor pada rentang periode ini.
+      </td></tr>`;
+      if (count) count.textContent = 'Tidak ada data.';
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      vendors.map(v => getDetailEvaluasi(v.kode_vendor, pAwal, pAkhir))
+    );
+
+    currentEvaluasiData = results
+      .map((r, i) => r.status === 'fulfilled' ? { ...r.value, kode_vendor: vendors[i].kode_vendor } : null)
+      .filter(Boolean);
+
+    renderEvaluasiTable(currentEvaluasiData, pAwal, pAkhir);
+  } catch (err) {
+    console.error('loadEvaluasiData error:', err);
+    tbody.innerHTML = `<tr><td colspan="10" class="px-sm py-10 text-center text-red-600">
+      <span class="material-symbols-outlined text-[36px]">error</span><br>
+      Gagal memuat data. Pastikan backend berjalan.<br>
+      <span class="text-xs font-mono text-red-500 block mt-2">${err.message}</span>
+    </td></tr>`;
+    if (count) count.textContent = 'Gagal memuat data evaluasi berkala.';
+  }
+}
+
+/** Render tabel ringkasan rata-rata semua vendor */
+function renderEvaluasiTable(dataArr, pAwal, pAkhir) {
+  const tbody = document.getElementById('evaluasi-tbody');
+  const count = document.getElementById('record-count');
+  if (!tbody) return;
+
+  const active = dataArr.filter(d => d.status === 'success' && d.rata_rata);
+
+  if (!active.length) {
+    tbody.innerHTML = `<tr><td colspan="10" class="px-sm py-10 text-center text-on-surface-variant">
+      <span class="material-symbols-outlined" style="font-size:36px">inbox</span><br>
+      Tidak ada data dalam rentang periode ini.
+    </td></tr>`;
+    if (count) count.textContent = 'Tidak ada data untuk evaluasi berkala.';
+    return;
+  }
+
+  const fmt = (v, dec = 1) => (v !== null && v !== undefined) ? parseFloat(v).toFixed(dec) : '-';
+  const gradeBadge = (g) => {
+    if (g === 'A') return `<span class="px-2 py-0.5 bg-green-100 text-green-800 text-[11px] font-bold rounded border border-green-200">A</span>`;
+    if (g === 'B') return `<span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[11px] font-bold rounded border border-yellow-200">B</span>`;
+    return `<span class="px-2 py-0.5 bg-red-100 text-red-800 text-[11px] font-bold rounded border border-red-200">C</span>`;
+  };
+
+  tbody.innerHTML = '';
+  active.forEach(d => {
+    const r = d.rata_rata;
+    const avgTotal = parseFloat(r.avg_total_score || 0);
+    const totalColor = avgTotal >= 90 ? '#22c55e' : avgTotal >= 70 ? '#f59e0b' : '#ef4444';
+
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr class="hover:bg-violet-50/40 transition-colors group border-l-4 border-l-violet-400">
+        <td class="px-sm py-4 text-center">
+          <span class="material-symbols-outlined text-violet-300 group-hover:text-violet-600 transition-colors">event_repeat</span>
+        </td>
+        <td class="px-sm py-4">
+          <div class="font-bold text-slate-800">${d.nama_vendor ?? '-'}</div>
+          <div class="text-[11px] text-slate-400">Kode: ${d.kode_vendor}</div>
+        </td>
+        <td class="px-sm py-4 text-on-surface-variant text-sm">${d.jenis_bahan ?? '-'}</td>
+        <td class="px-sm py-4 text-center font-semibold">${fmt(r.avg_qc_score)} Pts</td>
+        <td class="px-sm py-4 text-center font-semibold">${fmt(r.avg_ppic_score)} Pts</td>
+        <td class="px-sm py-4 text-center font-semibold">${fmt(r.avg_pch_score)} Pts</td>
+        <td class="px-sm py-4 text-center font-semibold">${fmt(r.avg_hse_score)} Pts</td>
+        <td class="px-sm py-4 text-center font-bold text-lg" style="color:${totalColor}">${fmt(r.avg_total_score)}</td>
+        <td class="px-sm py-4 text-center">${gradeBadge(r.avg_grade)}</td>
+        <td class="px-sm py-4 text-center">
+          <button
+            onclick="openEvaluasiDetailModal('${d.kode_vendor}','${pAwal}','${pAkhir}')"
+            class="inline-flex items-center gap-1 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm active:scale-95">
+            <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+            Lihat Selengkapnya
+          </button>
+        </td>
+      </tr>`);
+  });
+
+  if (count) count.textContent = `Evaluasi berkala: ${active.length} vendor, periode ${formatPeriode(pAwal)} — ${formatPeriode(pAkhir)}.`;
+}
+
+/**
+ * Lazy-load modal detail per vendor.
+ * Fungsi ini dipanggil via onclick inline di baris tabel evaluasi.
+ */
+async function openEvaluasiDetailModal(kodeVendor, pAwal, pAkhir) {
+  document.getElementById('evaluasi-detail-modal')?.remove();
+
+  // Skeleton modal muncul sebelum data tiba
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="evaluasi-detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fadeIn font-['Inter']">
+      <div class="bg-white rounded-3xl w-[98vw] max-w-[1500px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[95vh] animate-fadeInUp">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-violet-50 to-indigo-50">
+          <div>
+            <div class="text-[11px] font-bold text-violet-600 uppercase tracking-widest mb-1">Evaluasi Berkala — Detail Aktual</div>
+            <h3 id="evaluasi-modal-title" class="text-xl font-black text-slate-800">Memuat data...</h3>
+            <p class="text-xs text-slate-500 mt-1">${formatPeriode(pAwal)} — ${formatPeriode(pAkhir)}</p>
+          </div>
+          <button id="close-evaluasi-modal" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+            <span class="material-symbols-outlined text-[24px]">close</span>
+          </button>
+        </div>
+        <div id="evaluasi-modal-body" class="p-6 overflow-y-auto">
+          <div class="flex flex-col items-center gap-3 py-12 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[40px] text-violet-400" style="animation:spin 1s linear infinite">autorenew</span>
+            <span class="text-sm">Mengambil data aktual per bulan...</span>
+          </div>
+        </div>
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex flex-wrap justify-between items-center gap-4">
+          <div class="text-[10px] text-slate-500 bg-white px-3 py-2 rounded-lg border border-slate-200">
+            <strong class="text-slate-700">Kriteria Penilaian:</strong><br>
+            <span class="inline-block mt-1 mr-3"><b>QC:</b> &lt;0.5% = 30 pts | 0.5-0.99% = 15 pts | &ge;1% = 10 pts</span>
+            <span class="inline-block mt-1 mr-3"><b>PPIC:</b> &ge;90% = 30 pts | &ge;71% = 15 pts | &lt;71% = 10 pts</span>
+            <span class="inline-block mt-1"><b>PCH/HSE:</b> Baik = Max pts | Cukup/Kurang = Mid/Min pts</span>
+          </div>
+          <button id="close-evaluasi-modal-footer" class="px-6 py-2.5 bg-slate-900 text-white font-bold rounded-xl text-sm shadow-md hover:opacity-90 active:scale-95 transition-all">
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>`);
+
+  const closeEv = () => document.getElementById('evaluasi-detail-modal')?.remove();
+  document.getElementById('close-evaluasi-modal')?.addEventListener('click', closeEv);
+  document.getElementById('close-evaluasi-modal-footer')?.addEventListener('click', closeEv);
+  document.getElementById('evaluasi-detail-modal')?.addEventListener('click', e => {
+    if (e.target.id === 'evaluasi-detail-modal') closeEv();
+  });
+
+  try {
+    const res = await getDetailEvaluasi(kodeVendor, pAwal, pAkhir);
+    const titleEl = document.getElementById('evaluasi-modal-title');
+    if (titleEl) titleEl.textContent = `Data Aktual: ${res.nama_vendor ?? kodeVendor}`;
+
+    const fmt = (v, dec = 2) => (v !== null && v !== undefined) ? parseFloat(v).toFixed(dec) : '-';
+    const enumBadge = (val) => {
+      if (!val) return '<span class="text-slate-300">—</span>';
+      const cls = val === 'BAIK' ? 'bg-green-50 text-green-700 border-green-200'
+        : val === 'CUKUP' ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+          : 'bg-red-50 text-red-700 border-red-200';
+      return `<span class="px-1.5 py-0.5 text-[10px] font-bold rounded border ${cls}">${val}</span>`;
+    };
+    const gradeBadge = (g) => {
+      if (g === 'A') return `<span class="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-extrabold rounded-md border border-green-200">A</span>`;
+      if (g === 'B') return `<span class="px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-extrabold rounded-md border border-yellow-200">B</span>`;
+      return `<span class="px-2.5 py-1 bg-red-100 text-red-800 text-xs font-extrabold rounded-md border border-red-200">C</span>`;
+    };
+
+    // Baris data aktual
+    let rowsHtml = '';
+    if (!res.data_aktual?.length) {
+      rowsHtml = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">
+        Tidak ada data aktual pada rentang ini.</td></tr>`;
+    } else {
+      res.data_aktual.forEach(row => {
+        const sc = parseFloat(row.total_score || 0);
+        const tc = sc >= 90 ? '#22c55e' : sc >= 70 ? '#f59e0b' : '#ef4444';
+
+        // Data Tambahan
+        const qtyTerima = row.qc_qty_terima ?? 0;
+        const qtyReject = row.qc_qty_reject ?? 0;
+
+        rowsHtml += `
+          <tr class="hover:bg-violet-50/30 transition-colors border-b border-slate-100">
+            <td class="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap">${formatPeriode(row.periode)}</td>
+            <td class="px-4 py-3 text-center">
+              <div class="font-bold text-slate-800">${fmt(row.qc_ng_percent)}%</div>
+              <div class="text-[10px] text-slate-500 leading-tight mt-1">Terima: ${qtyTerima} <br> Reject: ${qtyReject}</div>
+              <div class="text-[11px] font-bold text-violet-600 mt-1 bg-violet-50 rounded-md inline-block px-2 py-0.5">${row.qc_score ?? 0} Pts</div>
+            </td>
+            <td class="px-4 py-3 text-center">
+              <div class="font-bold text-slate-800">${fmt(row.ppic_ot_percent)}%</div>
+              <div class="text-[10px] text-slate-500 leading-tight mt-1">Ketepatan <br> Pengiriman</div>
+              <div class="text-[11px] font-bold text-violet-600 mt-1 bg-violet-50 rounded-md inline-block px-2 py-0.5">${row.ppic_score ?? 0} Pts</div>
+            </td>
+            <td class="px-4 py-3 text-center">
+              <div class="text-[12px] font-bold text-slate-800">${row.pch_score ?? 0} Pts</div>
+              <div class="flex flex-wrap justify-center gap-1 mt-1.5">
+                ${enumBadge(row.pch_harga)}${enumBadge(row.pch_moq)}${enumBadge(row.pch_top)}${enumBadge(row.pch_pelayanan)}
+              </div>
+            </td>
+            <td class="px-4 py-3 text-center">
+              <div class="text-[12px] font-bold text-slate-800">${row.hse_score ?? 0} Pts</div>
+              <div class="flex flex-wrap justify-center gap-1 mt-1.5">
+                ${enumBadge(row.hse_uji_emisi)}${enumBadge(row.hse_apd)}
+              </div>
+            </td>
+            <td class="px-4 py-3 text-center font-bold text-lg" style="color:${tc}">${row.total_score ?? '-'}</td>
+            <td class="px-4 py-3 text-center">${gradeBadge(row.grade)}</td>
+          </tr>`;
+      });
+    }
+
+    // Baris footer rata-rata
+    let footerHtml = '';
+    const r = res.rata_rata;
+    if (r) {
+      const at = parseFloat(r.avg_total_score || 0);
+      const ac = at >= 90 ? '#22c55e' : at >= 70 ? '#f59e0b' : '#ef4444';
+
+      const sumTerima = r.sum_qc_qty_terima ?? 0;
+      const sumReject = r.sum_qc_qty_reject ?? 0;
+
+      footerHtml = `
+        <tr class="bg-violet-50 border-t-2 border-violet-300 sticky bottom-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+          <td class="px-4 py-4 text-violet-800 text-xs font-black uppercase tracking-wider whitespace-nowrap">
+            RATA-RATA <br><span class="text-[10px] font-semibold text-violet-600">(${r.jumlah_bulan} bln)</span>
+          </td>
+          <td class="px-4 py-4 text-center">
+            <div class="font-black text-violet-800">${fmt(r.avg_qc_ng_percent)}%</div>
+            <div class="text-[10px] text-violet-600 font-medium leading-tight mt-1">Tot. Terima: ${sumTerima} <br> Tot. Reject: ${sumReject}</div>
+            <div class="text-[11px] font-bold text-white bg-violet-600 rounded-md inline-block px-2 py-0.5 mt-1">${fmt(r.avg_qc_score, 1)} Pts</div>
+          </td>
+          <td class="px-4 py-4 text-center">
+            <div class="font-black text-violet-800">${fmt(r.avg_ppic_ot_percent)}%</div>
+            <div class="text-[10px] text-violet-600 font-medium mt-1">&nbsp;</div>
+            <div class="text-[11px] font-bold text-white bg-violet-600 rounded-md inline-block px-2 py-0.5 mt-1">${fmt(r.avg_ppic_score, 1)} Pts</div>
+          </td>
+          <td class="px-4 py-4 text-center">
+            <div class="text-[13px] font-black text-violet-800">${fmt(r.avg_pch_score, 1)} Pts</div>
+          </td>
+          <td class="px-4 py-4 text-center">
+            <div class="text-[13px] font-black text-violet-800">${fmt(r.avg_hse_score, 1)} Pts</div>
+          </td>
+          <td class="px-4 py-4 text-center font-black text-2xl" style="color:${ac}">${fmt(r.avg_total_score, 1)}</td>
+          <td class="px-4 py-4 text-center">${gradeBadge(r.avg_grade)}</td>
+        </tr>`;
+    }
+
+    const body = document.getElementById('evaluasi-modal-body');
+    if (body) {
+      body.innerHTML = `
+        <div class="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+          <span class="bg-slate-100 px-3 py-1.5 rounded-lg font-semibold border border-slate-200">Kode Vendor: <span class="text-slate-800">${kodeVendor}</span></span>
+          <span class="bg-slate-100 px-3 py-1.5 rounded-lg font-semibold border border-slate-200">Kategori: <span class="text-slate-800">${res.jenis_bahan ?? '-'}</span></span>
+          <span class="bg-violet-50 text-violet-800 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 border border-violet-200">
+            <span class="material-symbols-outlined text-[16px]">event_repeat</span>
+            Periode: ${formatPeriode(pAwal)} — ${formatPeriode(pAkhir)}
+          </span>
+        </div>
+        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <div class="max-h-[55vh] overflow-y-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead class="sticky top-0 z-10 shadow-sm">
+                <tr class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[11px] font-black uppercase tracking-wider">
+                  <th class="px-4 py-3.5 whitespace-nowrap border-r border-violet-500/30">Periode</th>
+                  <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30 w-40">QC (Quality Control)</th>
+                  <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30 w-36">PPIC (Delivery)</th>
+                  <th class="px-4 py-3.5 text-center border-r border-violet-500/30">PCH (Purchasing)</th>
+                  <th class="px-4 py-3.5 text-center border-r border-violet-500/30">HSE (Safety)</th>
+                  <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30">Total Score</th>
+                  <th class="px-4 py-3.5 text-center">Grade</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 bg-white">${rowsHtml}</tbody>
+              <tfoot>${footerHtml}</tfoot>
+            </table>
+          </div>
+        </div>`;
+    }
+  } catch (err) {
+    console.error('openEvaluasiDetailModal error:', err);
+    const body = document.getElementById('evaluasi-modal-body');
+    if (body) body.innerHTML = `<div class="py-12 text-center text-red-600">
+      <span class="material-symbols-outlined text-[40px]">error</span><br>
+      <span class="font-semibold">Gagal memuat detail evaluasi.</span><br>
+      <span class="text-xs text-red-400">${err.message}</span>
+    </div>`;
+  }
+}
+
+// ==========================================
+// FITUR BARU: SEARCH, FILTER, SORT, EXPORT
+// ==========================================
+
+function setupFiltersAndSearch() {
+  const searchInput = document.getElementById('search-heatmap');
+  const catSelect = document.getElementById('kategori-select');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      applyFiltersAndRender();
+    });
+  }
+
+  if (catSelect) {
+    catSelect.addEventListener('change', (e) => {
+      categoryFilter = e.target.value;
+      applyFiltersAndRender();
+    });
+  }
+}
+
+function setupSorting() {
+  const sortTotal = document.getElementById('sort-total-score');
+  const sortGrade = document.getElementById('sort-grade');
+  const iconTotal = document.getElementById('icon-sort-score');
+  const iconGrade = document.getElementById('icon-sort-grade');
+
+  const resetIcons = () => {
+    if (iconTotal) iconTotal.textContent = 'unfold_more';
+    if (iconGrade) iconGrade.textContent = 'unfold_more';
+  };
+
+  const handleSort = (col, iconEl) => {
+    if (currentSortCol === col) {
+      currentSortAsc = !currentSortAsc;
+    } else {
+      currentSortCol = col;
+      currentSortAsc = false; // default descending for score
+    }
+    
+    resetIcons();
+    if (iconEl) {
+      iconEl.textContent = currentSortAsc ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
+      iconEl.style.opacity = '1';
+    }
+    
+    applyFiltersAndRender();
+  };
+
+  if (sortTotal) {
+    sortTotal.addEventListener('click', () => handleSort('total_score', iconTotal));
+  }
+  
+  if (sortGrade) {
+    sortGrade.addEventListener('click', () => {
+      // For grade, default ascending (A is better than C, alphabetically smaller)
+      if (currentSortCol !== 'grade') {
+        currentSortAsc = true; 
+        currentSortCol = 'grade';
+      } else {
+        currentSortAsc = !currentSortAsc;
+      }
+      resetIcons();
+      if (iconGrade) {
+        iconGrade.textContent = currentSortAsc ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
+        iconGrade.style.opacity = '1';
+      }
+      applyFiltersAndRender();
+    });
+  }
+}
+
+function setupExport() {
+  const btnExport = document.getElementById('btn-export-excel');
+  if (!btnExport) return;
+
+  btnExport.addEventListener('click', () => {
+    if (currentMonthlyData.length === 0) {
+      alert('Tidak ada data untuk diexport pada periode ini.');
+      return;
+    }
+
+    let csv = 'No,Kode Vendor,Nama Vendor,Kategori,Score QC,Score PPIC,Score PCH,Score HSE,Total Score,Grade\\n';
+    currentMonthlyData.forEach((v, idx) => {
+      // Escape koma pada nama
+      const name = v.nama_vendor ? '"' + v.nama_vendor.replace(/"/g, '""') + '"' : '-';
+      csv += `${idx + 1},${v.kode_vendor || '-'},${name},${v.jenis_bahan || '-'},${v.qc_score || 0},${v.ppic_score || 0},${v.pch_score || 0},${v.hse_score || 0},${v.total_score || 0},${v.grade || '-'}\\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Rekap_Vendor_${currentPeriode}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   });
 }

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SPE Portal — Master Vendor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/spe.css"/>
+<!-- styles moved to spe.css -->
+<style>
+  .vendor-status-active{background:rgba(34,197,94,.1);color:#16a34a;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:650}
+  .vendor-status-inactive{background:rgba(148,163,184,.1);color:#64748b;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:650}
+  .search-bar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(148,163,184,.2);border-radius:12px;padding:8px 14px;margin-bottom:16px}
+  .search-bar input{border:none;outline:none;font-size:13px;color:#1e293b;flex:1;background:transparent;font-family:inherit}
+  .search-bar input::placeholder{color:#94a3b8}
+</style>
+</head>
+
+<body style="background:#f0f2f5">
+<nav class="spe-sidebar">
+  <div class="spe-sidebar-logo">
+    <img alt="Chitose" src="../assets/logo_chitose.png"/>
+    <div>
+      <div class="spe-sidebar-logo-title">SPE Portal</div>
+      <div class="spe-sidebar-logo-sub">Chitose</div>
+    </div>
+  </div>
+  <div class="spe-sidebar-nav" id="nav-links">
+    <div class="spe-nav-section">Menu</div>
+    <a id="nav-dashboard" href="./dashboard.html" class="spe-nav-item ">
+      <span class="material-symbols-outlined">grid_view</span><span>Dashboard</span>
+    </a>
+    <a id="nav-input" href="./input.html" class="spe-nav-item ">
+      <span class="material-symbols-outlined">edit_square</span><span>Input Penilaian</span>
+    </a>
+    <a id="nav-daily" href="./input-daily.html" class="spe-nav-item ">
+      <span class="material-symbols-outlined">assignment_add</span><span>Input Daily QC</span>
+    </a>
+    <div class="spe-nav-section" style="margin-top:4px">Laporan</div>
+    <a id="nav-rekap" href="./master-rekap.html" class="spe-nav-item ">
+      <span class="material-symbols-outlined">bar_chart_4_bars</span><span>Master Rekap</span>
+    </a>
+    <a id="nav-vendor" href="./master-vendor.html" class="spe-nav-item active">
+      <span class="material-symbols-outlined">corporate_fare</span><span>Master Vendor</span>
+    </a>
+  </div>
+  <div class="spe-sidebar-footer">
+    <a href="#" class="spe-nav-item"><span class="material-symbols-outlined">help_outline</span><span>Support</span></a>
+    <a href="#" class="spe-nav-item"><span class="material-symbols-outlined">logout</span><span>Keluar</span></a>
+  </div>
+</nav>
+<div class="spe-wrapper">
+  <header class="spe-header">
+    <span class="spe-header-title">Master Vendor</span>
+    <div class="spe-header-actions">
+      <span id="role-chip" class="spe-header-role" style="background:rgba(91,106,248,.1);color:#4338ca">GUEST</span>
+      <button class="spe-icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <button class="spe-icon-btn"><span class="material-symbols-outlined">settings</span></button>
+      <div class="spe-avatar"><img src="https://ui-avatars.com/api/?name=SPE&background=5b6af8&color=fff&size=64" alt=""/></div>
+    </div>
+  </header>
+<div class="spe-content">
+
+<div id="access-denied" class="access-denied-view">
+  <div style="width:64px;height:64px;border-radius:20px;background:rgba(224,82,82,.08);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+    <span class="material-symbols-outlined" style="color:#e05252;font-size:28px">lock</span>
+  </div>
+  <div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:8px">Akses Terbatas</div>
+  <div style="font-size:13px;color:#64748b;max-width:340px;text-align:center">Halaman ini hanya dapat diakses oleh role <strong>PCH</strong>. Hubungi administrator untuk mendapatkan akses.</div>
+  <a href="./dashboard.html" id="denied-back" style="margin-top:20px;padding:9px 22px;border-radius:10px;background:rgba(91,106,248,.08);color:#5b6af8;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(91,106,248,.2)">← Kembali ke Dashboard</a>
+</div>
+<div id="main-content">
+<main class="flex-1 p-margin-page overflow-y-auto">
+      <!-- Page Header -->
+      <div class="flex justify-between items-end mb-lg animate-fadeInUp">
+        <div>
+          <h2
+            class="font-headline-xl text-headline-xl bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent mb-xs">
+            Master Vendor Management</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant">Kelola status aktif/non-aktif vendor. Vendor
+            non-aktif tidak akan muncul di dropdown Input Penilaian.</p>
+        </div>
+      </div>
+
+      <!-- Stats Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-lg animate-fadeInUp" style="animation-delay: 100ms;">
+        <div
+          class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-indigo-600"
+                style="font-variation-settings: 'FILL' 1;">domain</span>
+            </div>
+            <span class="text-sm font-medium text-on-surface-variant">Total Vendor</span>
+          </div>
+          <span id="stat-total" class="text-3xl font-bold text-slate-800">-</span>
+        </div>
+        <div
+          class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-green-600"
+                style="font-variation-settings: 'FILL' 1;">check_circle</span>
+            </div>
+            <span class="text-sm font-medium text-on-surface-variant">Vendor Aktif</span>
+          </div>
+          <span id="stat-active" class="text-3xl font-bold text-green-600">-</span>
+        </div>
+        <div
+          class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-red-600"
+                style="font-variation-settings: 'FILL' 1;">cancel</span>
+            </div>
+            <span class="text-sm font-medium text-on-surface-variant">Vendor Non-Aktif</span>
+          </div>
+          <span id="stat-inactive" class="text-3xl font-bold text-red-500">-</span>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center mb-4 mt-6 animate-fadeInUp" style="animation-delay: 150ms;">
+        <h3 class="font-bold text-lg text-slate-800">Daftar Vendor</h3>
+        <div class="flex items-center bg-white border border-outline-variant rounded-md px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all w-full md:w-72 shadow-sm">
+          <span class="material-symbols-outlined text-slate-400 text-[18px] mr-2">search</span>
+          <input type="text" id="search-input" placeholder="Cari kode atau nama vendor..." class="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-400">
+        </div>
+      </div>
+
+      <!-- Vendor Table -->
+      <div
+        class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-fadeInUp"
+        style="animation-delay: 200ms;">
+        <table id="vendor-table" class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gradient-to-r from-surface-container-low to-surface-container-lowest border-b border-gray-200">
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase w-16 text-center">No</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Kode Vendor</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Nama Vendor</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Jenis Bahan</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center w-48">Status / Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="vendor-tbody" class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
+            <!-- Loading state -->
+            <tr id="loading-row">
+              <td colspan="5" class="px-sm py-10 text-center text-on-surface-variant">
+                <div class="flex flex-col items-center gap-3">
+                  <span class="material-symbols-outlined text-[36px] animate-spin text-primary">autorenew</span>
+                  <span class="text-sm">Memuat data vendor dari database...</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer: Info count & Pagination -->
+      <div class="mt-4 flex flex-col md:flex-row justify-between items-center gap-4 text-body-sm text-on-surface-variant animate-fadeInUp" style="animation-delay: 250ms;">
+        <span id="record-count">Memuat data...</span>
+        
+        <!-- Pagination Controls -->
+        <div class="flex items-center gap-2" id="pagination-container" style="display: none;">
+          <button id="btn-prev-page" class="flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+          </button>
+          
+          <div id="page-numbers" class="flex items-center gap-1">
+            <!-- Diisi oleh JS -->
+          </div>
+          
+          <button id="btn-next-page" class="flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/master-vendor.js"></script>
+</div>
+
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/master-vendor.js"></script>
+</div>
+</div>
+
+<script>
+(function(){
+  const role=(new URLSearchParams(location.search).get('role')||'GUEST').toUpperCase();
+  ['nav-dashboard','nav-input','nav-daily','nav-rekap','nav-vendor'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.href=el.getAttribute('href').split('?')[0]+'?role='+role;
+  });
+  const chip=document.getElementById('role-chip');
+  const s={QC:['rgba(34,197,94,.1)','#16a34a'],PPIC:['rgba(245,158,11,.1)','#b45309'],PCH:['rgba(91,106,248,.1)','#4338ca'],HSE:['rgba(239,68,68,.1)','#dc2626']};
+  if(chip){chip.textContent=role;if(s[role]){chip.style.background=s[role][0];chip.style.color=s[role][1];}}
+})();
+</script>
+
+<script>
+(function(){
+  const role=(new URLSearchParams(location.search).get('role')||'GUEST').toUpperCase();
+  const denied=document.getElementById('access-denied');
+  const mainel=document.getElementById('main-content');
+  if(role!=='PCH'){
+    if(denied) denied.classList.add('show');
+    if(mainel) mainel.style.display='none';
+    const back=document.getElementById('denied-back');
+    if(back) back.href='./dashboard.html?role='+role;
+  }
+})();
+</script>
+</body>
+</html>

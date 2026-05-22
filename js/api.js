@@ -16,6 +16,42 @@ async function getSuppliers() {
   }
 }
 
+/**
+ * Get ALL suppliers (termasuk yang non-aktif)
+ * Dipakai oleh halaman Master Vendor
+ */
+async function getAllSuppliers() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/supplier/all`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching all suppliers:', error);
+    return [];
+  }
+}
+
+/**
+ * Toggle status aktif/non-aktif vendor
+ * @param {number} id - ID vendor di database
+ */
+async function toggleVendorStatus(id) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/supplier/toggle-status/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.messages?.error || err.message || `HTTP Error ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error toggling vendor status:', error);
+    throw error;
+  }
+}
+
 async function getPenilaian(filters = {}) {
   try {
     const params = new URLSearchParams();
@@ -73,7 +109,7 @@ async function uploadPpicFile(file, supplierId, periode) {
       const err = await response.json();
       throw new Error(err.messages?.error || `HTTP Error ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('Error uploading PPIC:', error);
@@ -104,10 +140,10 @@ async function getDashboardSummary() {
  */
 async function getHeatmapData(periode = null) {
   try {
-    const url = periode 
+    const url = periode
       ? `${API_BASE_URL}/penilaian/heatmap/data?periode=${periode}`
       : `${API_BASE_URL}/penilaian/heatmap/data`;
-    
+
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
@@ -167,16 +203,97 @@ async function getQtyDariSAP(kodeVendor, periode) {
   try {
     // Di input.html, format periode itu "YYYY-MM" (contoh: 2026-03), kita pecah dulu
     const [tahun, bulan] = periode.split('-');
-    
+
     // Nembak ke endpoint CI4
     const url = `${API_BASE_URL}/supplier/get-qty?kode_vendor=${kodeVendor}&bulan=${bulan}&tahun=${tahun}`;
     const response = await fetch(url);
-    
+
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
-    
+
   } catch (error) {
     console.error('Gagal narik QTY dari SAP:', error);
     return null;
+  }
+}
+
+/**
+ * Ambil detail evaluasi berkala per vendor dalam rentang periode.
+ * Endpoint: GET /api/penilaian/evaluasi/detail
+ * @param {string} kodeVendor  - Kode vendor (e.g. "1003107")
+ * @param {string} periodeAwal - Format YYYY-MM (e.g. "2025-07")
+ * @param {string} periodeAkhir - Format YYYY-MM (e.g. "2025-12")
+ * @returns {Promise<Object>} { status, nama_vendor, jenis_bahan, data_aktual, rata_rata }
+ */
+async function getDetailEvaluasi(kodeVendor, periodeAwal, periodeAkhir) {
+  const params = new URLSearchParams({
+    kode_vendor: kodeVendor,
+    periode_awal: periodeAwal,
+    periode_akhir: periodeAkhir,
+  });
+  const url = `${API_BASE_URL}/penilaian/evaluasi/detail?${params.toString()}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.messages?.error || err.message || `HTTP ${response.status}`);
+  }
+  return await response.json();
+}
+
+/**
+ * Get all Qc Daily entries
+ */
+async function getQcDailyList() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/qc-daily`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching QC daily list:', error);
+    return [];
+  }
+}
+
+/**
+ * Save a new daily QC entry
+ */
+async function saveQcDaily(data) {
+  try {
+    const formData = new URLSearchParams();
+    for (const key in data) {
+      formData.append(key, data[key]);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/qc-daily`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString()
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.messages?.error || err.message || `HTTP Error ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error saving daily QC:', error);
+    throw error;
+  }
+}
+
+/**
+ * Search SAP materials
+ */
+async function searchSapMaterials(query) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sap/materials?q=${encodeURIComponent(query)}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error searching SAP materials:', error);
+    return [];
   }
 }

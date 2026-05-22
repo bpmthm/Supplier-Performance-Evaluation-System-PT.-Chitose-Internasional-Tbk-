@@ -1,217 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Supplier Portal - Master Rekap</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-    rel="stylesheet" />
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          "colors": {
-            "on-surface-variant": "#454653", "primary": "#434fc6", "on-tertiary": "#ffffff",
-            "background": "#f7fafc", "tertiary-fixed": "#e0e2ee", "on-surface": "#181c1e",
-            "surface-container-low": "#f1f4f6", "on-primary-fixed-variant": "#2a36af", "surface-dim": "#d7dadc",
-            "secondary-fixed": "#d1e4fb", "on-secondary-fixed-variant": "#36485b", "surface-variant": "#e0e3e5",
-            "tertiary-fixed-dim": "#c4c6d2", "primary-fixed-dim": "#bdc2ff", "on-tertiary-container": "#fffdff",
-            "on-background": "#181c1e", "error-container": "#ffdad6", "primary-container": "#5d69e1",
-            "on-secondary": "#ffffff", "on-secondary-fixed": "#091d2e", "surface": "#f7fafc",
-            "surface-container-highest": "#e0e3e5", "on-primary": "#ffffff", "inverse-on-surface": "#eef1f3",
-            "on-tertiary-fixed": "#181b24", "on-error-container": "#93000a", "on-tertiary-fixed-variant": "#434750",
-            "surface-container-lowest": "#ffffff", "outline": "#767685", "on-secondary-container": "#526478",
-            "primary-fixed": "#e0e0ff", "surface-container": "#ebeef0", "secondary-container": "#cfe2f9",
-            "surface-container-high": "#e5e9eb", "tertiary": "#595c66", "secondary": "#4e6073",
-            "tertiary-container": "#72757f", "on-primary-fixed": "#000667", "outline-variant": "#c6c5d6",
-            "surface-tint": "#4551c8", "on-error": "#ffffff", "error": "#ba1a1a", "inverse-primary": "#bdc2ff",
-            "inverse-surface": "#2d3133"
-          },
-          "borderRadius": {
-            "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"
-          },
-          "spacing": {
-            "margin-page": "40px", "lg": "32px", "gutter": "24px", "base": "4px",
-            "sm": "16px", "md": "24px", "xs": "8px", "xl": "48px"
-          },
-          "fontFamily": {
-            "label-sm": ["Inter"], "headline-md": ["Inter"], "headline-xl": ["Inter"],
-            "body-md": ["Inter"], "body-lg": ["Inter"], "headline-lg": ["Inter"]
-          },
-          "fontSize": {
-            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
-            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
-            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
-            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
-            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f7fafc 0%, #f0f4f8 100%);
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0px);
-      }
-
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    .animate-fadeInUp {
-      animation: fadeInUp 0.6s ease-out;
-    }
-
-    .animate-fadeIn {
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    .animate-float {
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .smooth-hover {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .smooth-hover:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(67, 79, 198, 0.15);
-    }
-  </style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SPE Portal — Master Rekap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/spe.css"/>
+<style>
+  /* Page-specific styles — base animations & utilities handled by spe.css */
+  .heatmap-cell{font-size:12px;font-weight:650;padding:6px 10px;border-radius:8px;text-align:center;white-space:nowrap}
+  .hm-a{background:rgba(34,197,94,.12);color:#16a34a}
+  .hm-b{background:rgba(245,158,11,.12);color:#b45309}
+  .hm-c{background:rgba(224,82,82,.12);color:#dc2626}
+  .hm-na{background:rgba(148,163,184,.1);color:#ffffff}
+  .filter-bar{background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+  .tab-btn{flex:1;padding:7px 14px;border-radius:10px;font-size:13px;font-weight:550;color:#64748b;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px;border:none;background:transparent;font-family:inherit}
+  .tab-btn:hover{color:#1e293b;background:rgba(255,255,255,.5)}
+  .tab-btn.active{background:#fff;color:#1e293b;box-shadow:0 1px 4px rgba(0,0,0,.08);font-weight:650}
+</style>
 </head>
 
-<body class="bg-background text-on-background flex min-h-screen antialiased">
-
-  <!-- SideNavBar -->
-  <nav
-    class="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 dark:bg-black font-['Inter'] text-sm tracking-wide fixed left-0 top-0 h-full w-64 border-r border-slate-700/50 shadow-2xl flex flex-col py-6 hidden md:flex z-50">
-    <!-- Logo Section at Top -->
-    <div class="px-6 mb-8 flex items-center gap-3 animate-fadeInUp">
-      <img alt="Chitose Logo" class="w-10 h-10 rounded bg-white p-1 hover:scale-110 transition-transform duration-300"
-        src="../assets/logo_chitose.png" />
-      <div>
-        <div class="text-lg font-black text-white uppercase tracking-wider">Supplier Portal</div>
-        <div class="text-xs text-indigo-400">Chitose</div>
-      </div>
+<body style="background:#f0f2f5">
+<nav class="spe-sidebar">
+  <div class="spe-sidebar-logo">
+    <img alt="Chitose" src="../assets/logo_chitose.png"/>
+    <div>
+      <div class="spe-sidebar-logo-title">SPE Portal</div>
+      <div class="spe-sidebar-logo-sub">Chitose</div>
     </div>
-
-    <!-- Navigation Links -->
-    <div class="flex flex-col gap-2 flex-grow" id="nav-links">
-      <a id="nav-dashboard"
-        class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left"
-        href="./dashboard.html">
-        <span class="material-symbols-outlined">dashboard</span>
-        <span>Dashboard</span>
-      </a>
-
-      <a id="nav-input"
-        class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left"
-        href="./input.html">
-        <span class="material-symbols-outlined">edit_document</span>
-        <span>Input</span>
-      </a>
-
-      <!-- Active Tab: Master Rekap -->
-      <a id="nav-rekap"
-        class="bg-indigo-600 text-white rounded-md mx-2 px-4 py-2 flex items-center gap-3 active:scale-95 origin-left"
-        href="./master-rekap.html">
-        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
-        <span>Master Rekap</span>
-      </a>
+  </div>
+  <div class="spe-sidebar-nav" id="nav-links">
+    <div class="spe-nav-section">Menu</div>
+    <a id="nav-dashboard" href="./dashboard.html" class="spe-nav-item ">
+      <span class="material-symbols-outlined">grid_view</span><span>Dashboard</span>
+    </a>
+    <a id="nav-input" href="./input.html" class="spe-nav-item ">
+      <span class="material-symbols-outlined">edit_square</span><span>Input Penilaian</span>
+    </a>
+    <a id="nav-daily" href="./input-daily.html" class="spe-nav-item ">
+      <span class="material-symbols-outlined">assignment_add</span><span>Input Daily QC</span>
+    </a>
+    <div class="spe-nav-section" style="margin-top:4px">Laporan</div>
+    <a id="nav-rekap" href="./master-rekap.html" class="spe-nav-item active">
+      <span class="material-symbols-outlined">bar_chart_4_bars</span><span>Master Rekap</span>
+    </a>
+    <a id="nav-vendor" href="./master-vendor.html" class="spe-nav-item ">
+      <span class="material-symbols-outlined">corporate_fare</span><span>Master Vendor</span>
+    </a>
+  </div>
+  <div class="spe-sidebar-footer">
+    <a href="#" class="spe-nav-item"><span class="material-symbols-outlined">help_outline</span><span>Support</span></a>
+    <a href="#" class="spe-nav-item"><span class="material-symbols-outlined">logout</span><span>Keluar</span></a>
+  </div>
+</nav>
+<div class="spe-wrapper">
+  <header class="spe-header">
+    <span class="spe-header-title">Master Rekap</span>
+    <div class="spe-header-actions">
+      <span id="role-chip" class="spe-header-role" style="background:rgba(91,106,248,.1);color:#4338ca">GUEST</span>
+      <button class="spe-icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <button class="spe-icon-btn"><span class="material-symbols-outlined">settings</span></button>
+      <div class="spe-avatar"><img src="https://ui-avatars.com/api/?name=SPE&background=5b6af8&color=fff&size=64" alt=""/></div>
     </div>
+  </header>
+<div class="spe-content">
 
-    <!-- Footer Links -->
-    <div class="mt-auto flex flex-col gap-2 border-t border-slate-800 pt-4">
-      <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left"
-        href="#">
-        <span class="material-symbols-outlined">help</span>
-        <span>Support</span>
-      </a>
-      <a class="text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left"
-        href="#">
-        <span class="material-symbols-outlined">logout</span>
-        <span>Logout</span>
-      </a>
-    </div>
-  </nav>
-
-  <!-- Main Content Area -->
-  <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
-    <!-- TopNavBar -->
-    <header
-      class="docked full-width top-0 h-16 border-b border-gray-200/50 dark:border-slate-800 flex justify-between items-center px-6 w-full sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
-      <div class="flex items-center">
-        <span
-          class="text-lg font-bold bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent animate-fadeIn mr-8">Master
-          Rekap</span>
-      </div>
-      <div class="flex items-center space-x-6 smooth-hover group">
-        <div class="relative hidden md:block">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-          <input
-            class="pl-10 pr-4 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none w-64"
-            placeholder="Search..." type="text" />
-        </div>
-        <div class="flex items-center space-x-4 text-primary dark:text-indigo-400">
-          <button
-            class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
-            <span class="material-symbols-outlined">notifications</span>
-          </button>
-          <button
-            class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
-            <span class="material-symbols-outlined">help_outline</span>
-          </button>
-          <button
-            class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-full active:opacity-80 transition-all">
-            <span class="material-symbols-outlined">settings</span>
-          </button>
-          <div class="w-8 h-8 rounded-full bg-surface-variant border border-outline overflow-hidden ml-2">
-            <img alt="User avatar" class="w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuC724qIeyrSkls5cSaWTRN-_7P9N79dK0AYsjnIzDIj__KdbJy0lMDI1A-H7mugzjDyyVc3HZukQuBILp6lAmwpFeiCE_Tznz3Z-rg81L0OhdgtPJJkYpkPLjsTJZd68X2iB_Q95u0cWlnsU5q0qiCJHkIhwDEWX0wy1ZIJwRfKyeTEXGvF7NBcNaG8keDbCNyLPlpUKO3DfmF498eUZSCHI1MJIFdY8dbBIFuIwHO8BRuCumj5Mo9FS8bwRfH3DifroWKgNTqNVqg" />
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Page Content -->
-    <main class="flex-1 p-margin-page overflow-y-auto">
+<div id="access-denied" class="access-denied-view">
+  <div style="width:64px;height:64px;border-radius:20px;background:rgba(224,82,82,.08);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+    <span class="material-symbols-outlined" style="color:#e05252;font-size:28px">lock</span>
+  </div>
+  <div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:8px">Akses Terbatas</div>
+  <div style="font-size:13px;color:#64748b;max-width:340px;text-align:center">Halaman ini hanya dapat diakses oleh role <strong>PCH</strong>. Hubungi administrator untuk mendapatkan akses.</div>
+  <a href="./dashboard.html" id="denied-back" style="margin-top:20px;padding:9px 22px;border-radius:10px;background:rgba(91,106,248,.08);color:#5b6af8;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(91,106,248,.2)">← Kembali ke Dashboard</a>
+</div>
+<div id="main-content">
+<main class="flex-1 p-margin-page overflow-y-auto">
       <!-- Page Header & Actions -->
       <div class="flex justify-between items-end mb-lg animate-fadeInUp">
         <div>
@@ -221,24 +86,40 @@
           <p class="font-body-md text-body-md text-on-surface-variant">Comprehensive supplier performance evaluation
             based on key logistics metrics.</p>
         </div>
-        <button
-          class="flex items-center bg-gradient-to-r from-primary to-indigo-600 text-on-primary px-4 h-10 rounded-DEFAULT font-label-sm text-label-sm uppercase hover:shadow-lg hover:shadow-primary/50 transition-all duration-300 shadow-sm smooth-hover animate-fadeInUp"
-          style="animation-delay: 100ms;">
-          <span
-            class="material-symbols-outlined mr-2 text-[18px] group-hover:scale-110 transition-transform duration-300">picture_as_pdf</span>
-          Print PDF Report
-        </button>
+        <div class="flex items-center gap-3">
+          <button id="btn-export-excel"
+            class="flex items-center bg-white border border-green-500 text-green-700 px-4 h-10 rounded-DEFAULT font-label-sm text-label-sm uppercase hover:bg-green-50 transition-all duration-300 shadow-sm smooth-hover animate-fadeInUp"
+            style="animation-delay: 50ms;">
+            <span
+              class="material-symbols-outlined mr-2 text-[18px] group-hover:scale-110 transition-transform duration-300">download</span>
+            Export Excel
+          </button>
+          <button
+            class="flex items-center bg-gradient-to-r from-primary to-indigo-600 text-on-primary px-4 h-10 rounded-DEFAULT font-label-sm text-label-sm uppercase hover:shadow-lg hover:shadow-primary/50 transition-all duration-300 shadow-sm smooth-hover animate-fadeInUp"
+            style="animation-delay: 100ms;">
+            <span
+              class="material-symbols-outlined mr-2 text-[18px] group-hover:scale-110 transition-transform duration-300">picture_as_pdf</span>
+            Print PDF Report
+          </button>
+        </div>
       </div>
 
       <!-- Tabs Switcher -->
-      <div class="flex space-x-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl max-w-md mb-6 animate-fadeInUp">
-        <button id="tab-monthly" class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2">
+      <div class="flex space-x-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl max-w-2xl mb-6 animate-fadeInUp">
+        <button id="tab-monthly"
+          class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2">
           <span class="material-symbols-outlined text-[18px]">calendar_month</span>
           <span>Rekap Bulanan</span>
         </button>
-        <button id="tab-compare" class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2">
+        <button id="tab-compare"
+          class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2">
           <span class="material-symbols-outlined text-[18px]">calculate</span>
           <span>Rerata 2 Periode</span>
+        </button>
+        <button id="tab-evaluasi"
+          class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">event_repeat</span>
+          <span>Evaluasi Berkala</span>
         </button>
       </div>
 
@@ -265,12 +146,29 @@
         </div>
 
         <!-- Filter Bulanan Form -->
-        <div id="filter-monthly-container" class="flex items-center space-x-4">
-          <span class="text-sm text-slate-500 font-medium">Pilih Periode:</span>
-          <select data-select="periode" id="periode-select"
-            class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
-            <!-- Diisi oleh JS -->
-          </select>
+        <div id="filter-monthly-container" class="flex flex-wrap items-center gap-4">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-slate-500 font-medium">Pilih Periode:</span>
+            <select data-select="periode" id="periode-select"
+              class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer min-w-[140px]">
+              <!-- Diisi oleh JS -->
+            </select>
+          </div>
+          
+          <div class="h-6 w-px bg-slate-300 hidden md:block"></div>
+          
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-slate-500 font-medium">Kategori:</span>
+            <select id="kategori-select" class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer min-w-[120px]">
+              <option value="">Semua Kategori</option>
+              <!-- Diisi dari data vendor -->
+            </select>
+          </div>
+
+          <div class="flex items-center bg-white border border-outline-variant rounded-md px-3 py-1.5 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all min-w-[200px]">
+            <span class="material-symbols-outlined text-slate-400 text-[18px] mr-2">search</span>
+            <input type="text" id="search-heatmap" placeholder="Cari vendor..." class="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-400">
+          </div>
         </div>
 
         <!-- Filter Perbandingan Form (Hidden by default) -->
@@ -289,10 +187,36 @@
               <!-- Diisi oleh JS -->
             </select>
           </div>
-          <button id="btn-bandingkan" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1 transition-colors">
+          <button id="btn-bandingkan"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1 transition-colors">
             <span class="material-symbols-outlined text-[16px]">calculate</span>
             <span>Hitung Rerata</span>
           </button>
+        </div>
+
+        <!-- Filter Evaluasi Berkala (Hidden by default) -->
+        <div id="filter-evaluasi-container" class="hidden flex flex-wrap items-center gap-3">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-slate-500 font-medium">Dari:</span>
+            <select id="evaluasi-periode-awal"
+              class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
+              <!-- Diisi oleh JS -->
+            </select>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-slate-500 font-medium">Sampai:</span>
+            <select id="evaluasi-periode-akhir"
+              class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
+              <!-- Diisi oleh JS -->
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-load-evaluasi"
+              class="bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined text-[16px]">event_repeat</span>
+              <span>Tampilkan Evaluasi</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -300,7 +224,7 @@
       <div
         class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-fadeInUp"
         style="animation-delay: 200ms;">
-        
+
         <!-- Table 1: Rekap Bulanan -->
         <table id="table-monthly" data-table="heatmap" class="w-full text-left border-collapse">
           <thead>
@@ -313,8 +237,18 @@
               <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PPIC</th>
               <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PCH</th>
               <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">HSE</th>
-              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Total Score</th>
-              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Grade</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center cursor-pointer group hover:text-slate-800 transition-colors" id="sort-total-score">
+                <div class="flex items-center justify-center gap-1">
+                  Total Score
+                  <span class="material-symbols-outlined text-[14px] opacity-50 group-hover:opacity-100" id="icon-sort-score">unfold_more</span>
+                </div>
+              </th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center cursor-pointer group hover:text-slate-800 transition-colors" id="sort-grade">
+                <div class="flex items-center justify-center gap-1">
+                  Grade
+                  <span class="material-symbols-outlined text-[14px] opacity-50 group-hover:opacity-100" id="icon-sort-grade">unfold_more</span>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody id="heatmap-tbody" class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
@@ -338,12 +272,18 @@
               <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase w-12"></th>
               <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Supplier Name</th>
               <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Category</th>
-              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">QC Average</th>
-              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PPIC Average</th>
-              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PCH Average</th>
-              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">HSE Average</th>
-              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Avg Total Score</th>
-              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Avg Grade</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">QC
+                Average</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PPIC
+                Average</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PCH
+                Average</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">HSE
+                Average</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Avg Total
+                Score</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Avg Grade
+              </th>
             </tr>
           </thead>
           <tbody id="compare-tbody" class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
@@ -351,6 +291,37 @@
             <tr>
               <td colspan="9" class="px-sm py-10 text-center text-on-surface-variant">
                 Silakan pilih dua periode di atas dan klik tombol Hitung Rerata.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Table 3: Evaluasi Berkala (Hidden by default) -->
+        <table id="table-evaluasi" class="w-full text-left border-collapse hidden">
+          <thead>
+            <tr class="bg-gradient-to-r from-violet-50 to-surface-container-lowest border-b border-gray-200">
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase w-12"></th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Supplier Name</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Category</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Rata-rata
+                QC</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Rata-rata
+                PPIC</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Rata-rata
+                PCH</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Rata-rata
+                HSE</th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Avg Total
+              </th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Avg Grade
+              </th>
+              <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="evaluasi-tbody" class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
+            <tr>
+              <td colspan="10" class="px-sm py-10 text-center text-on-surface-variant">
+                Pilih rentang periode dan klik tombol <strong>Tampilkan Evaluasi</strong>.
               </td>
             </tr>
           </tbody>
@@ -367,6 +338,41 @@
 
   <script src="../js/api.js"></script>
   <script src="../js/master-rekap.js"></script>
-</body>
+</div>
 
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/master-rekap.js"></script>
+</div>
+</div>
+
+<script>
+(function(){
+  const role=(new URLSearchParams(location.search).get('role')||'GUEST').toUpperCase();
+  ['nav-dashboard','nav-input','nav-daily','nav-rekap','nav-vendor'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.href=el.getAttribute('href').split('?')[0]+'?role='+role;
+  });
+  const chip=document.getElementById('role-chip');
+  const s={QC:['rgba(34,197,94,.1)','#16a34a'],PPIC:['rgba(245,158,11,.1)','#b45309'],PCH:['rgba(91,106,248,.1)','#4338ca'],HSE:['rgba(239,68,68,.1)','#dc2626']};
+  if(chip){chip.textContent=role;if(s[role]){chip.style.background=s[role][0];chip.style.color=s[role][1];}}
+})();
+</script>
+
+<script>
+(function(){
+  const role=(new URLSearchParams(location.search).get('role')||'GUEST').toUpperCase();
+  const denied=document.getElementById('access-denied');
+  const mainel=document.getElementById('main-content');
+  if(role!=='PCH'){
+    if(denied) denied.classList.add('show');
+    if(mainel) mainel.style.display='none';
+    const back=document.getElementById('denied-back');
+    if(back) back.href='./dashboard.html?role='+role;
+  }
+})();
+</script>
+</body>
 </html>

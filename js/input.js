@@ -370,9 +370,9 @@ function updateFormFeedback() {
   const ng = formData.qc_ng_percent;
   let qcScore = 0;
   if (ng !== undefined && ng !== null) {
-    if (ng < 0.4) qcScore = 30;
-    else if (ng > 0.5) qcScore = 15;
-    else if (ng > 1) qcScore = 10;
+    if (ng < 0.5) qcScore = 30;
+    else if (ng >= 0.5 && ng < 1) qcScore = 15;
+    else if (ng >= 1) qcScore = 10;
   }
   formData.qc_score = qcScore;
 
@@ -386,11 +386,10 @@ function updateFormFeedback() {
   }
   formData.ppic_score = ppicScore;
 
-  // --- Calculate PCH (Maks 30: Harga 10 + MOQ 10 + TOP 5 + Pelayanan 5) ---
+  // --- Calculate PCH (Maks 25: Harga 10 + MOQ 10 + Pelayanan 5) ---
   let pchScore = 0;
   if (formData.pch_harga === 'BAIK') pchScore += 10; else if (formData.pch_harga === 'CUKUP') pchScore += 5; else if (formData.pch_harga === 'KURANG') pchScore += 3;
   if (formData.pch_moq === 'BAIK') pchScore += 10; else if (formData.pch_moq === 'CUKUP') pchScore += 5; else if (formData.pch_moq === 'KURANG') pchScore += 3;
-  if (formData.pch_top === 'BAIK') pchScore += 5; else if (formData.pch_top === 'CUKUP') pchScore += 3; else if (formData.pch_top === 'KURANG') pchScore += 1;
   if (formData.pch_pelayanan === 'BAIK') pchScore += 5; else if (formData.pch_pelayanan === 'CUKUP') pchScore += 3; else if (formData.pch_pelayanan === 'KURANG') pchScore += 1;
   formData.pch_score = pchScore;
 
@@ -422,7 +421,7 @@ function updateFormFeedback() {
   // --- UPDATE BADGES (UI) ---
   updateBadge('qc', ng, qcScore, 30);
   updateBadgePpic(ot, ppicScore); // PPIC punya logic badge sendiri
-  updateBadge('pch', (formData.pch_harga || formData.pch_moq || formData.pch_top || formData.pch_pelayanan) ? 'isi' : null, pchScore, 30);
+  updateBadge('pch', (formData.pch_harga || formData.pch_moq || formData.pch_pelayanan) ? 'isi' : null, pchScore, 25);
   updateBadge('hse', (formData.hse_uji_emisi || formData.hse_apd) ? 'isi' : null, hseScore, 10);
 }
 
@@ -482,7 +481,7 @@ function applyRoleAccess() {
   const sections = document.querySelectorAll('h3');
   sections.forEach(h3 => {
     const title = h3.textContent.trim();
-    const card = h3.closest('.bg-surface-container-lowest');
+    const card = h3.closest('.division-card');
     if (!card) return;
 
     if (title.includes('QC') && activeRole !== 'QC') {
@@ -787,9 +786,13 @@ function forwardRoleToNavLinks() {
 
   const navDashboard = document.getElementById('nav-dashboard');
   const navInput = document.getElementById('nav-input');
+  const navDaily = document.getElementById('nav-daily');
   const navRekap = document.getElementById('nav-rekap');
+  const navVendor = document.getElementById('nav-vendor');
 
   if (navDashboard) navDashboard.href = `./dashboard.html?role=${activeRole}`;
   if (navInput) navInput.href = `./input.html?role=${activeRole}`;
+  if (navDaily) navDaily.href = `./input-daily.html?role=${activeRole}`;
   if (navRekap) navRekap.href = `./master-rekap.html?role=${activeRole}`;
+  if (navVendor) navVendor.href = `./master-vendor.html?role=${activeRole}`;
 }
