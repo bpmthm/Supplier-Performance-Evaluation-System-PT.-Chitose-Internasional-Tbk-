@@ -82,13 +82,15 @@
       <div
         style="margin-bottom:28px;display:flex;gap:20px;background:#fff;padding:22px;border-radius:20px;border:1px solid rgba(148,163,184,.18);box-shadow:0 1px 3px rgba(0,0,0,.04)"
         style="animation-delay: 100ms;">
-        <div class="flex-1">
-          <label class="spe-label">Pilih
-            Supplier</label>
-          <select data-input="supplier-select"
-            class="spe-select">
-            <option value="">Loading suppliers...</option>
-          </select>
+        <div class="flex-1 relative">
+          <label class="spe-label">Pilih Supplier</label>
+          <div class="relative">
+            <input type="text" id="supplier-search-input" placeholder="Cari nama, kode, atau ID supplier (min. 2 huruf)..." class="spe-input" autocomplete="off" style="padding-right: 40px;">
+            <span class="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 pointer-events-none text-[20px]" id="supplier-search-icon">search</span>
+            <button type="button" id="btn-clear-supplier" class="absolute right-3 top-2.5 text-slate-400 hover:text-red-500 transition-colors hidden" style="background:none; border:none; outline:none; cursor:pointer;"><span class="material-symbols-outlined text-[20px]">close</span></button>
+          </div>
+          <ul id="supplier-search-results" class="absolute z-20 w-full bg-white border border-slate-200 rounded-lg mt-1 shadow-xl max-h-60 overflow-y-auto hidden">
+          </ul>
         </div>
         <div class="w-64">
           <label class="spe-label">Periode

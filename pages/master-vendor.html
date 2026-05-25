@@ -123,9 +123,16 @@
 
       <div class="flex justify-between items-center mb-4 mt-6 animate-fadeInUp" style="animation-delay: 150ms;">
         <h3 class="font-bold text-lg text-slate-800">Daftar Vendor</h3>
-        <div class="flex items-center bg-white border border-outline-variant rounded-md px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all w-full md:w-72 shadow-sm">
-          <span class="material-symbols-outlined text-slate-400 text-[18px] mr-2">search</span>
-          <input type="text" id="search-input" placeholder="Cari kode atau nama vendor..." class="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-400">
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="flex items-center bg-white border border-outline-variant rounded-md px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all w-full md:w-72 shadow-sm">
+            <span class="material-symbols-outlined text-slate-400 text-[18px] mr-2">search</span>
+            <input type="text" id="search-input" placeholder="Cari kode atau nama vendor..." class="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-400">
+          </div>
+  
+          <button onclick="openSyncModal()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md shadow-sm transition-colors text-sm font-semibold whitespace-nowrap">
+            <span class="material-symbols-outlined text-[18px]">sync</span>
+            <span>Sync SAP</span>
+          </button>
         </div>
       </div>
 
@@ -176,19 +183,53 @@
           </button>
         </div>
       </div>
+            <div id="modal-sync-sap" class="fixed inset-0 z-[100] hidden items-center justify-center">
+            <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeSyncModal()"></div>
+  
+        <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-fadeInUp">
+          <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <span class="material-symbols-outlined text-indigo-600">cloud_download</span>
+              Tarik Data Vendor SAP
+            </h3>
+            <button onclick="closeSyncModal()" class="text-slate-400 hover:text-red-500 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    
+        <div class="p-6">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Cari Nama / Kode Vendor di SAP</label>
+            <div class="relative">
+              <input type="text" id="sap-search-input" placeholder="Ketik minimal 2 huruf nama / kode vendor..."
+               class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
+              <span id="sap-loading" class="material-symbols-outlined absolute right-3 top-2.5 text-indigo-500 animate-spin hidden">autorenew</span>
+        
+              <ul id="sap-search-results" class="absolute z-10 w-full bg-white border border-slate-200 rounded-lg mt-1 shadow-xl max-h-64 overflow-y-auto hidden">
+                </ul>
+            </div>
+
+            <div id="sap-selected-preview" class="mt-4 p-4 bg-indigo-50 border border-indigo-100 rounded-lg hidden">
+              <p class="text-xs text-indigo-600 font-semibold mb-1">Vendor Terpilih:</p>
+              <p id="preview-kode" class="font-mono text-sm font-bold text-slate-800"></p>
+              <p id="preview-nama" class="text-sm text-slate-600"></p>
+              </div>
+          </div>
+    
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+          <button onclick="closeSyncModal()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Batal</button>
+          <button id="btn-submit-sync" onclick="submitSyncSap()" disabled class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">save</span> Simpan ke Lokal
+            </button>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
-
-  <script src="../js/api.js"></script>
-  <script src="../js/master-vendor.js"></script>
-</div>
-
-  </div>
-
-  <script src="../js/api.js"></script>
-  <script src="../js/master-vendor.js"></script>
 </div>
 </div>
+
+<script src="../js/api.js"></script>
+<script src="../js/master-vendor.js"></script>
 
 <script>
 (function(){

@@ -301,15 +301,15 @@ async function handleToggle(vendorId) {
     }
 
     const result = await toggleVendorStatus(vendorId);
-    
+
     if (result && result.status === 'success') {
       // Update cache lokal
       vendor.is_active = result.is_active;
-      
+
       // Re-render
       applyFiltersAndPaginate();
       updateStats();
-      
+
       showToast(`Vendor "${vendor.nama_vendor}" berhasil di-${result.is_active == 1 ? 'aktifkan' : 'nonaktifkan'}.`, result.is_active == 1 ? 'success' : 'warning');
     }
   } catch (error) {
@@ -359,7 +359,7 @@ function showToast(message, type = 'success') {
 function renderPagination() {
   const totalVendors = filteredVendors.length;
   const totalPages = Math.ceil(totalVendors / vendorsPerPage) || 1;
-  
+
   if (currentVendorPage > totalPages) currentVendorPage = totalPages;
   if (currentVendorPage < 1) currentVendorPage = 1;
 
@@ -367,7 +367,7 @@ function renderPagination() {
   const startIdx = (currentVendorPage - 1) * vendorsPerPage;
   const endIdx = startIdx + vendorsPerPage;
   const paginatedData = filteredVendors.slice(startIdx, endIdx);
-  
+
   // Custom render Table for Pagination to keep numbering consistent
   renderTablePaginated(paginatedData, startIdx);
 
@@ -415,7 +415,7 @@ function renderPagination() {
   // Generate Page Numbers (Simple: all pages, assuming < 20 pages. Can be optimized later)
   if (pageNumbersEl) {
     pageNumbersEl.innerHTML = '';
-    
+
     // Logic for ellipses if many pages
     let startPage = Math.max(1, currentVendorPage - 2);
     let endPage = Math.min(totalPages, startPage + 4);
@@ -429,11 +429,10 @@ function renderPagination() {
 
     for (let i = startPage; i <= endPage; i++) {
       const btn = document.createElement('button');
-      btn.className = `w-8 h-8 flex items-center justify-center rounded-md font-medium text-sm transition-colors ${
-        i === currentVendorPage 
-          ? 'bg-primary text-white shadow-sm' 
+      btn.className = `w-8 h-8 flex items-center justify-center rounded-md font-medium text-sm transition-colors ${i === currentVendorPage
+          ? 'bg-primary text-white shadow-sm'
           : 'bg-transparent text-slate-600 hover:bg-slate-100'
-      }`;
+        }`;
       btn.textContent = i;
       btn.onclick = () => {
         currentVendorPage = i;
@@ -508,4 +507,144 @@ function renderTablePaginated(data, startIdx) {
       </tr>
     `);
   });
+}
+
+//fitur nambah vendor
+
+let selectedSapVendor = null;
+let sapDebounceTimer;
+
+
+function openSyncModal() {
+  document.getElementById('modal-sync-sap').classList.remove('hidden');
+  document.getElementById('modal-sync-sap').classList.add('flex');
+  document.getElementById('sap-search-input').value = '';
+  document.getElementById('sap-search-results').classList.add('hidden');
+  document.getElementById('sap-selected-preview').classList.add('hidden');
+  document.getElementById('btn-submit-sync').disabled = true;
+  selectedSapVendor = null;
+}
+
+function closeSyncModal() {
+  document.getElementById('modal-sync-sap').classList.add('hidden');
+  document.getElementById('modal-sync-sap').classList.remove('flex');
+}
+
+// Event Listener buat ngetik di input Modal
+document.getElementById('sap-search-input')?.addEventListener('input', (e) => {
+  const keyword = e.target.value.trim();
+  const resultBox = document.getElementById('sap-search-results');
+  const loadingIcon = document.getElementById('sap-loading');
+
+  // Reset pilihan sebelumnya kalau ngetik ulang
+  document.getElementById('sap-selected-preview').classList.add('hidden');
+  document.getElementById('btn-submit-sync').disabled = true;
+  selectedSapVendor = null;
+
+  if (keyword.length < 2) {
+    resultBox.classList.add('hidden');
+    return;
+  }
+
+  loadingIcon.classList.remove('hidden');
+  clearTimeout(sapDebounceTimer);
+
+  sapDebounceTimer = setTimeout(async () => {
+    try {
+      const token = localStorage.getItem('jwt_token') || '';
+
+      const response = await fetch(`${API_BASE_URL}/supplier/search-sap?q=${encodeURIComponent(keyword)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Gagal narik data SAP');
+
+      const data = await response.json();
+      renderSapResults(data);
+    } catch (error) {
+      console.error(error);
+      resultBox.innerHTML = `<li class="px-4 py-3 text-sm text-red-500">Error koneksi ke SAP</li>`;
+      resultBox.classList.remove('hidden');
+    } finally {
+      loadingIcon.classList.add('hidden');
+    }
+  }, 400);
+});
+
+function renderSapResults(data) {
+  const resultBox = document.getElementById('sap-search-results');
+  resultBox.innerHTML = '';
+
+  if (data.length === 0) {
+    resultBox.innerHTML = `<li class="px-4 py-3 text-sm text-slate-500 text-center">Vendor tidak ditemukan di SAP</li>`;
+  } else {
+    data.forEach(item => {
+      const li = document.createElement('li');
+      li.className = "px-4 py-2 hover:bg-indigo-50 border-b border-slate-100 cursor-pointer transition-colors";
+      li.innerHTML = `
+        <div class="font-bold text-slate-700 text-sm">${item.VENDOR_CODE}</div>
+        <div class="text-xs text-slate-500">${item.VENDOR_NAME}</div>
+      `;
+      li.onclick = () => selectSapVendor(item.VENDOR_CODE, item.VENDOR_NAME);
+      resultBox.appendChild(li);
+    });
+  }
+  resultBox.classList.remove('hidden');
+}
+
+function selectSapVendor(kode, nama) {
+  selectedSapVendor = { vendor_code: kode, vendor_name: nama };
+
+  // Tutup dropdown, isi input form
+  document.getElementById('sap-search-input').value = nama;
+  document.getElementById('sap-search-results').classList.add('hidden');
+
+  // Tunjukin preview kotak biru
+  document.getElementById('preview-kode').textContent = kode;
+  document.getElementById('preview-nama').textContent = nama;
+  document.getElementById('sap-selected-preview').classList.remove('hidden');
+
+  // Nyalain tombol simpan
+  document.getElementById('btn-submit-sync').disabled = false;
+}
+
+async function submitSyncSap() {
+  if (!selectedSapVendor) return;
+
+  const btnSubmit = document.getElementById('btn-submit-sync');
+  btnSubmit.disabled = true;
+  btnSubmit.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">autorenew</span> Menyimpan...`;
+
+  try {
+    const token = localStorage.getItem('jwt_token') || '';
+
+    const response = await fetch(`${API_BASE_URL}/supplier/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(selectedSapVendor)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      // Nangkap error validasi dari CI4 (Misal: Vendor udah ada)
+      throw new Error(result.messages?.error || result.message || 'Gagal menyimpan vendor');
+    }
+
+    showToast('Berhasil menarik vendor dari SAP!', 'success');
+    closeSyncModal();
+
+    // Refresh tabel vendor otomatis biar data barunya langsung muncul!
+    await loadVendorData();
+
+  } catch (error) {
+    showToast(error.message, 'error');
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = `<span class="material-symbols-outlined text-[18px]">save</span> Simpan ke Lokal`;
+  }
 }

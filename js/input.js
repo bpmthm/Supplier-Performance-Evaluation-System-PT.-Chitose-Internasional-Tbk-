@@ -5,6 +5,7 @@
 
 let currentSupplier = null;
 let currentPeriode = '';
+let allSuppliers = [];
 let formData = {};
 let isFetching = false; // Guard biar gak race condition
 
@@ -14,8 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     forwardRoleToNavLinks();
     setupPeriodeDropdown();
 
-    const suppliers = await getSuppliers();
-    populateSupplierDropdown(suppliers);
+    allSuppliers = await getSuppliers();
+    populateSupplierSearch(allSuppliers);
     setupFormInputs();
     setupButtons();
 
@@ -29,11 +30,11 @@ function setLoadingState(loading) {
   isFetching = loading;
   const saveDraftBtn = document.querySelector('[data-button="save-draft"]');
   const continueBtn = document.querySelector('[data-button="continue"]');
-  const supplierSelect = document.querySelector('[data-input="supplier-select"]');
+  const supplierInput = document.getElementById('supplier-search-input');
   const periodeSelect = document.querySelector('[data-input="periode-select"]');
 
-  // Tombol & dropdown di-disable saat loading
-  [saveDraftBtn, continueBtn, supplierSelect, periodeSelect].forEach(el => {
+  // Tombol & input di-disable saat loading
+  [saveDraftBtn, continueBtn, supplierInput, periodeSelect].forEach(el => {
     if (el) el.disabled = loading;
   });
 
@@ -164,33 +165,118 @@ function updatePeriodeStatusBar(state = 'auto') {
   }
 }
 
-function populateSupplierDropdown(suppliers) {
-  const select = document.querySelector('[data-input="supplier-select"]');
-  if (!select) return;
+function populateSupplierSearch(suppliers) {
+  const input = document.getElementById('supplier-search-input');
+  const resultBox = document.getElementById('supplier-search-results');
+  const clearBtn = document.getElementById('btn-clear-supplier');
+  const searchIcon = document.getElementById('supplier-search-icon');
 
-  // Event listener periode SUDAH ada di setupPeriodeDropdown() — tidak perlu duplikat
+  if (!input || !resultBox) return;
 
-  select.innerHTML = '<option value="">Pilih Supplier...</option>';
-  suppliers.forEach(supplier => {
-    const option = document.createElement('option');
-    option.value = supplier.id;
-    option.dataset.kode = supplier.kode_vendor;
-    option.textContent = `${supplier.kode_vendor} - ${supplier.nama_vendor}`;
-    select.appendChild(option);
+  // Render results list based on input value
+  function searchSuppliers(keyword) {
+    resultBox.innerHTML = '';
+    
+    if (keyword.length < 2) {
+      resultBox.classList.add('hidden');
+      return;
+    }
+
+    const filtered = suppliers.filter(s => {
+      const matchName = s.nama_vendor.toLowerCase().includes(keyword.toLowerCase());
+      const matchCode = s.kode_vendor.toLowerCase().includes(keyword.toLowerCase());
+      const matchId = String(s.id) === keyword;
+      return matchName || matchCode || matchId;
+    });
+
+    if (filtered.length === 0) {
+      resultBox.innerHTML = `<li class="px-4 py-3 text-sm text-slate-500 text-center">Supplier tidak ditemukan</li>`;
+    } else {
+      filtered.forEach(s => {
+        const li = document.createElement('li');
+        li.className = "px-4 py-2 hover:bg-indigo-50 border-b border-slate-100 cursor-pointer transition-colors";
+        li.innerHTML = `
+          <div class="font-bold text-slate-700 text-[11px] font-mono">${s.kode_vendor}</div>
+          <div class="text-xs text-slate-500">${s.nama_vendor}</div>
+        `;
+        li.onclick = () => selectSupplier(s);
+        resultBox.appendChild(li);
+      });
+    }
+    resultBox.classList.remove('hidden');
+  }
+
+  // Handle supplier selection
+  async function selectSupplier(s) {
+    if (isFetching) return;
+    currentSupplier = s.id;
+    input.value = `${s.kode_vendor} - ${s.nama_vendor}`;
+    resultBox.classList.add('hidden');
+    
+    // Toggle icons
+    if (clearBtn) clearBtn.classList.remove('hidden');
+    if (searchIcon) searchIcon.classList.add('hidden');
+
+    // Trigger actions
+    await updatePeriodeIndicators(currentSupplier);
+    await loadSupplierPenilaian(currentSupplier);
+    await tarikQtyOtomatis();
+  }
+
+  // Reset/clear selection
+  function clearSelection() {
+    if (isFetching) return;
+    currentSupplier = null;
+    input.value = '';
+    resultBox.classList.add('hidden');
+    
+    // Toggle icons
+    if (clearBtn) clearBtn.classList.add('hidden');
+    if (searchIcon) searchIcon.classList.remove('hidden');
+
+    resetForm();
+    updatePeriodeIndicators(null);
+  }
+
+  // Input event listener
+  input.addEventListener('input', (e) => {
+    const keyword = e.target.value.trim();
+    if (keyword === '') {
+      clearSelection();
+    } else {
+      searchSuppliers(keyword);
+    }
   });
 
-  select.addEventListener('change', async (e) => {
-    if (isFetching) return;
-    currentSupplier = parseInt(e.target.value) || null;
-    if (currentSupplier) {
-      // Pertama: update indikator periode (fetch semua periode supplier ini)
-      await updatePeriodeIndicators(currentSupplier);
-      // Kedua: load data untuk supplier + periode yang aktif
-      await loadSupplierPenilaian(currentSupplier);
-      await tarikQtyOtomatis();
-    } else {
-      resetForm();
-      updatePeriodeIndicators(null); // Reset indikator
+  // Focus event listener to show dropdown if keyword is already entered
+  input.addEventListener('focus', (e) => {
+    const keyword = e.target.value.trim();
+    if (keyword.length >= 2 && !input.value.includes(' - ')) {
+      searchSuppliers(keyword);
+    }
+  });
+
+  // Clear button click listener
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      clearSelection();
+    });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (e.target !== input && e.target !== resultBox && !resultBox.contains(e.target) && e.target !== clearBtn) {
+      resultBox.classList.add('hidden');
+      
+      // If user typed something but didn't select, and it's not a valid selection format, restore previous or clear
+      if (currentSupplier) {
+        const supplier = suppliers.find(s => s.id === currentSupplier);
+        if (supplier) {
+          input.value = `${supplier.kode_vendor} - ${supplier.nama_vendor}`;
+        }
+      } else if (input.value.trim() !== '') {
+        clearSelection();
+      }
     }
   });
 }
@@ -221,11 +307,11 @@ async function loadSupplierPenilaian(supplierId) {
 // Fungsi narik QTY dari SAP (silent fail kalo SAP tidak tersedia)
 async function tarikQtyOtomatis() {
 
-  const select = document.querySelector('[data-input="supplier-select"]');
-  if (!select || select.selectedIndex <= 0) return;
+  if (!currentSupplier) return;
 
-  const selectedOption = select.options[select.selectedIndex];
-  const kodeVendor = selectedOption.dataset.kode;
+  const supplier = allSuppliers.find(s => s.id === currentSupplier);
+  if (!supplier) return;
+  const kodeVendor = supplier.kode_vendor;
   const periode = document.querySelector('[data-input="periode-select"]').value;
 
   if (!kodeVendor || !periode) return;
@@ -649,12 +735,10 @@ function showSubmitModal(ppicResult = null) {
   const modal = document.getElementById('submit-modal');
   if (!modal) return;
 
-  // --- Nama supplier dari dropdown ---
-  const supplierSelect = document.querySelector('[data-input="supplier-select"]');
-  const selectedOption = supplierSelect?.options[supplierSelect.selectedIndex];
-  const supplierText = selectedOption?.textContent?.trim() || '—';
-  const [kode, ...namaParts] = supplierText.split(' - ');
-  const namaDB = namaParts.join(' - ');
+  // --- Nama supplier dari global cache ---
+  const supplier = allSuppliers.find(s => s.id === currentSupplier);
+  const kode = supplier ? supplier.kode_vendor : '—';
+  const namaDB = supplier ? supplier.nama_vendor : '—';
 
   // --- Nama vendor dari Excel (jika ada PPIC result) ---
   const namaExcel = ppicResult?.excel_nama_vendor || null;
