@@ -7,13 +7,13 @@
 ## 🎨 Color System (Tailwind)
 
 Menggunakan palet warna solid, bersih, dan kontras untuk kesan modern (berbasis Material Design 3):
-- **Primary (Indigo)**: `#4F46E5` / `indigo-600` (Gunakan untuk tombol aksi utama, state aktif, & highlight).
+- **Primary (Indigo)**: `indigo-900` (Gunakan untuk tombol aksi utama, state aktif, & highlight).
 - **Secondary (Slate)**: `#64748B` / `slate-500` (Gunakan untuk teks sekunder, border netral, & ikon).
 - **Tertiary (Gray)**: `#595c66` (Gunakan untuk elemen pendukung dan disable state).
 - **Error (Red)**: `#ba1a1a` (Gunakan untuk alert, notifikasi error, & status reject).
 - **Background**: `#F8FAFC` / `slate-50` (Warna dasar latar belakang aplikasi agar mata tidak cepat lelah).
 - **Surface / Card**: `#FFFFFF` / `white` (Gunakan sebagai warna dasar form, modal, dan tabel).
-
+ 
 ## 📝 Typography & Iconography
 
 - **Font Family**: Inter (Google Fonts) - Dipilih karena bersih, modern, dan highly legible untuk membaca data.

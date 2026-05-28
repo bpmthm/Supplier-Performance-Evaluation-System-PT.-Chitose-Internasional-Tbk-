@@ -11,6 +11,7 @@ const activeRole = getActiveRole();
 const allowedRoles = ['QC'];
 
 let selectedMaterial = null; // Cache chosen material
+let allSuppliers    = [];    // Cache supplier list
 
 // ---- IIFE: Role check SEBELUM DOM selesai ----
 (function enforceRoleAccess() {
@@ -67,8 +68,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Forward URL role parameters
   forwardRoleToNavLinks();
 
-  // Load dropdown suppliers
-  await loadSupplierDropdown();
+  // Load & setup supplier search
+  await setupSupplierSearch();
 
   // Setup Live Material Search
   setupMaterialAutocomplete();
@@ -94,24 +95,84 @@ function forwardRoleToNavLinks() {
   });
 }
 
-/** Populate supplier dropdown */
-async function loadSupplierDropdown() {
-  const select = document.getElementById('supplier_id');
-  if (!select) return;
+/** Supplier live search (replaces static <select>) */
+async function setupSupplierSearch() {
+  const input      = document.getElementById('supplier-search-input');
+  const resultBox  = document.getElementById('supplier-results');
+  const clearBtn   = document.getElementById('btn-clear-supplier');
+  const searchIcon = document.getElementById('supplier-search-icon');
+  const hiddenId   = document.getElementById('supplier_id');
+
+  if (!input || !resultBox) return;
 
   try {
-    const suppliers = await getSuppliers();
-    select.innerHTML = '<option value="">Pilih Supplier...</option>';
-    
-    suppliers.forEach(s => {
-      select.insertAdjacentHTML('beforeend', `
-        <option value="${s.id}">${s.nama_vendor} (${s.kode_vendor})</option>
-      `);
-    });
-  } catch (error) {
-    console.error('Error loading suppliers dropdown:', error);
-    select.innerHTML = '<option value="">Gagal memuat supplier</option>';
+    allSuppliers = await getSuppliers();
+  } catch (e) {
+    console.error('Error loading suppliers:', e);
   }
+
+  function showResults(keyword) {
+    resultBox.innerHTML = '';
+    if (keyword.length < 2) { resultBox.classList.remove('open'); return; }
+
+    const filtered = allSuppliers.filter(s =>
+      s.nama_vendor.toLowerCase().includes(keyword.toLowerCase()) ||
+      s.kode_vendor.toLowerCase().includes(keyword.toLowerCase())
+    );
+
+    if (filtered.length === 0) {
+      resultBox.innerHTML = `<li style="padding:10px 14px;font-size:12.5px;color:#94a3b8;text-align:center">Supplier tidak ditemukan</li>`;
+    } else {
+      filtered.forEach(s => {
+        const li = document.createElement('li');
+        li.className = 'supplier-item';
+        li.innerHTML = `
+          <div style="font-size:12.5px;font-weight:700;color:#1e293b">${s.nama_vendor}</div>
+          <div style="font-size:11px;font-family:monospace;color:#5b6af8;margin-top:1px">${s.kode_vendor}</div>
+        `;
+        li.style.listStyle = 'none';
+        li.onclick = () => selectSupplier(s);
+        resultBox.appendChild(li);
+      });
+    }
+    resultBox.classList.add('open');
+  }
+
+  function selectSupplier(s) {
+    hiddenId.value       = s.id;
+    input.value          = `${s.kode_vendor} — ${s.nama_vendor}`;
+    resultBox.classList.remove('open');
+    if (clearBtn)   { clearBtn.style.display = 'flex'; }
+    if (searchIcon) { searchIcon.style.display = 'none'; }
+  }
+
+  function clearSupplier() {
+    hiddenId.value = '';
+    input.value    = '';
+    resultBox.classList.remove('open');
+    if (clearBtn)   { clearBtn.style.display = 'none'; }
+    if (searchIcon) { searchIcon.style.display = ''; }
+  }
+
+  input.addEventListener('input', e => {
+    const kw = e.target.value.trim();
+    if (kw === '') { clearSupplier(); } else { showResults(kw); }
+  });
+
+  input.addEventListener('focus', e => {
+    const kw = e.target.value.trim();
+    if (kw.length >= 2 && !hiddenId.value) showResults(kw);
+  });
+
+  if (clearBtn) clearBtn.addEventListener('click', clearSupplier);
+
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !resultBox.contains(e.target) && e.target !== clearBtn) {
+      resultBox.classList.remove('open');
+      // Restore display if partially typed but not selected
+      if (!hiddenId.value && input.value.trim()) clearSupplier();
+    }
+  });
 }
 
 /** Live material search autocomplete logic */
@@ -360,6 +421,18 @@ function setupFormReset() {
     const form = document.getElementById('daily-qc-form');
     if (form) {
       form.reset();
+
+      // Clear supplier search
+      const suppInput  = document.getElementById('supplier-search-input');
+      const suppHidden = document.getElementById('supplier_id');
+      const suppClear  = document.getElementById('btn-clear-supplier');
+      const suppIcon   = document.getElementById('supplier-search-icon');
+      if (suppInput)  { suppInput.value  = ''; suppInput.disabled = false; }
+      if (suppHidden) suppHidden.value = '';
+      if (suppClear)  suppClear.style.display = 'none';
+      if (suppIcon)   suppIcon.style.display  = '';
+
+      // Clear material
       const clearBtn = document.getElementById('clear-material');
       if (clearBtn && selectedMaterial) clearBtn.click();
       

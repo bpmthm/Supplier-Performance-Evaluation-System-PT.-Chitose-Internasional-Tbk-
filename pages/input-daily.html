@@ -8,21 +8,63 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/spe.css"/>
-<!-- styles moved to spe.css -->
-<style>
-  .daily-card{background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:20px;padding:24px;transition:all .22s}
-  .autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;z-index:100;background:#fff;border:1px solid rgba(148,163,184,.25);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.1);max-height:260px;overflow-y:auto;margin-top:4px}
-  .autocomplete-item{padding:10px 14px;cursor:pointer;font-size:13px;transition:background .12s;border-radius:8px;margin:2px 4px}
-  .autocomplete-item:hover{background:rgba(91,106,248,.07)}
-  .history-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(226,232,240,.5)}
-  .history-row:last-child{border-bottom:none}
-</style>
+  <style>
+    /* ── Supplier Search ──────────────────────────────────── */
+    .supplier-search-wrap { position:relative; }
+    .supplier-search-wrap input:focus { border-color:#5b6af8; box-shadow:0 0 0 3px rgba(91,106,248,.12); }
+    #supplier-results {
+      position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:120;
+      background:#fff; border:1px solid rgba(148,163,184,.25); border-radius:14px;
+      box-shadow:0 12px 32px rgba(0,0,0,.1); max-height:240px; overflow-y:auto;
+      display:none;
+    }
+    #supplier-results.open { display:block; }
+    .supplier-item {
+      padding:10px 14px; cursor:pointer; transition:background .12s; border-radius:8px; margin:2px 4px;
+    }
+    .supplier-item:hover { background:rgba(91,106,248,.07); }
+
+    /* ── Material Autocomplete ────────────────────────────── */
+    #autocomplete-wrapper {
+      position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:110;
+      background:#fff; border:1px solid rgba(148,163,184,.25); border-radius:14px;
+      box-shadow:0 12px 32px rgba(0,0,0,.1); max-height:260px; overflow-y:auto;
+    }
+    .autocomplete-item {
+      padding:10px 14px; cursor:pointer; font-size:13px; transition:background .12s;
+      border-radius:8px; margin:2px 4px;
+    }
+    .autocomplete-item:hover { background:rgba(91,106,248,.07); }
+
+    /* ── Form field styling ───────────────────────────────── */
+    .field-label {
+      display:block; font-size:10.5px; font-weight:700; color:#64748b;
+      text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px;
+    }
+    .field-input {
+      width:100%; padding:9px 13px; background:#fff;
+      border:1px solid rgba(148,163,184,.3); border-radius:11px;
+      font-size:13.5px; color:#1e293b; font-family:inherit;
+      outline:none; transition:border-color .18s, box-shadow .18s;
+    }
+    .field-input:focus {
+      border-color:#5b6af8; box-shadow:0 0 0 3px rgba(91,106,248,.12);
+    }
+    .field-input::placeholder { color:#94a3b8; }
+    .field-input[disabled] { background:#f8fafc; color:#64748b; cursor:not-allowed; }
+
+    /* ── Scrollbar ────────────────────────────────────────── */
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+  </style>
 </head>
 
 <body style="background:#f0f2f5">
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
 <nav class="spe-sidebar">
   <div class="spe-sidebar-logo">
-    <img alt="Chitose" src="../assets/logo_chitose.png"/>
     <div>
       <div class="spe-sidebar-logo-title">SPE Portal</div>
       <div class="spe-sidebar-logo-sub">Chitose</div>
@@ -30,20 +72,20 @@
   </div>
   <div class="spe-sidebar-nav" id="nav-links">
     <div class="spe-nav-section">Menu</div>
-    <a id="nav-dashboard" href="./dashboard.html" class="spe-nav-item ">
+    <a id="nav-dashboard" href="./dashboard.html" class="spe-nav-item">
       <span class="material-symbols-outlined">grid_view</span><span>Dashboard</span>
     </a>
-    <a id="nav-input" href="./input.html" class="spe-nav-item ">
+    <a id="nav-input" href="./input.html" class="spe-nav-item">
       <span class="material-symbols-outlined">edit_square</span><span>Input Penilaian</span>
     </a>
     <a id="nav-daily" href="./input-daily.html" class="spe-nav-item active">
       <span class="material-symbols-outlined">assignment_add</span><span>Input Daily QC</span>
     </a>
     <div class="spe-nav-section" style="margin-top:4px">Laporan</div>
-    <a id="nav-rekap" href="./master-rekap.html" class="spe-nav-item ">
+    <a id="nav-rekap" href="./master-rekap.html" class="spe-nav-item">
       <span class="material-symbols-outlined">bar_chart_4_bars</span><span>Master Rekap</span>
     </a>
-    <a id="nav-vendor" href="./master-vendor.html" class="spe-nav-item ">
+    <a id="nav-vendor" href="./master-vendor.html" class="spe-nav-item">
       <span class="material-symbols-outlined">corporate_fare</span><span>Master Vendor</span>
     </a>
   </div>
@@ -52,6 +94,8 @@
     <a href="#" class="spe-nav-item"><span class="material-symbols-outlined">logout</span><span>Keluar</span></a>
   </div>
 </nav>
+
+<!-- ══════════════════ WRAPPER ══════════════════ -->
 <div class="spe-wrapper">
   <header class="spe-header">
     <span class="spe-header-title">Input Daily QC</span>
@@ -62,182 +106,212 @@
       <div class="spe-avatar"><img src="https://ui-avatars.com/api/?name=SPE&background=5b6af8&color=fff&size=64" alt=""/></div>
     </div>
   </header>
-<div class="spe-content">
 
-<main class="flex-1 p-margin-page overflow-y-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter items-start">
-        
-        <!-- Left 2 Cols: Form Card -->
-        <div class="lg:col-span-2 space-y-gutter animate-fadeInUp">
-          <div class="daily-card">
-            <div class="mb-6 flex justify-between items-center border-b border-slate-100 pb-4">
-              <div>
-                <h1 class="text-2xl font-black text-slate-800">Form Daily Cek Harian QC</h1>
-                <p class="text-sm text-slate-500 mt-1">Catat dan simpan hasil pengecekan komponen/material harian.</p>
-              </div>
-              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-200">
-                <span class="material-symbols-outlined text-[16px]">verified_user</span>
-                QC Authorized
-              </span>
-            </div>
+  <div class="spe-content">
+    <main style="padding:28px 32px; max-width:1300px; margin:0 auto; width:100%">
 
-            <!-- Form -->
-            <form id="daily-qc-form" class="space-y-6">
-              
-              <!-- Row 1: Tanggal & Supplier -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 uppercase tracking-wider">Tanggal Terima <span class="text-red-500">*</span></label>
-                  <input type="date" id="tanggal_terima" required
-                    class="w-full border-gray-200 rounded-lg text-body-md focus:ring-primary focus:border-primary py-2.5 px-4" />
-                </div>
-                <div>
-                  <label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 uppercase tracking-wider">Nama Supplier <span class="text-red-500">*</span></label>
-                  <select id="supplier_id" required
-                    class="w-full border-gray-200 rounded-lg text-body-md focus:ring-primary focus:border-primary py-2.5 px-4 bg-white cursor-pointer">
-                    <option value="">Pilih Supplier...</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Row 2: No Surat Jalan -->
-              <div>
-                <label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 uppercase tracking-wider">No. Surat Jalan <span class="text-red-500">*</span></label>
-                <input type="text" id="no_surat_jalan" placeholder="Masukkan nomor surat jalan..." required
-                  class="w-full border-gray-200 rounded-lg text-body-md focus:ring-primary focus:border-primary py-2.5 px-4" />
-              </div>
-
-              <!-- Row 3: Nama Komponen (Live Search SAP) -->
-              <div class="relative">
-                <label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 uppercase tracking-wider">Cari & Pilih Nama Komponen (SAP) <span class="text-red-500">*</span></label>
-                <div class="relative">
-                  <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                  <input type="text" id="material_search" placeholder="Ketik minimal 2 karakter kode atau nama material..." required
-                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-body-md focus:ring-primary focus:border-primary" />
-                </div>
-                <!-- Autocomplete dropdown -->
-                <div id="autocomplete-wrapper" class="hidden absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl autocomplete-list z-50 divide-y divide-gray-100">
-                  <!-- JS will render options here -->
-                </div>
-
-                <!-- Hidden inputs for code & description -->
-                <input type="hidden" id="material_code" />
-                <input type="hidden" id="material_desc" />
-              </div>
-
-              <!-- Selection Preview (Premium highlight of chosen material) -->
-              <div id="material-preview" class="hidden p-4 bg-slate-50 border border-slate-200 rounded-lg animate-fadeIn">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Komponen Terpilih</div>
-                    <div id="preview-desc" class="text-sm font-bold text-slate-800 mt-1">-</div>
-                    <div id="preview-code" class="text-xs font-mono text-indigo-600 mt-0.5">-</div>
-                  </div>
-                  <button type="button" id="clear-material" class="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px]">close</span> Hapus
-                  </button>
-                </div>
-              </div>
-
-              <!-- Row 4: Qty Masuk & Qty Reject -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 uppercase tracking-wider">Jumlah Masuk <span class="text-red-500">*</span></label>
-                  <input type="number" id="qty_masuk" placeholder="0" min="0" required
-                    class="w-full border-gray-200 rounded-lg text-body-md focus:ring-primary focus:border-primary py-2.5 px-4" />
-                </div>
-                <div>
-                  <label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 uppercase tracking-wider">Qty Reject <span class="text-red-500">*</span></label>
-                  <input type="number" id="qty_reject" placeholder="0" min="0" required
-                    class="w-full border-gray-200 rounded-lg text-body-md focus:ring-primary focus:border-primary py-2.5 px-4" />
-                </div>
-              </div>
-
-              <!-- Row 5: Keterangan -->
-              <div>
-                <label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 uppercase tracking-wider">Keterangan</label>
-                <textarea id="keterangan" rows="3" placeholder="Tambahkan catatan jika ada..."
-                  class="w-full border-gray-200 rounded-lg text-body-md focus:ring-primary focus:border-primary py-2.5 px-4"></textarea>
-              </div>
-
-              <!-- Action buttons -->
-              <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                <button type="button" id="btn-reset"
-                  class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-sm transition-colors cursor-pointer">
-                  Reset Form
-                </button>
-                <button type="submit" id="btn-submit"
-                  class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-sm shadow-md transition-all duration-150 active:scale-95 cursor-pointer">
-                  Simpan Transaksi harian
-                </button>
-              </div>
-
-            </form>
-          </div>
-        </div>
-
-        <!-- Right 1 Col: Info Panel & Recent Entry list -->
-        <div class="space-y-gutter animate-fadeInUp" style="animation-delay: 100ms;">
-          <!-- QC Division Info -->
-          <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white rounded-2xl shadow-md p-6 relative overflow-hidden">
-            <div class="absolute -right-10 -bottom-10 opacity-10">
-              <span class="material-symbols-outlined text-[150px]">fact_check</span>
-            </div>
-            <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
-              <span class="material-symbols-outlined">info</span> Info Petunjuk QC
-            </h3>
-            <p class="text-xs text-slate-300 leading-relaxed mb-4">
-              Halaman ini digunakan untuk mencatat penerimaan material harian dari supplier. Data SAP secara live dicari untuk menjamin konsistensi nama & kode material.
-            </p>
-            <div class="space-y-2 text-xs text-slate-200">
-              <div class="flex gap-2">
-                <span class="font-bold text-indigo-400">•</span>
-                <span>Pilih vendor aktif dari dropdown menu.</span>
-              </div>
-              <div class="flex gap-2">
-                <span class="font-bold text-indigo-400">•</span>
-                <span>Ketik minimal 2 karakter untuk memicu pencarian komponen di SAP.</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recent Entries Feed -->
-          <div class="daily-card">
-            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <span class="material-symbols-outlined text-indigo-600">history</span> Riwayat Input Terakhir
-            </h3>
-            <div id="recent-entries" class="space-y-3 divide-y divide-slate-100 max-h-[400px] overflow-y-auto pr-1">
-              <!-- Loading history state -->
-              <div class="text-center py-6 text-slate-400 text-xs">
-                <span class="material-symbols-outlined animate-spin mb-1">autorenew</span>
-                <div>Memuat riwayat harian...</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <!-- Page Title -->
+      <div class="animate-fadeInUp" style="margin-bottom:24px">
+        <h1 style="font-size:22px;font-weight:800;letter-spacing:-.025em;color:#1e293b">Form Daily Cek Harian QC</h1>
+        <p style="font-size:13px;color:#64748b;margin-top:4px">Catat dan simpan hasil pengecekan komponen/material harian dari supplier.</p>
       </div>
+
+      <!-- Main Grid: Form (left) + Info Panel (right) -->
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start">
+
+        <!-- ── FORM CARD ─────────────────────────────────── -->
+        <div style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:20px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.04)" class="animate-fadeInUp">
+
+          <!-- Card header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid rgba(148,163,184,.14);margin-bottom:24px">
+            <div>
+              <h2 style="font-size:15px;font-weight:750;color:#1e293b">Data Penerimaan Material</h2>
+              <p style="font-size:12px;color:#64748b;margin-top:3px">Semua field bertanda <span style="color:#ef4444">*</span> wajib diisi.</p>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(34,197,94,.08);color:#16a34a;border:1px solid rgba(34,197,94,.2);border-radius:9px;font-size:11px;font-weight:700">
+              <span class="material-symbols-outlined" style="font-size:15px">verified_user</span>
+              QC Authorized
+            </span>
+          </div>
+
+          <form id="daily-qc-form" style="display:flex;flex-direction:column;gap:20px">
+
+            <!-- Row 1: Tanggal & Supplier -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+              <div>
+                <label class="field-label">Tanggal Terima <span style="color:#ef4444">*</span></label>
+                <input type="date" id="tanggal_terima" required class="field-input"/>
+              </div>
+              <div>
+                <label class="field-label">Nama Supplier <span style="color:#ef4444">*</span></label>
+                <!-- Supplier Search (replaces <select>) -->
+                <div class="supplier-search-wrap">
+                  <div style="position:relative">
+                    <input type="text" id="supplier-search-input"
+                      placeholder="Cari nama atau kode vendor (min. 2 huruf)..."
+                      class="field-input" autocomplete="off"
+                      style="padding-right:36px"/>
+                    <span class="material-symbols-outlined" id="supplier-search-icon"
+                      style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:18px;color:#94a3b8;pointer-events:none">search</span>
+                    <button type="button" id="btn-clear-supplier"
+                      style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:2px;line-height:1"
+                      onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                      <span class="material-symbols-outlined" style="font-size:18px">close</span>
+                    </button>
+                  </div>
+                  <ul id="supplier-results"></ul>
+                  <!-- Hidden real value -->
+                  <input type="hidden" id="supplier_id" required/>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 2: No Surat Jalan -->
+            <div>
+              <label class="field-label">No. Surat Jalan <span style="color:#ef4444">*</span></label>
+              <input type="text" id="no_surat_jalan" placeholder="Masukkan nomor surat jalan..." required class="field-input"/>
+            </div>
+
+            <!-- Row 3: Cari Komponen SAP -->
+            <div style="position:relative">
+              <label class="field-label">Cari &amp; Pilih Nama Komponen (SAP) <span style="color:#ef4444">*</span></label>
+              <div style="position:relative">
+                <span class="material-symbols-outlined"
+                  style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:17px;color:#94a3b8;pointer-events:none">search</span>
+                <input type="text" id="material_search"
+                  placeholder="Ketik minimal 2 karakter kode atau nama material..."
+                  required class="field-input" style="padding-left:36px"/>
+              </div>
+              <!-- Autocomplete dropdown -->
+              <div id="autocomplete-wrapper" class="hidden"></div>
+              <!-- Hidden real values -->
+              <input type="hidden" id="material_code"/>
+              <input type="hidden" id="material_desc"/>
+            </div>
+
+            <!-- Material Selection Preview -->
+            <div id="material-preview"
+              style="display:none;padding:14px 16px;background:rgba(91,106,248,.04);border:1px solid rgba(91,106,248,.18);border-radius:12px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Komponen Terpilih</div>
+                  <div id="preview-desc" style="font-size:13.5px;font-weight:700;color:#1e293b">—</div>
+                  <div id="preview-code" style="font-size:11.5px;font-family:monospace;color:#5b6af8;margin-top:2px">—</div>
+                </div>
+                <button type="button" id="clear-material"
+                  style="display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:#ef4444;background:none;border:none;cursor:pointer;padding:0">
+                  <span class="material-symbols-outlined" style="font-size:15px">close</span> Hapus
+                </button>
+              </div>
+            </div>
+
+            <!-- Row 4: QTY -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+              <div>
+                <label class="field-label">Jumlah Masuk (PCS) <span style="color:#ef4444">*</span></label>
+                <input type="number" id="qty_masuk" placeholder="0" min="0" required class="field-input"/>
+              </div>
+              <div>
+                <label class="field-label">Qty Reject (PCS) <span style="color:#ef4444">*</span></label>
+                <input type="number" id="qty_reject" placeholder="0" min="0" required class="field-input"/>
+              </div>
+            </div>
+
+            <!-- Row 5: Keterangan -->
+            <div>
+              <label class="field-label">Keterangan</label>
+              <textarea id="keterangan" rows="3" placeholder="Tambahkan catatan jika ada..."
+                class="field-input" style="resize:vertical;min-height:80px"></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:14px;border-top:1px solid rgba(148,163,184,.14)">
+              <button type="button" id="btn-reset"
+                style="padding:9px 20px;background:#f1f5f9;border:1px solid rgba(148,163,184,.25);color:#475569;font-size:13px;font-weight:650;border-radius:11px;cursor:pointer;transition:all .15s;font-family:inherit"
+                onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                Reset Form
+              </button>
+              <button type="submit" id="btn-submit"
+                style="padding:9px 22px;background:#212d95;color:#fff;font-size:13px;font-weight:700;border-radius:11px;border:none;cursor:pointer;transition:all .15s;font-family:inherit;display:flex;align-items:center;gap:7px;box-shadow:0 4px 12px rgba(91,106,248,.3)"
+                onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#5b6af8'">
+                <span class="material-symbols-outlined" style="font-size:16px">save</span>
+                Simpan Transaksi Harian
+              </button>
+            </div>
+
+          </form>
+        </div><!-- /form card -->
+
+        <!-- ── RIGHT PANEL ──────────────────────────────── -->
+        <div style="display:flex;flex-direction:column;gap:18px" class="animate-fadeInUp">
+
+          <!-- Info Card -->
+          <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#312e81 100%);color:#fff;border-radius:20px;padding:24px;position:relative;overflow:hidden">
+            <div style="position:absolute;right:-20px;bottom:-20px;opacity:.07">
+              <span class="material-symbols-outlined" style="font-size:130px">fact_check</span>
+            </div>
+            <h3 style="font-size:14px;font-weight:750;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined" style="font-size:18px;color:#818cf8">info</span>
+              Info Petunjuk QC
+            </h3>
+            <p style="font-size:11.5px;color:#94a3b8;line-height:1.7;margin-bottom:14px">
+              Halaman ini untuk mencatat penerimaan material harian dari supplier. Data SAP dicari secara live untuk konsistensi nama &amp; kode material.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:11.5px;color:#cbd5e1">
+              <div style="display:flex;gap:8px;align-items:flex-start">
+                <span style="color:#818cf8;font-weight:800;flex-shrink:0">•</span>
+                <span>Ketik <strong style="color:#fff">nama atau kode vendor</strong> (min. 2 huruf) untuk mencari supplier aktif.</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:flex-start">
+                <span style="color:#818cf8;font-weight:800;flex-shrink:0">•</span>
+                <span>Ketik minimal <strong style="color:#fff">2 karakter</strong> untuk memicu pencarian komponen di SAP.</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:flex-start">
+                <span style="color:#818cf8;font-weight:800;flex-shrink:0">•</span>
+                <span>Isi QTY Masuk dan QTY Reject sesuai data fisik di lapangan.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Riwayat Link Card -->
+          <div style="background:#98a3ce;border:1px solid rgba(91,106,248,.18);border-radius:18px;padding:22px;text-align:center">
+            <div style="width:52px;height:52px;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(91,106,248,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+              <span class="material-symbols-outlined" style="font-size:26px;color:#5b6af8">history</span>
+            </div>
+            <h3 style="font-size:14px;font-weight:750;color:#ffffffc8;margin-bottom:6px">Riwayat Input Harian</h3>
+            <p style="font-size:12px;color:#1f3c63;margin-bottom:16px;line-height:1.6">Lihat, cari, dan filter seluruh data penerimaan material harian yang sudah dicatat.</p>
+            <a href="./riwayat-input.html"
+              style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 16px;background:#3c53ff90;color:#fff;font-size:13px;font-weight:700;border-radius:11px;text-decoration:none;transition:background .18s"
+              onmouseover="this.style.background='#5b6af8'" onmouseout="this.style.background='#1e293b'">
+              <span>Daftar Riwayat Input</span>
+              <span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span>
+            </a>
+          </div>
+
+        </div><!-- /right panel -->
+      </div><!-- /grid -->
+
     </main>
-  </div>
+  </div><!-- /spe-content -->
+</div><!-- /spe-wrapper -->
 
-  <script src="../js/api.js"></script>
-  <script src="../js/input-daily.js"></script>
-
-  </div>
-
-  <script src="../js/api.js"></script>
-  <script src="../js/input-daily.js"></script>
-</div>
-</div>
-
+<script src="../js/api.js"></script>
+<script src="../js/input-daily.js"></script>
 <script>
 (function(){
   const role = getActiveRole();
   const chip = document.getElementById('role-chip');
-  const s = {QC:['rgba(34,197,94,.1)','#16a34a'],PPIC:['rgba(245,158,11,.1)','#b45309'],PCH:['rgba(91,106,248,.1)','#4338ca'],HSE:['rgba(239,68,68,.1)','#dc2626']};
-  if (chip) {chip.textContent = role; if (s[role]) {chip.style.background = s[role][0]; chip.style.color = s[role][1];}}
+  const s = {
+    QC:  ['rgba(34,197,94,.1)','#16a34a'],
+    PPIC:['rgba(245,158,11,.1)','#b45309'],
+    PCH: ['rgba(91,106,248,.1)','#4338ca'],
+    HSE: ['rgba(239,68,68,.1)','#dc2626']
+  };
+  if (chip) {
+    chip.textContent = role;
+    if (s[role]) { chip.style.background = s[role][0]; chip.style.color = s[role][1]; }
+  }
 })();
 </script>
-
 </body>
 </html>
