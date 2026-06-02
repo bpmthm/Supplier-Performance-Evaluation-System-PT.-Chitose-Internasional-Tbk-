@@ -1,340 +1,511 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SPE Portal — Riwayat Input QC</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="../css/spe.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/spe.css" />
   <style>
     /* Stats card hover lift */
-    .stat-card { transition: box-shadow .2s, transform .2s; }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(91,106,248,.1); }
+    .stat-card {
+      transition: box-shadow .2s, transform .2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(91, 106, 248, .1);
+    }
 
     /* Row selected state */
-    .row-selected { background: rgba(91,106,248,.06) !important; border-left: 3px solid #5b6af8; }
+    .row-selected {
+      background: rgba(91, 106, 248, .06) !important;
+      border-left: 3px solid #5b6af8;
+    }
 
     /* NG rate badges */
-    .ng-ok   { background: rgba(34,197,94,.12);  color:#16a34a; padding:2px 10px; border-radius:9999px; font-size:11px; font-weight:700; }
-    .ng-warn { background: rgba(245,158,11,.12); color:#b45309; padding:2px 10px; border-radius:9999px; font-size:11px; font-weight:700; }
-    .ng-bad  { background: rgba(239,68,68,.12);  color:#dc2626; padding:2px 10px; border-radius:9999px; font-size:11px; font-weight:700; }
+    .ng-ok {
+      background: rgba(34, 197, 94, .12);
+      color: #16a34a;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .ng-warn {
+      background: rgba(245, 158, 11, .12);
+      color: #b45309;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .ng-bad {
+      background: rgba(239, 68, 68, .12);
+      color: #dc2626;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
 
     /* Slide-over panel */
     #detail-panel {
-      position: fixed; top:0; right:0; bottom:0; width:460px;
-      background:#fff; border-left:1px solid #e2e8f0;
-      box-shadow: -8px 0 40px rgba(0,0,0,.12);
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 460px;
+      background: #fff;
+      border-left: 1px solid #e2e8f0;
+      box-shadow: -8px 0 40px rgba(0, 0, 0, .12);
       transform: translateX(100%);
-      transition: transform .3s cubic-bezier(.4,0,.2,1);
-      z-index:200; display:flex; flex-direction:column;
+      transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
     }
-    #detail-panel.open { transform: translateX(0); }
+
+    #detail-panel.open {
+      transform: translateX(0);
+    }
+
     #detail-backdrop {
-      position:fixed; inset:0; background:rgba(15,23,42,.35);
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .35);
       backdrop-filter: blur(2px);
-      z-index:199; opacity:0; pointer-events:none;
+      z-index: 199;
+      opacity: 0;
+      pointer-events: none;
       transition: opacity .3s;
     }
-    #detail-backdrop.open { opacity:1; pointer-events:all; }
+
+    #detail-backdrop.open {
+      opacity: 1;
+      pointer-events: all;
+    }
 
     /* Smooth scrollbar */
-    ::-webkit-scrollbar { width:5px; height:5px; }
-    ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
-    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* Transisi mulus buat Sidebar dan Konten */
+    .spe-sidebar {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 260px;
+      /* Lebar default */
+      overflow: hidden;
+      /* Biar teks gak mbleber pas mengecil */
+    }
+
+    .spe-wrapper {
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-left: 260px;
+      /* Jarak awal ngikutin lebar sidebar */
+    }
+
+    /* KELAS AJAIB BUAT MODE MINIMIZE */
+    .spe-sidebar.minimized {
+      width: 80px;
+      /* Lebar mengecil jadi segini doang */
+    }
+
+    /* Pas di-minimize, sembunyiin logo teks, teks menu, dan label footer */
+    .spe-sidebar.minimized .spe-sidebar-logo-title,
+    .spe-sidebar.minimized .spe-sidebar-logo-sub,
+    .spe-sidebar.minimized .spe-nav-section,
+    .spe-sidebar.minimized .spe-nav-item span:not(.material-symbols-outlined) {
+      display: none;
+    }
+
+    /* Pas di-minimize, ikon ditengahin */
+    .spe-sidebar.minimized .spe-nav-item {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .spe-sidebar.minimized .spe-sidebar-logo {
+      justify-content: center;
+    }
+
+    /* Margin konten utama ngikutin sidebar yang mengecil */
+    .spe-wrapper.expanded {
+      margin-left: 80px;
+    }
   </style>
 </head>
 
 <body style="background:#f0f2f5">
 
-<!-- ═══════════════════ SIDEBAR (same as all other pages) ═══════════════════ -->
-<nav class="spe-sidebar">
-  <div class="spe-sidebar-logo">
-    <div>
-      <div class="spe-sidebar-logo-title">SPE Portal</div>
-      <div class="spe-sidebar-logo-sub">Chitose</div>
-    </div>
-  </div>
-  <div class="spe-sidebar-nav" id="nav-links">
-    <div class="spe-nav-section">Menu</div>
-    <a id="nav-dashboard" href="./dashboard.html" class="spe-nav-item">
-      <span class="material-symbols-outlined">grid_view</span><span>Dashboard</span>
-    </a>
-    <a id="nav-input" href="./input.html" class="spe-nav-item">
-      <span class="material-symbols-outlined">edit_square</span><span>Input Penilaian</span>
-    </a>
-    <a id="nav-daily" href="./input-daily.html" class="spe-nav-item active">
-      <span class="material-symbols-outlined">assignment_add</span><span>Input Daily QC</span>
-    </a>
-    <div class="spe-nav-section" style="margin-top:4px">Laporan</div>
-    <a id="nav-rekap" href="./master-rekap.html" class="spe-nav-item">
-      <span class="material-symbols-outlined">bar_chart_4_bars</span><span>Master Rekap</span>
-    </a>
-    <a id="nav-vendor" href="./master-vendor.html" class="spe-nav-item">
-      <span class="material-symbols-outlined">corporate_fare</span><span>Master Vendor</span>
-    </a>
-  </div>
-  <div class="spe-sidebar-footer">
-    <a href="#" class="spe-nav-item"><span class="material-symbols-outlined">help_outline</span><span>Support</span></a>
-    <a href="#" id="btn-logout" class="spe-nav-item"><span class="material-symbols-outlined">logout</span><span>Keluar</span></a>
-  </div>
-</nav>
+  <!-- ═══════════════════ SIDEBAR (same as all other pages) ═══════════════════ -->
+  <div id="sidebar-container"></div>
 
-<!-- ═══════════════════ MAIN WRAPPER ═══════════════════ -->
-<div class="spe-wrapper">
-  <header class="spe-header">
-    <span class="spe-header-title">Riwayat Input QC</span>
-    <div class="spe-header-actions">
-      <span id="role-chip" class="spe-header-role" style="background:rgba(91,106,248,.1);color:#4338ca">GUEST</span>
-      <button class="spe-icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-      <button class="spe-icon-btn"><span class="material-symbols-outlined">settings</span></button>
-      <div class="spe-avatar"><img src="https://ui-avatars.com/api/?name=SPE&background=5b6af8&color=fff&size=64" alt=""/></div>
-    </div>
-  </header>
+  <!-- ═══════════════════ MAIN WRAPPER ═══════════════════ -->
+  <div class="spe-wrapper">
+    <div id="navbar-container"></div>
 
-  <div class="spe-content">
-    <main style="padding:28px 32px; max-width:1400px; margin:0 auto; width:100%">
+    <div class="spe-content">
+      <main style="padding:28px 32px; max-width:1400px; margin:0 auto; width:100%">
 
-      <!-- Page Title -->
-      <div class="mb-lg animate-fadeInUp" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-        <div>
-          <h1 style="font-size:22px;font-weight:750;letter-spacing:-.025em;color:#1e293b">Riwayat Penerimaan Material</h1>
-          <p style="font-size:13px;color:#64748b;margin-top:4px">Catatan harian penerimaan dan penolakan (reject) kuantitas komponen supplier.</p>
-        </div>
-        <a href="./input-daily.html"
-          style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:11px;border:1px solid rgba(91,106,248,.25);background:rgba(91,106,248,.06);color:#4f46e5;font-size:13px;font-weight:650;text-decoration:none;transition:all .18s;white-space:nowrap"
-          onmouseover="this.style.background='rgba(91,106,248,.12)';this.style.borderColor='rgba(91,106,248,.4)'"
-          onmouseout="this.style.background='rgba(91,106,248,.06)';this.style.borderColor='rgba(91,106,248,.25)'">
-          <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span>
-          Kembali ke Input Daily QC
-        </a>
-      </div>
-
-      <!-- Stats Cards -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px" class="animate-fadeInUp">
-
-        <div class="stat-card" style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between">
+        <!-- Page Title -->
+        <div class="mb-lg animate-fadeInUp"
+          style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
           <div>
-            <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Total Penerimaan</p>
-            <h3 id="stat-total-penerimaan" style="font-size:26px;font-weight:800;color:#1e293b;margin-top:4px">0</h3>
-            <p style="font-size:10px;color:#94a3b8;margin-top:2px">Transaksi tercatat</p>
+            <h1 style="font-size:22px;font-weight:750;letter-spacing:-.025em;color:#1e293b">Riwayat Penerimaan Material
+            </h1>
+            <p style="font-size:13px;color:#64748b;margin-top:4px">Catatan harian penerimaan dan peno/* Transisi mulus
+              buat Sidebar dan Konten */
+              .spe-sidebar {
+              transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+              width: 260px; /* Lebar default */
+              overflow: hidden; /* Biar teks gak mbleber pas mengecil */
+              }
+
+              .spe-wrapper {
+              transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+              margin-left: 260px; /* Jarak awal ngikutin lebar sidebar */
+              }
+
+              /* KELAS AJAIB BUAT MODE MINIMIZE */
+              .spe-sidebar.minimized {
+              width: 80px; /* Lebar mengecil jadi segini doang */
+              }
+
+              /* Pas di-minimize, sembunyiin logo teks, teks menu, dan label footer */
+              .spe-sidebar.minimized .spe-sidebar-logo-title,
+              .spe-sidebar.minimized .spe-sidebar-logo-sub,
+              .spe-sidebar.minimized .spe-nav-section,
+              .spe-sidebar.minimized .spe-nav-item span:not(.material-symbols-outlined) {
+              display: none;
+              }
+
+              /* Pas di-minimize, ikon ditengahin */
+              .spe-sidebar.minimized .spe-nav-item {
+              justify-content: center;
+              padding-left: 0;
+              padding-right: 0;
+              }
+
+              .spe-sidebar.minimized .spe-sidebar-logo {
+              justify-content: center;
+              }
+
+              /* Margin konten utama ngikutin sidebar yang mengecil */
+              .spe-wrapper.expanded {
+              margin-left: 80px;
+              }lakan (reject) kuantitas komponen supplier.</p>
           </div>
-          <div style="width:44px;height:44px;border-radius:13px;background:rgba(91,106,248,.1);display:flex;align-items:center;justify-content:center">
-            <span class="material-symbols-outlined" style="color:#5b6af8;font-size:22px">assignment</span>
-          </div>
+          <a href="./input-daily.html"
+            style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:11px;border:1px solid rgba(91,106,248,.25);background:rgba(91,106,248,.06);color:#4f46e5;font-size:13px;font-weight:650;text-decoration:none;transition:all .18s;white-space:nowrap"
+            onmouseover="this.style.background='rgba(91,106,248,.12)';this.style.borderColor='rgba(91,106,248,.4)'"
+            onmouseout="this.style.background='rgba(91,106,248,.06)';this.style.borderColor='rgba(91,106,248,.25)'">
+            <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span>
+            Kembali ke Input Daily QC
+          </a>
         </div>
 
-        <div class="stat-card" style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Total QTY Masuk</p>
-            <h3 id="stat-qty-masuk" style="font-size:26px;font-weight:800;color:#1e293b;margin-top:4px">0</h3>
-            <p style="font-size:10px;color:#94a3b8;margin-top:2px">Pcs material diterima</p>
-          </div>
-          <div style="width:44px;height:44px;border-radius:13px;background:rgba(34,197,94,.1);display:flex;align-items:center;justify-content:center">
-            <span class="material-symbols-outlined" style="color:#16a34a;font-size:22px">inventory_2</span>
-          </div>
-        </div>
+        <!-- Stats Cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px"
+          class="animate-fadeInUp">
 
-        <div class="stat-card" style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Total QTY Reject</p>
-            <h3 id="stat-qty-reject" style="font-size:26px;font-weight:800;color:#1e293b;margin-top:4px">0</h3>
-            <p style="font-size:10px;color:#94a3b8;margin-top:2px">Pcs material ditolak</p>
-          </div>
-          <div style="width:44px;height:44px;border-radius:13px;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center">
-            <span class="material-symbols-outlined" style="color:#dc2626;font-size:22px">cancel</span>
-          </div>
-        </div>
-
-        <div class="stat-card" style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Rata-rata % NG</p>
-            <h3 id="stat-ng-rate" style="font-size:26px;font-weight:800;color:#1e293b;margin-top:4px">0.00%</h3>
-            <p style="font-size:10px;color:#94a3b8;margin-top:2px">Rasio reject keseluruhan</p>
-          </div>
-          <div style="width:44px;height:44px;border-radius:13px;background:rgba(245,158,11,.1);display:flex;align-items:center;justify-content:center">
-            <span class="material-symbols-outlined" style="color:#b45309;font-size:22px">percent</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Filter & Table Card -->
-      <div style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:20px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)" class="animate-fadeInUp">
-
-        <!-- Filter Bar -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid rgba(148,163,184,.14);gap:14px;flex-wrap:wrap">
-          <div>
-            <h2 style="font-size:15px;font-weight:700;color:#1e293b">Daftar Penerimaan</h2>
-            <p style="font-size:12px;color:#64748b;margin-top:2px">Klik baris untuk melihat detail lengkap.</p>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <!-- Month filter -->
-            <input type="month" id="filter-bulan"
-              style="padding:7px 13px;border:1px solid rgba(148,163,184,.3);border-radius:10px;font-size:12px;font-weight:600;color:#475569;background:#f8fafc;outline:none;cursor:pointer;font-family:inherit">
-            <!-- Search -->
-            <div style="position:relative">
-              <span class="material-symbols-outlined" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:17px;color:#94a3b8;pointer-events:none">search</span>
-              <input type="text" id="search-input" placeholder="Cari supplier, komponen, no. SJ..."
-                style="padding:7px 13px 7px 34px;border:1px solid rgba(148,163,184,.3);border-radius:10px;font-size:12px;color:#1e293b;background:#f8fafc;outline:none;width:280px;font-family:inherit">
+          <div class="stat-card"
+            style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
+                Total Penerimaan</p>
+              <h3 id="stat-total-penerimaan" style="font-size:26px;font-weight:800;color:#1e293b;margin-top:4px">0</h3>
+              <p style="font-size:10px;color:#94a3b8;margin-top:2px">Transaksi tercatat</p>
+            </div>
+            <div
+              style="width:44px;height:44px;border-radius:13px;background:rgba(91,106,248,.1);display:flex;align-items:center;justify-content:center">
+              <span class="material-symbols-outlined" style="color:#5b6af8;font-size:22px">assignment</span>
             </div>
           </div>
+
+          <div class="stat-card"
+            style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
+                Total QTY Masuk</p>
+              <h3 id="stat-qty-masuk" style="font-size:26px;font-weight:800;color:#1e293b;margin-top:4px">0</h3>
+              <p style="font-size:10px;color:#94a3b8;margin-top:2px">Pcs material diterima</p>
+            </div>
+            <div
+              style="width:44px;height:44px;border-radius:13px;background:rgba(34,197,94,.1);display:flex;align-items:center;justify-content:center">
+              <span class="material-symbols-outlined" style="color:#16a34a;font-size:22px">inventory_2</span>
+            </div>
+          </div>
+
+          <div class="stat-card"
+            style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
+                Total QTY Reject</p>
+              <h3 id="stat-qty-reject" style="font-size:26px;font-weight:800;color:#1e293b;margin-top:4px">0</h3>
+              <p style="font-size:10px;color:#94a3b8;margin-top:2px">Pcs material ditolak</p>
+            </div>
+            <div
+              style="width:44px;height:44px;border-radius:13px;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center">
+              <span class="material-symbols-outlined" style="color:#dc2626;font-size:22px">cancel</span>
+            </div>
+          </div>
+
+          <div class="stat-card"
+            style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
+                Rata-rata % NG</p>
+              <h3 id="stat-ng-rate" style="font-size:26px;font-weight:800;color:#1e293b;margin-top:4px">0.00%</h3>
+              <p style="font-size:10px;color:#94a3b8;margin-top:2px">Rasio reject keseluruhan</p>
+            </div>
+            <div
+              style="width:44px;height:44px;border-radius:13px;background:rgba(245,158,11,.1);display:flex;align-items:center;justify-content:center">
+              <span class="material-symbols-outlined" style="color:#b45309;font-size:22px">percent</span>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Table (no overflow-x scroll — columns are proportional) -->
-        <div style="overflow-y:auto; max-height:calc(100vh - 380px)">
-          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
-            <thead style="background:#f8fafc;position:sticky;top:0;z-index:10">
-              <tr style="border-bottom:1px solid rgba(148,163,184,.16)">
-                <th style="padding:11px 20px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Supplier</th>
-                <th style="padding:11px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">No. Surat Jalan</th>
-                <th style="padding:11px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Nama Komponen</th>
-                <th style="padding:11px 16px;text-align:center;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">QTY Masuk</th>
-                <th style="padding:11px 16px;text-align:center;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">QTY Reject</th>
-                <th style="padding:11px 16px;text-align:center;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">% NG</th>
-                <th style="padding:11px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Tgl Terima</th>
-                <th style="padding:11px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">Keterangan</th>
-              </tr>
-            </thead>
-            <tbody id="table-body">
-              <!-- JS renders rows here -->
-            </tbody>
-          </table>
-        </div>
+        <!-- Filter & Table Card -->
+        <div
+          style="background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:20px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)"
+          class="animate-fadeInUp">
 
-        <!-- Pagination Footer -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 24px;border-top:1px solid rgba(148,163,184,.14);background:#f8fafc">
-          <span id="page-info" style="font-size:11px;font-weight:600;color:#64748b">Menampilkan 0 – 0 dari 0 data</span>
-          <div id="pagination-container" style="display:flex;align-items:center;gap:4px"></div>
-        </div>
+          <!-- Filter Bar -->
+          <div
+            style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid rgba(148,163,184,.14);gap:14px;flex-wrap:wrap">
+            <div>
+              <h2 style="font-size:15px;font-weight:700;color:#1e293b">Daftar Penerimaan</h2>
+              <p style="font-size:12px;color:#64748b;margin-top:2px">Klik baris untuk melihat detail lengkap.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <!-- Month filter -->
+              <input type="month" id="filter-bulan"
+                style="padding:7px 13px;border:1px solid rgba(148,163,184,.3);border-radius:10px;font-size:12px;font-weight:600;color:#475569;background:#f8fafc;outline:none;cursor:pointer;font-family:inherit">
+              <!-- Search -->
+              <div style="position:relative">
+                <span class="material-symbols-outlined"
+                  style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:17px;color:#94a3b8;pointer-events:none">search</span>
+                <input type="text" id="search-input" placeholder="Cari supplier, komponen, no. SJ..."
+                  style="padding:7px 13px 7px 34px;border:1px solid rgba(148,163,184,.3);border-radius:10px;font-size:12px;color:#1e293b;background:#f8fafc;outline:none;width:280px;font-family:inherit">
+              </div>
+            </div>
+          </div>
 
-      </div><!-- /table card -->
+          <!-- Table (no overflow-x scroll — columns are proportional) -->
+          <div style="overflow-y:auto; max-height:calc(100vh - 380px)">
+            <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+              <thead style="background:#f8fafc;position:sticky;top:0;z-index:10">
+                <tr style="border-bottom:1px solid rgba(148,163,184,.16)">
+                  <th
+                    style="padding:11px 20px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">
+                    Supplier</th>
+                  <th
+                    style="padding:11px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">
+                    No. Surat Jalan</th>
+                  <th
+                    style="padding:11px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">
+                    Nama Komponen</th>
+                  <th
+                    style="padding:11px 16px;text-align:center;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">
+                    QTY Masuk</th>
+                  <th
+                    style="padding:11px 16px;text-align:center;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">
+                    QTY Reject</th>
+                  <th
+                    style="padding:11px 16px;text-align:center;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">
+                    % NG</th>
+                  <th
+                    style="padding:11px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">
+                    Tgl Terima</th>
+                  <th
+                    style="padding:11px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em">
+                    Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- JS renders rows here -->
+              </tbody>
+            </table>
+          </div>
 
-    </main>
-  </div><!-- /spe-content -->
-</div><!-- /spe-wrapper -->
+          <!-- Pagination Footer -->
+          <div
+            style="display:flex;align-items:center;justify-content:space-between;padding:13px 24px;border-top:1px solid rgba(148,163,184,.14);background:#f8fafc">
+            <span id="page-info" style="font-size:11px;font-weight:600;color:#64748b">Menampilkan 0 – 0 dari 0
+              data</span>
+            <div id="pagination-container" style="display:flex;align-items:center;gap:4px"></div>
+          </div>
 
-<!-- ═══════════════════ SLIDE-OVER DETAIL PANEL ═══════════════════ -->
-<div id="detail-backdrop" onclick="closeDetailPanel()"></div>
-<div id="detail-panel">
+        </div><!-- /table card -->
 
-  <!-- Panel Header -->
-  <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:flex-start;background:#f8fafc">
-    <div>
-      <h3 style="font-size:15px;font-weight:750;color:#1e293b">Detail Penerimaan QC</h3>
-      <p id="detail-no-sj-title" style="font-size:11px;color:#94a3b8;margin-top:3px;font-weight:600">SJ: —</p>
+      </main>
+    </div><!-- /spe-content -->
+  </div><!-- /spe-wrapper -->
+
+  <!-- ═══════════════════ SLIDE-OVER DETAIL PANEL ═══════════════════ -->
+  <div id="detail-backdrop" onclick="closeDetailPanel()"></div>
+  <div id="detail-panel">
+
+    <!-- Panel Header -->
+    <div
+      style="padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:flex-start;background:#f8fafc">
+      <div>
+        <h3 style="font-size:15px;font-weight:750;color:#1e293b">Detail Penerimaan QC</h3>
+        <p id="detail-no-sj-title" style="font-size:11px;color:#94a3b8;margin-top:3px;font-weight:600">SJ: —</p>
+      </div>
+      <button onclick="closeDetailPanel()"
+        style="width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;transition:all .15s"
+        onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+        <span class="material-symbols-outlined" style="font-size:18px">close</span>
+      </button>
     </div>
-    <button onclick="closeDetailPanel()" style="width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;transition:all .15s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
-      <span class="material-symbols-outlined" style="font-size:18px">close</span>
-    </button>
-  </div>
 
-  <!-- Panel Body (scrollable) -->
-  <div style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+    <!-- Panel Body (scrollable) -->
+    <div style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px">
 
-    <!-- Supplier block -->
-    <div style="background:rgba(91,106,248,.05);border:1px solid rgba(91,106,248,.15);border-radius:14px;padding:16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="width:36px;height:36px;border-radius:10px;background:#5b6af8;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <span class="material-symbols-outlined" style="color:#fff;font-size:18px">store</span>
+      <!-- Supplier block -->
+      <div
+        style="background:rgba(91,106,248,.05);border:1px solid rgba(91,106,248,.15);border-radius:14px;padding:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div
+            style="width:36px;height:36px;border-radius:10px;background:#5b6af8;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <span class="material-symbols-outlined" style="color:#fff;font-size:18px">store</span>
+          </div>
+          <div>
+            <p style="font-size:9px;font-weight:700;color:#818cf8;text-transform:uppercase;letter-spacing:.08em">
+              Supplier / Vendor</p>
+            <h4 id="detail-supplier-name" style="font-size:13.5px;font-weight:750;color:#1e293b;margin-top:1px">—</h4>
+          </div>
         </div>
-        <div>
-          <p style="font-size:9px;font-weight:700;color:#818cf8;text-transform:uppercase;letter-spacing:.08em">Supplier / Vendor</p>
-          <h4 id="detail-supplier-name" style="font-size:13.5px;font-weight:750;color:#1e293b;margin-top:1px">—</h4>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:12px;border-top:1px solid rgba(91,106,248,.12);font-size:12px">
-        <div>
-          <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px">Kode Vendor</span>
-          <span id="detail-supplier-kode" style="font-weight:700;color:#334155;font-family:monospace;background:rgba(91,106,248,.08);padding:2px 8px;border-radius:6px;font-size:11px">—</span>
-        </div>
-        <div>
-          <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px">No. Surat Jalan</span>
-          <span id="detail-no-sj" style="font-weight:700;color:#334155;font-family:monospace;font-size:11px">—</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Material block -->
-    <div style="background:#f8fafc;border:1px solid rgba(148,163,184,.2);border-radius:14px;padding:16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="width:36px;height:36px;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <span class="material-symbols-outlined" style="color:#475569;font-size:18px">inventory_2</span>
-        </div>
-        <div>
-          <p style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em">Item / Material</p>
-          <h4 id="detail-material-desc" style="font-size:13.5px;font-weight:750;color:#1e293b;margin-top:1px">—</h4>
+        <div
+          style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:12px;border-top:1px solid rgba(91,106,248,.12);font-size:12px">
+          <div>
+            <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px">Kode Vendor</span>
+            <span id="detail-supplier-kode"
+              style="font-weight:700;color:#334155;font-family:monospace;background:rgba(91,106,248,.08);padding:2px 8px;border-radius:6px;font-size:11px">—</span>
+          </div>
+          <div>
+            <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px">No. Surat Jalan</span>
+            <span id="detail-no-sj" style="font-weight:700;color:#334155;font-family:monospace;font-size:11px">—</span>
+          </div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:12px;border-top:1px solid rgba(148,163,184,.18);font-size:12px">
-        <div>
-          <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px">Material Code</span>
-          <span id="detail-material-code" style="font-weight:700;color:#334155;font-family:monospace;font-size:11px">—</span>
+
+      <!-- Material block -->
+      <div style="background:#f8fafc;border:1px solid rgba(148,163,184,.2);border-radius:14px;padding:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div
+            style="width:36px;height:36px;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <span class="material-symbols-outlined" style="color:#475569;font-size:18px">inventory_2</span>
+          </div>
+          <div>
+            <p style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em">Item /
+              Material</p>
+            <h4 id="detail-material-desc" style="font-size:13.5px;font-weight:750;color:#1e293b;margin-top:1px">—</h4>
+          </div>
         </div>
-        <div>
-          <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px">Tanggal Terima</span>
-          <span id="detail-tgl-terima" style="font-weight:700;color:#334155;font-size:11px">—</span>
+        <div
+          style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:12px;border-top:1px solid rgba(148,163,184,.18);font-size:12px">
+          <div>
+            <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px">Material Code</span>
+            <span id="detail-material-code"
+              style="font-weight:700;color:#334155;font-family:monospace;font-size:11px">—</span>
+          </div>
+          <div>
+            <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:3px">Tanggal Terima</span>
+            <span id="detail-tgl-terima" style="font-weight:700;color:#334155;font-size:11px">—</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- QTY grid -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:13px;padding:14px;text-align:center">
-        <span style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">QTY Masuk</span>
-        <span id="detail-qty-masuk" style="font-size:28px;font-weight:800;color:#15803d">0</span>
-        <span style="font-size:10px;color:#86efac;display:block;margin-top:3px;font-weight:700">PCS</span>
+      <!-- QTY grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div
+          style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:13px;padding:14px;text-align:center">
+          <span
+            style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">QTY
+            Masuk</span>
+          <span id="detail-qty-masuk" style="font-size:28px;font-weight:800;color:#15803d">0</span>
+          <span style="font-size:10px;color:#86efac;display:block;margin-top:3px;font-weight:700">PCS</span>
+        </div>
+        <div
+          style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:13px;padding:14px;text-align:center">
+          <span
+            style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">QTY
+            Reject</span>
+          <span id="detail-qty-reject" style="font-size:28px;font-weight:800;color:#b91c1c">0</span>
+          <span style="font-size:10px;color:#fca5a5;display:block;margin-top:3px;font-weight:700">PCS</span>
+        </div>
       </div>
-      <div style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:13px;padding:14px;text-align:center">
-        <span style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">QTY Reject</span>
-        <span id="detail-qty-reject" style="font-size:28px;font-weight:800;color:#b91c1c">0</span>
-        <span style="font-size:10px;color:#fca5a5;display:block;margin-top:3px;font-weight:700">PCS</span>
+
+      <!-- NG Rate bar -->
+      <div style="background:#f8fafc;border:1px solid rgba(148,163,184,.2);border-radius:14px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:#475569">Rasio Reject (% NG)</span>
+          <span id="detail-ng-rate" style="font-size:14px;font-weight:800;color:#1e293b">0.00%</span>
+        </div>
+        <div style="height:8px;background:#e2e8f0;border-radius:9999px;overflow:hidden">
+          <div id="detail-ng-bar"
+            style="height:100%;border-radius:9999px;width:0%;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
+        </div>
+        <p id="detail-ng-status" style="font-size:10.5px;margin-top:8px;font-weight:600"></p>
       </div>
-    </div>
 
-    <!-- NG Rate bar -->
-    <div style="background:#f8fafc;border:1px solid rgba(148,163,184,.2);border-radius:14px;padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:11px;font-weight:700;color:#475569">Rasio Reject (% NG)</span>
-        <span id="detail-ng-rate" style="font-size:14px;font-weight:800;color:#1e293b">0.00%</span>
+      <!-- Keterangan -->
+      <div>
+        <label
+          style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:7px">Keterangan
+          / Notes</label>
+        <div id="detail-keterangan"
+          style="background:#f8fafc;border:1px solid rgba(148,163,184,.2);border-radius:13px;padding:14px;font-size:12px;color:#475569;line-height:1.7;min-height:80px;white-space:pre-wrap;font-weight:500">
+          Tidak ada keterangan tambahan.
+        </div>
       </div>
-      <div style="height:8px;background:#e2e8f0;border-radius:9999px;overflow:hidden">
-        <div id="detail-ng-bar" style="height:100%;border-radius:9999px;width:0%;transition:width .5s cubic-bezier(.4,0,.2,1)"></div>
-      </div>
-      <p id="detail-ng-status" style="font-size:10.5px;margin-top:8px;font-weight:600"></p>
-    </div>
 
-    <!-- Keterangan -->
-    <div>
-      <label style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:7px">Keterangan / Notes</label>
-      <div id="detail-keterangan" style="background:#f8fafc;border:1px solid rgba(148,163,184,.2);border-radius:13px;padding:14px;font-size:12px;color:#475569;line-height:1.7;min-height:80px;white-space:pre-wrap;font-weight:500">
-        Tidak ada keterangan tambahan.
-      </div>
-    </div>
+    </div><!-- /panel body -->
+  </div><!-- /detail-panel -->
 
-  </div><!-- /panel body -->
-</div><!-- /detail-panel -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/riwayat-input.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="../js/api.js"></script>
-<script src="../js/riwayat-input.js"></script>
-
-<script>
-(function(){
-  const role = getActiveRole();
-  const chip = document.getElementById('role-chip');
-  const s = {
-    QC:  ['rgba(34,197,94,.1)','#16a34a'],
-    PPIC:['rgba(245,158,11,.1)','#b45309'],
-    PCH: ['rgba(91,106,248,.1)','#4338ca'],
-    HSE: ['rgba(239,68,68,.1)','#dc2626']
-  };
-  if (chip) {
-    chip.textContent = role;
-    if (s[role]) { chip.style.background = s[role][0]; chip.style.color = s[role][1]; }
-  }
-})();
-</script>
+  <script>
+    (function () {
+      const role = getActiveRole();
+      const chip = document.getElementById('role-chip');
+      const s = {
+        QC: ['rgba(34,197,94,.1)', '#16a34a'],
+        PPIC: ['rgba(245,158,11,.1)', '#b45309'],
+        PCH: ['rgba(91,106,248,.1)', '#4338ca'],
+        HSE: ['rgba(239,68,68,.1)', '#dc2626']
+      };
+      if (chip) {
+        chip.textContent = role;
+        if (s[role]) { chip.style.background = s[role][0]; chip.style.color = s[role][1]; }
+      }
+    })();
+  </script>
 </body>
+
 </html>

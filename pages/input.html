@@ -1,78 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SPE Portal — Input Penilaian</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="../css/spe.css"/>
-<!-- styles moved to spe.css -->
-<style>
-  .division-card{background:#fff;border:1px solid rgba(148,163,184,.18);border-radius:20px;padding:24px;display:flex;flex-direction:column;transition:all .22s cubic-bezier(.4,0,.2,1)}
-  .division-card:hover{box-shadow:0 6px 24px rgba(91,106,248,.09);border-color:rgba(91,106,248,.2);transform:translateY(-1px)}
-  .division-card-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-  .division-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .radio-card{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid rgba(148,163,184,.2);border-radius:12px;cursor:pointer;transition:all .18s}
-  .radio-card:hover{border-color:rgba(91,106,248,.35);background:rgba(91,106,248,.03)}
-  .radio-card:has(input:checked){border-color:rgba(91,106,248,.45);background:rgba(91,106,248,.05)}
-  .drop-zone{border:1.5px dashed rgba(148,163,184,.4);border-radius:14px;padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;transition:all .2s;background:#f8fafc}
-  .drop-zone:hover{border-color:#5b6af8;background:rgba(91,106,248,.04)}
-  .submit-bar{background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border:1px solid rgba(226,232,240,.7);border-radius:20px;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -4px 24px rgba(0,0,0,.06)}
-  .form-section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-  .badge-result{padding:5px 14px;border-radius:9999px;font-size:11.5px;font-weight:700;letter-spacing:.04em}
-</style>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/spe.css" />
+  <!-- styles moved to spe.css -->
+  <style>
+    .division-card {
+      background: #fff;
+      border: 1px solid rgba(148, 163, 184, .18);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      transition: all .22s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    .division-card:hover {
+      box-shadow: 0 6px 24px rgba(91, 106, 248, .09);
+      border-color: rgba(91, 106, 248, .2);
+      transform: translateY(-1px)
+    }
+
+    .division-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px
+    }
+
+    .division-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .radio-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, .2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all .18s
+    }
+
+    .radio-card:hover {
+      border-color: rgba(91, 106, 248, .35);
+      background: rgba(91, 106, 248, .03)
+    }
+
+    .radio-card:has(input:checked) {
+      border-color: rgba(91, 106, 248, .45);
+      background: rgba(91, 106, 248, .05)
+    }
+
+    .drop-zone {
+      border: 1.5px dashed rgba(148, 163, 184, .4);
+      border-radius: 14px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: #f8fafc
+    }
+
+    .drop-zone:hover {
+      border-color: #5b6af8;
+      background: rgba(91, 106, 248, .04)
+    }
+
+    .submit-bar {
+      background: rgba(255, 255, 255, .9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, .7);
+      border-radius: 20px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, .06)
+    }
+
+    .form-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px
+    }
+
+    .badge-result {
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: .04em
+    }
+
+    /* Transisi mulus buat Sidebar dan Konten */
+    .spe-sidebar {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 260px;
+      /* Lebar default */
+      overflow: hidden;
+      /* Biar teks gak mbleber pas mengecil */
+    }
+
+    .spe-wrapper {
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-left: 260px;
+      /* Jarak awal ngikutin lebar sidebar */
+    }
+
+    /* KELAS AJAIB BUAT MODE MINIMIZE */
+    .spe-sidebar.minimized {
+      width: 80px;
+      /* Lebar mengecil jadi segini doang */
+    }
+
+    /* Pas di-minimize, sembunyiin logo teks, teks menu, dan label footer */
+    .spe-sidebar.minimized .spe-sidebar-logo-title,
+    .spe-sidebar.minimized .spe-sidebar-logo-sub,
+    .spe-sidebar.minimized .spe-nav-section,
+    .spe-sidebar.minimized .spe-nav-item span:not(.material-symbols-outlined) {
+      display: none;
+    }
+
+    /* Pas di-minimize, ikon ditengahin */
+    .spe-sidebar.minimized .spe-nav-item {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .spe-sidebar.minimized .spe-sidebar-logo {
+      justify-content: center;
+    }
+
+    /* Margin konten utama ngikutin sidebar yang mengecil */
+    .spe-wrapper.expanded {
+      margin-left: 80px;
+    }
+  </style>
 </head>
 
 <body style="background:#f0f2f5">
-<nav class="spe-sidebar">
-  <div class="spe-sidebar-logo">
-    <div>
-      <div class="spe-sidebar-logo-title">SPE Portal</div>
-      <div class="spe-sidebar-logo-sub">Chitose</div>
-    </div>
-  </div>
-  <div class="spe-sidebar-nav" id="nav-links">
-    <div class="spe-nav-section">Menu</div>
-    <a id="nav-dashboard" href="./dashboard.html" class="spe-nav-item ">
-      <span class="material-symbols-outlined">grid_view</span><span>Dashboard</span>
-    </a>
-    <a id="nav-input" href="./input.html" class="spe-nav-item active">
-      <span class="material-symbols-outlined">edit_square</span><span>Input Penilaian</span>
-    </a>
-    <a id="nav-daily" href="./input-daily.html" class="spe-nav-item ">
-      <span class="material-symbols-outlined">assignment_add</span><span>Input Daily QC</span>
-    </a>
-    <div class="spe-nav-section" style="margin-top:4px">Laporan</div>
-    <a id="nav-rekap" href="./master-rekap.html" class="spe-nav-item ">
-      <span class="material-symbols-outlined">bar_chart_4_bars</span><span>Master Rekap</span>
-    </a>
-    <a id="nav-vendor" href="./master-vendor.html" class="spe-nav-item ">
-      <span class="material-symbols-outlined">corporate_fare</span><span>Master Vendor</span>
-    </a>
-  </div>
-  <div class="spe-sidebar-footer">
-    <a href="#" class="spe-nav-item"><span class="material-symbols-outlined">help_outline</span><span>Support</span></a>
-    <a href="#" class="spe-nav-item"><span class="material-symbols-outlined">logout</span><span>Keluar</span></a>
-  </div>
-</nav>
-<div class="spe-wrapper">
-  <header class="spe-header">
-    <span class="spe-header-title">Input Penilaian Supplier</span>
-    <div class="spe-header-actions">
-      <span id="role-chip" class="spe-header-role" style="background:rgba(91,106,248,.1);color:#4338ca">GUEST</span>
-      <button class="spe-icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-      <button class="spe-icon-btn"><span class="material-symbols-outlined">settings</span></button>
-      <div class="spe-avatar"><img src="https://ui-avatars.com/api/?name=SPE&background=5b6af8&color=fff&size=64" alt=""/></div>
-    </div>
-  </header>
-<div class="spe-content">
-
-<main style="padding:28px 32px;max-width:1280px;margin:0 auto;width:100%">
+  <div id="sidebar-container"></div>
+  <div class="spe-wrapper">
+    <div id="navbar-container"></div>
+    <main style="padding:28px 32px;max-width:1280px;margin:0 auto;width:100%">
       <div class="mb-lg animate-fadeInUp">
-        <h1
-          style="font-size:22px;font-weight:750;letter-spacing:-.025em;color:#1e293b">
+        <h1 style="font-size:22px;font-weight:750;letter-spacing:-.025em;color:#1e293b">
           Penilaian Supplier</h1>
         <p style="font-size:13px;color:#64748b;margin-top:4px">Simulasi input form seluruh divisi untuk
           menguji logic penilaian Backend.</p>
@@ -84,18 +178,25 @@
         <div class="flex-1 relative">
           <label class="spe-label">Pilih Supplier</label>
           <div class="relative">
-            <input type="text" id="supplier-search-input" placeholder="Cari nama, kode, atau ID supplier (min. 2 huruf)..." class="spe-input" autocomplete="off" style="padding-right: 40px;">
-            <span class="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 pointer-events-none text-[20px]" id="supplier-search-icon">search</span>
-            <button type="button" id="btn-clear-supplier" class="absolute right-3 top-2.5 text-slate-400 hover:text-red-500 transition-colors hidden" style="background:none; border:none; outline:none; cursor:pointer;"><span class="material-symbols-outlined text-[20px]">close</span></button>
+            <input type="text" id="supplier-search-input"
+              placeholder="Cari nama, kode, atau ID supplier (min. 2 huruf)..." class="spe-input" autocomplete="off"
+              style="padding-right: 40px;">
+            <span
+              class="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 pointer-events-none text-[20px]"
+              id="supplier-search-icon">search</span>
+            <button type="button" id="btn-clear-supplier"
+              class="absolute right-3 top-2.5 text-slate-400 hover:text-red-500 transition-colors hidden"
+              style="background:none; border:none; outline:none; cursor:pointer;"><span
+                class="material-symbols-outlined text-[20px]">close</span></button>
           </div>
-          <ul id="supplier-search-results" class="absolute z-20 w-full bg-white border border-slate-200 rounded-lg mt-1 shadow-xl max-h-60 overflow-y-auto hidden">
+          <ul id="supplier-search-results"
+            class="absolute z-20 w-full bg-white border border-slate-200 rounded-lg mt-1 shadow-xl max-h-60 overflow-y-auto hidden">
           </ul>
         </div>
         <div class="w-64">
           <label class="spe-label">Periode
             Penilaian</label>
-          <select data-input="periode-select"
-            class="spe-select">
+          <select data-input="periode-select" class="spe-select">
           </select>
           <div id="periode-status-bar" class="mt-1.5 text-[11px] pl-1 h-4"><span class="text-gray-400">— Pilih supplier
               untuk melihat status</span></div>
@@ -104,8 +205,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mb-xl animate-fadeInUp" style="animation-delay: 200ms;">
 
-        <div
-          class="division-card">
+        <div class="division-card">
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-blue-100 text-blue-700 rounded-lg"><span
@@ -143,8 +243,7 @@
           </div>
         </div>
 
-        <div
-          class="division-card">
+        <div class="division-card">
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-amber-100 text-amber-700 rounded-lg"><span
@@ -201,8 +300,7 @@
               Menunggu File</div>
           </div>
         </div>
-        <div
-          class="division-card">
+        <div class="division-card">
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg"><span
@@ -213,8 +311,7 @@
           <div class="space-y-6 mb-4">
             <!-- 1. Harga -->
             <div>
-              <label
-                class="spe-label">Harga
+              <label class="spe-label">Harga
                 / Biaya</label>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label
@@ -249,8 +346,7 @@
 
             <!-- 2. MOQ -->
             <div>
-              <label
-                class="spe-label">Minimum
+              <label class="spe-label">Minimum
                 Order Quantity (MOQ)</label>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <label
@@ -283,8 +379,7 @@
 
             <!-- 4. Pelayanan -->
             <div>
-              <label
-                class="spe-label">Pelayanan</label>
+              <label class="spe-label">Pelayanan</label>
               <div class="flex flex-col gap-3">
                 <label
                   class="flex items-center gap-3 p-3 border border-surface-variant rounded-xl cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all">
@@ -337,8 +432,7 @@
           <div class="space-y-5 mb-4">
             <!-- 1. Uji Emisi -->
             <div>
-              <label
-                class="spe-label">Dokumen
+              <label class="spe-label">Dokumen
                 Uji Emisi Kendaraan</label>
               <div class="flex flex-col gap-3">
                 <label
@@ -364,8 +458,7 @@
             </div>
             <!-- 2. APD -->
             <div>
-              <label
-                class="spe-label">Kelengkapan
+              <label class="spe-label">Kelengkapan
                 APD Kurir</label>
               <div class="flex flex-col gap-3">
                 <label
@@ -398,8 +491,7 @@
         </div>
       </div>
 
-      <div
-        class="submit-bar sticky bottom-6 z-40">
+      <div class="submit-bar sticky bottom-6 z-40">
         <!-- Bagian Total Skor & Grade disembunyikan sementara sesuai permintaan -->
         <div
           class="hidden items-center gap-4 bg-surface-container-low px-6 py-3 rounded-lg border border-surface-variant mb-4 md:mb-0 justify-center">
@@ -410,12 +502,10 @@
           <span data-display="running-grade" class="font-headline-xl text-headline-xl text-primary">-</span>
         </div>
         <div class="flex gap-4 w-full md:w-auto">
-          <button data-button="save-draft"
-            class="btn btn-ghost">
+          <button data-button="save-draft" class="btn btn-ghost">
             Simpan Draft
           </button>
-          <button data-button="continue"
-            class="btn btn-primary">
+          <button data-button="continue" class="btn btn-primary">
             Submit ke Database
             <span class="material-symbols-outlined text-[18px]">send</span>
           </button>
@@ -503,97 +593,20 @@
   </div>
   <!-- ===== END MODAL ===== -->
 
-  </div>
+  </div> <!-- closes spe-wrapper -->
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="../js/api.js"></script>
   <script src="../js/input.js"></script>
 
-  <!-- ===== MODAL SUBMIT RESULT ===== -->
-  <div id="submit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
-    style="background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-fadeInUp overflow-hidden">
-
-      <!-- Header -->
-      <div id="modal-header" class="p-6 text-white"
-        style="background: linear-gradient(135deg, #434fc6 0%, #4f46e5 100%);">
-        <div class="flex items-center gap-4">
-          <div id="modal-icon-wrap"
-            class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
-            <span id="modal-icon" class="material-symbols-outlined text-[32px]"
-              style="font-variation-settings: 'FILL' 1;">task_alt</span>
-          </div>
-          <div>
-            <h2 id="modal-title" class="font-bold text-xl">Data Berhasil Dikirim</h2>
-            <p id="modal-subtitle" class="text-indigo-200 text-sm mt-0.5">Semua divisi tersimpan ke database</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Supplier Info -->
-      <div class="px-6 pt-5">
-        <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between">
-          <div>
-            <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Supplier Terdeteksi di
-              Excel</div>
-            <div id="modal-supplier-name" class="font-bold text-slate-800 text-sm">—</div>
-            <div id="modal-supplier-kode" class="text-xs text-slate-500 mt-0.5">—</div>
-          </div>
-          <div class="text-right">
-            <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Periode</div>
-            <div id="modal-periode" class="font-semibold text-slate-700 text-sm">—</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Score Breakdown -->
-      <div class="px-6 pt-4">
-        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2">Rincian Skor</div>
-        <div id="modal-breakdown" class="space-y-2">
-          <!-- Diisi oleh JS -->
-        </div>
-      </div>
-
-      <!-- Total Score (Disembunyikan sementara) -->
-      <div class="px-6 pt-4 hidden">
-        <div class="rounded-xl p-4 flex items-center justify-between"
-          style="background: linear-gradient(135deg, #434fc6 0%, #4f46e5 100%);">
-          <div>
-            <div class="text-indigo-200 text-xs font-semibold uppercase tracking-wide">Total Skor</div>
-            <div id="modal-total" class="text-white text-3xl font-black mt-0.5">—</div>
-          </div>
-          <div class="text-right">
-            <div class="text-indigo-200 text-xs font-semibold uppercase tracking-wide mb-1">Grade</div>
-            <div id="modal-grade-badge" class="text-2xl font-black text-white bg-white/20 rounded-xl px-4 py-1">—</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="px-6 py-5 flex gap-3">
-        <button onclick="closeSubmitModal()"
-          class="flex-1 py-3 border-2 border-slate-200 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 transition-colors text-sm">
-          Tutup
-        </button>
-        <button onclick="closeSubmitModal()"
-          class="flex-1 py-3 rounded-xl text-white font-semibold text-sm hover:shadow-lg hover:scale-105 transition-all"
-          style="background: linear-gradient(135deg, #434fc6 0%, #4f46e5 100%);">
-          OK, Mengerti ✓
-        </button>
-      </div>
-    </div>
-  </div>
-  <!-- ===== END MODAL ===== -->
-</div>
-</div>
-
-<script>
-(function(){
-  const role = getActiveRole();
-  const chip = document.getElementById('role-chip');
-  const s = {QC:['rgba(34,197,94,.1)','#16a34a'],PPIC:['rgba(245,158,11,.1)','#b45309'],PCH:['rgba(91,106,248,.1)','#4338ca'],HSE:['rgba(239,68,68,.1)','#dc2626']};
-  if (chip) {chip.textContent = role; if (s[role]) {chip.style.background = s[role][0]; chip.style.color = s[role][1];}}
-})();
-</script>
-
+  <script>
+    (function () {
+      const role = getActiveRole();
+      const chip = document.getElementById('role-chip');
+      const s = { QC: ['rgba(34,197,94,.1)', '#16a34a'], PPIC: ['rgba(245,158,11,.1)', '#b45309'], PCH: ['rgba(91,106,248,.1)', '#4338ca'], HSE: ['rgba(239,68,68,.1)', '#dc2626'] };
+      if (chip) { chip.textContent = role; if (s[role]) { chip.style.background = s[role][0]; chip.style.color = s[role][1]; } }
+    })();
+  </script>
 </body>
+
 </html>

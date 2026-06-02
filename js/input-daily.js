@@ -193,19 +193,39 @@ function setupMaterialAutocomplete() {
     if (query.length < 2) {
       wrapper.innerHTML = '';
       wrapper.classList.add('hidden');
+      setMaterialSearchIcon('search');
       return;
     }
 
     debounceTimer = setTimeout(async () => {
+      setMaterialSearchIcon('spinner'); // show spinner while fetching
       try {
         const materials = await searchSapMaterials(query);
         renderAutocomplete(materials);
       } catch (error) {
         console.error('Error autocomplete materials:', error);
-        wrapper.innerHTML = '<div class="p-3 text-red-500 text-xs">Gagal mencari material.</div>';
+        wrapper.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:#ef4444;text-align:center">Gagal mencari material.</div>';
+        wrapper.classList.remove('hidden');
+      } finally {
+        setMaterialSearchIcon('search'); // restore icon after done
       }
     }, 300);
   });
+
+  /** Toggle material search icon between 'search' and animated spinner */
+  function setMaterialSearchIcon(state) {
+    const icon = document.getElementById('material-search-icon');
+    if (!icon) return;
+    if (state === 'spinner') {
+      icon.textContent = 'autorenew';
+      icon.classList.add('icon-spinning');
+      icon.style.color = '#5b6af8';
+    } else {
+      icon.textContent = 'search';
+      icon.classList.remove('icon-spinning');
+      icon.style.color = '#94a3b8';
+    }
+  }
 
   // Hide dropdown when clicking outside
   document.addEventListener('click', (e) => {
@@ -366,11 +386,18 @@ function setupFormSubmit() {
       return;
     }
 
-    // Set button loading
+    // Set button loading — disable + spinner + grey state
     const btn = document.getElementById('btn-submit');
-    const originalText = btn.innerHTML;
+    const originalHTML = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[16px] inline-block align-middle">autorenew</span> Menyimpan...';
+    btn.style.background = '#64748b';
+    btn.style.boxShadow = 'none';
+    btn.style.transform = 'none';
+    btn.innerHTML = `
+      <span class="material-symbols-outlined icon-spinning" style="font-size:16px">autorenew</span>
+      Menyimpan...
+    `;
+    window._submitOriginalHTML = originalHTML;
 
     try {
       const payload = {
@@ -407,7 +434,9 @@ function setupFormSubmit() {
       showToast('Gagal menyimpan transaksi: ' + error.message, 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = originalText;
+      btn.style.background = '#212d95';
+      btn.style.boxShadow = '0 4px 12px rgba(91,106,248,.3)';
+      btn.innerHTML = window._submitOriginalHTML || '<span class="material-symbols-outlined" style="font-size:16px">save</span> Simpan Transaksi Harian';
     }
   });
 }

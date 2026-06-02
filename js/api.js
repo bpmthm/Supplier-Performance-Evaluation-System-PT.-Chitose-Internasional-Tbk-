@@ -1,15 +1,74 @@
-/**
- * API Configuration & Functions
- * Frontend API integration dengan backend CodeIgniter
- */
+// --- KONFIGURASI URL ---
+const PORTAL_CI3_URL = 'http://localhost:8080';
+const API_BASE_URL   = 'http://localhost:8082/api';
 
-const API_BASE_URL = 'http://localhost:8082/api';
+// Helper to remove a query parameter from the URL address bar cleanly
+function cleanUrlParameter(paramName) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete(paramName);
+  if (paramName === 'role') {
+    url.searchParams.delete('nik');
+  }
+  window.history.replaceState({}, document.title, url.pathname + url.search);
+}
+
+// --- SISTEM GATEKEEPER (PENAHAN AKSES) ---
+// Handles ?token= capture, ?role= → JWT exchange, and final redirect check
+function checkGatekeeper() {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // 1. Jika ada ?token= langsung dari portal CI3, simpan dan bersihkan URL
+    const tokenFromUrl = urlParams.get('token');
+    if (tokenFromUrl) {
+        localStorage.setItem('jwt_token', tokenFromUrl);
+        cleanUrlParameter('token');
+    }
+
+    // 2. Jika ada ?role= (legacy flow dari portal), tukar ke JWT dulu
+    const roleParam = urlParams.get('role');
+    if (roleParam && !tokenFromUrl) {
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `${API_BASE_URL}/auth/generate-token?role=${roleParam}`, false);
+            xhr.send();
+            if (xhr.status === 200) {
+                const res = JSON.parse(xhr.responseText);
+                if (res && res.token) {
+                    localStorage.setItem('jwt_token', res.token);
+                }
+            }
+        } catch (e) {
+            console.error('Failed to exchange role for JWT token:', e);
+        }
+        cleanUrlParameter('role');
+    }
+
+    // 3. Final check — tendang jika tetap tidak ada token atau token kadaluarsa
+    const currentToken = localStorage.getItem('jwt_token');
+    let isTokenValid = false;
+    if (currentToken) {
+        const decoded = parseJwt(currentToken);
+        if (decoded && decoded.exp && (decoded.exp * 1000 > Date.now())) {
+            isTokenValid = true;
+        } else {
+            localStorage.removeItem('jwt_token');
+        }
+    }
+
+    if (!isTokenValid) {
+        console.warn("Akses ditolak: Autentikasi tidak valid atau expired. Mengalihkan ke Portal Utama...");
+        window.location.href = PORTAL_CI3_URL;
+    }
+}
+
+// Jalankan gatekeeper secara otomatis saat file dimuat
+checkGatekeeper();
 
 // ==========================================
 // SECURITY CORE: JWT & AUTHENTICATION LAYER
 // ==========================================
 
-// Parse base64url encoded token locally in the browser [ignoring loop detection]
+// Parse base64url encoded JWT token payload
 function parseJwt(token) {
   try {
     const base64Url = token.split('.')[1];
@@ -33,43 +92,6 @@ function getActiveRole() {
     }
   }
   return 'GUEST';
-}
-
-// Synchronous-like IIFE to perform token exchanges during initial file parse
-(function initializeSessionSecurity() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tokenParam = urlParams.get('token');
-  const roleParam = urlParams.get('role');
-
-  if (tokenParam) {
-    localStorage.setItem('jwt_token', tokenParam);
-    cleanUrlParameter('token');
-  } else if (roleParam) {
-    try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', `${API_BASE_URL}/auth/generate-token?role=${roleParam}`, false); // Synchronous GET
-      xhr.send();
-      if (xhr.status === 200) {
-        const res = JSON.parse(xhr.responseText);
-        if (res && res.token) {
-          localStorage.setItem('jwt_token', res.token);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to auto-exchange role parameter for JWT token:', e);
-    }
-    cleanUrlParameter('role');
-  }
-})();
-
-// Helper to remove a query parameter from the URL address bar cleanly
-function cleanUrlParameter(paramName) {
-  const url = new URL(window.location.href);
-  url.searchParams.delete(paramName);
-  if (paramName === 'role') {
-    url.searchParams.delete('nik');
-  }
-  window.history.replaceState({}, document.title, url.pathname + url.search);
 }
 
 // Transparently intercept window.fetch to inject Authorization Bearer headers
@@ -392,3 +414,164 @@ async function searchSapMaterials(query) {
     return [];
   }
 }
+
+// --- FUNGSI LOGOUT GLOBAL ---
+function logout() {
+    const performLogout = () => {
+        // Hapus token dari penyimpanan lokal
+        localStorage.removeItem('jwt_token');
+        
+        // Tendang balik ke Portal Utama CI3
+        window.location.href = PORTAL_CI3_URL;
+    };
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Keluar dari Portal?',
+            text: "Sesi Anda akan diakhiri.",
+            icon: 'warning',
+            showCancelButton: true,
+            // 1. Matiin styling bawaan Swal! Ini kuncinya
+            buttonsStyling: false, 
+            
+            // 2. Suntik class Tailwind ke elemen-elemen Swal
+            customClass: {
+                popup: 'rounded-2xl shadow-xl border border-gray-100 bg-white p-6', // Bikin kotak lebih smooth
+                title: 'text-xl font-semibold text-gray-800 mt-2',
+                htmlContainer: 'text-sm text-gray-500 mt-1',
+                actions: 'flex gap-3 mt-6 w-full justify-center', // Jarak antar tombol
+                
+                // Desain tombol Batal (Minimalis abu-abu)
+                cancelButton: 'px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200',
+                
+                // Desain tombol Keluar (Merah solid tapi elegan)
+                confirmButton: 'px-5 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200'
+            },
+            
+            // 3. Animasi muncul yang lebih asik (opsional, manfaatin class bawaan Animate.css atau Tailwind lo)
+            showClass: {
+                popup: 'animate__animated animate__fadeInUp animate__faster' // Kalau lo pake Animate.css
+                // atau pake class Tailwind lo: 'animate-fadeInUp'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutDown animate__faster'
+            },
+            
+            confirmButtonText: 'Ya, Keluar!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                performLogout();
+            }
+        });
+    } else {
+        if (confirm('Keluar dari Portal? Sesi Anda akan diakhiri.')) {
+            performLogout();
+        }
+    }
+}
+
+// Automatically attach logout click handler using event delegation
+document.addEventListener('click', (e) => {
+    const logoutBtn = e.target.closest('#btn-logout');
+    if (logoutBtn) {
+        e.preventDefault();
+        logout();
+    }
+});
+
+// ==========================================
+// MODULAR UI LOADER (SIDEBAR & NAVBAR)
+// ==========================================
+
+// --- MESIN PEMANGGIL SIDEBAR ---
+async function loadSidebar() {
+    const container = document.getElementById('sidebar-container');
+    if (!container) return; 
+
+    try {
+        // Path pake ../ biar keluar dulu dari folder js/ atau pages/
+        const response = await fetch('../components/sidebar.html');
+        container.innerHTML = await response.text();
+
+        // Otomatis nyalain class "active" sesuai halaman
+        const currentPage = window.location.pathname.split("/").pop();
+        const navLinks = container.querySelectorAll('.spe-nav-item');
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active'); 
+            const href = link.getAttribute('href');
+            if (href && href.includes(currentPage)) {
+                link.classList.add('active');
+            }
+        });
+
+    } catch (error) {
+        console.error('Gagal memuat sidebar:', error);
+    }
+}
+
+// --- MESIN PEMANGGIL NAVBAR ---
+async function loadNavbar() {
+    const container = document.getElementById('navbar-container');
+    if (!container) return;
+
+    try {
+        const response = await fetch('../components/navbar.html');
+        container.innerHTML = await response.text();
+
+        // Otomatis ubah Judul Header sesuai halaman
+        const pageTitle = document.getElementById('header-title');
+        const path = window.location.pathname;
+        
+        if (path.includes('dashboard')) pageTitle.innerText = 'Dashboard';
+        else if (path.includes('input-daily')) pageTitle.innerText = 'Input Daily QC';
+        else if (path.includes('input')) pageTitle.innerText = 'Input Penilaian';
+        else if (path.includes('master-rekap')) pageTitle.innerText = 'Master Rekap';
+        else if (path.includes('master-vendor')) pageTitle.innerText = 'Master Vendor';
+        else if (path.includes('riwayat-input')) pageTitle.innerText = 'Riwayat Input';
+
+        // Panggil ulang fungsi nampilin Role biar chip "Memuat..." berubah
+        if (typeof getActiveRole === 'function') {
+            const roleChip = document.getElementById('role-chip');
+            if (roleChip) {
+                const role = getActiveRole();
+                roleChip.innerText = role;
+                
+                // Styling warna chip sesuai role
+                const roleStyle = {
+                    QC: ['rgba(34,197,94,.1)', '#16a34a'],
+                    PPIC: ['rgba(245,158,11,.1)', '#b45309'],
+                    PCH: ['rgba(91,106,248,.1)', '#4338ca'],
+                    HSE: ['rgba(239,68,68,.1)', '#dc2626']
+                };
+                if (roleStyle[role]) {
+                    roleChip.style.background = roleStyle[role][0];
+                    roleChip.style.color = roleStyle[role][1];
+                }
+            }
+        }
+        // --- LOGIC TOGGLE SIDEBAR ---
+        const btnToggle = document.getElementById('btn-toggle-sidebar');
+        if (btnToggle) {
+            btnToggle.addEventListener('click', () => {
+                const sidebar = document.querySelector('.spe-sidebar');
+                const wrapper = document.querySelector('.spe-wrapper');
+                
+                if (sidebar && wrapper) {
+                    sidebar.classList.toggle('minimized');
+                    wrapper.classList.toggle('expanded');
+                }
+            });
+        }
+
+    } catch (error) {
+        console.error('Gagal memuat navbar:', error);
+    }
+}
+
+// --- JALANKAN MESIN SAAT HALAMAN DIBUKA ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadSidebar();
+    loadNavbar();
+});

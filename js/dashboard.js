@@ -42,10 +42,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateCriticalAlerts(heatmap);
       updateRadarFromHeatmap(heatmap);
     } else {
-      // Handle jika heatmap kosong
+      // Handle jika heatmap kosong — update SEMUA section
       updateKPICards({ total_suppliers: 0, grade_a: 0, grade_c: 0, pending_input: 0 }, role);
-      const container = document.getElementById('top-chart');
-      if (container) container.innerHTML = '<div style="text-align:center;padding:24px 0;color:#94a3b8;font-size:13px">Belum ada data periode ini</div>';
+
+      const topChart = document.getElementById('top-chart');
+      if (topChart) topChart.innerHTML = '<div style="text-align:center;padding:24px 0;color:#94a3b8;font-size:13px">Belum ada data periode ini</div>';
+
+      const divisiChart = document.getElementById('divisi-chart');
+      if (divisiChart) divisiChart.innerHTML = '<div style="text-align:center;padding:24px 0;color:#94a3b8;font-size:13px"><span class="material-symbols-outlined" style="font-size:28px;display:block;margin-bottom:6px">analytics</span>Belum ada data penilaian untuk periode ini</div>';
+
+      // Update alert ticker to neutral state
+      updateCriticalAlerts([]);
     }
 
   } catch (err) {

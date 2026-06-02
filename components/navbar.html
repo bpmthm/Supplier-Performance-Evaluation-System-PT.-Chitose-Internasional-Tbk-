@@ -1,0 +1,24 @@
+<header class="spe-header flex justify-between items-center px-6 py-4 bg-white shadow-sm border-b border-gray-100">
+  <div class="flex items-center gap-4">
+    <button id="btn-toggle-sidebar" class="spe-icon-btn hover:bg-gray-100 rounded-lg p-2 transition-colors">
+      <span class="material-symbols-outlined text-gray-600">menu</span>
+    </button>
+    <span class="spe-header-title text-xl font-semibold text-gray-800" id="header-title">Portal SPE</span>
+  </div>
+  
+  <div class="spe-header-actions flex items-center gap-3">
+    <span id="role-chip" class="spe-header-role hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-semibold" style="background:rgba(91,106,248,.1);color:#4338ca">Memuat...</span>
+    
+    <button class="spe-icon-btn hover:bg-gray-100 rounded-full p-2"><span class="material-symbols-outlined text-gray-600">notifications</span></button>
+    <button class="spe-icon-btn hover:bg-gray-100 rounded-full p-2 hidden sm:block"><span class="material-symbols-outlined text-gray-600">settings</span></button>
+    
+    <div class="spe-avatar w-10 h-10 rounded-full overflow-hidden border-2 border-indigo-100">
+      <img src="https://ui-avatars.com/api/?name=SPE&background=5b6af8&color=fff&size=64" alt="" class="w-full h-full object-cover"/>
+    </div>
+  </div>
+</header>
+
+<div id="role-banner" class="role-banner mx-6 my-4 p-4 rounded-xl flex items-center gap-3" style="display:none;">
+  <span class="material-symbols-outlined sym-sm flex-shrink-0">person</span>
+  <span id="role-banner-text" class="text-sm font-medium">—</span>
+</div>
