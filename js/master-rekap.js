@@ -227,12 +227,12 @@ function setupTabs() {
 
   if (!tabMonthly) return;
 
-  const CLS_ACTIVE = 'flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2';
-  const CLS_INACTIVE = 'flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2';
+  const CLS_ACTIVE = 'spe-tab active';
+  const CLS_INACTIVE = 'spe-tab';
 
   const deactivateAll = () => {
     [tabMonthly, tabEvaluasi].forEach(t => { if (t) t.className = CLS_INACTIVE; });
-    [filterMonthly, filterEvaluasi].forEach(f => { if (f) f.classList.add('hidden'); });
+    [filterMonthly, filterEvaluasi].forEach(f => { if (f) f.style.display = 'none'; });
     [tableMonthly, tableEvaluasi].forEach(t => { if (t) t.classList.add('hidden'); });
   };
 
@@ -240,7 +240,7 @@ function setupTabs() {
     currentMode = 'monthly';
     deactivateAll();
     tabMonthly.className = CLS_ACTIVE;
-    if (filterMonthly) filterMonthly.classList.remove('hidden');
+    if (filterMonthly) filterMonthly.style.display = 'flex';
     if (tableMonthly) tableMonthly.classList.remove('hidden');
     loadHeatmapData();
   });
@@ -250,7 +250,7 @@ function setupTabs() {
       currentMode = 'evaluasi';
       deactivateAll();
       tabEvaluasi.className = CLS_ACTIVE;
-      if (filterEvaluasi) filterEvaluasi.classList.remove('hidden');
+      if (filterEvaluasi) filterEvaluasi.style.display = 'flex';
       if (tableEvaluasi) tableEvaluasi.classList.remove('hidden');
     });
   }
@@ -486,7 +486,7 @@ function renderComparisonTable(dataA, dataB, pAwal, pAkhir) {
       `;
     }
 
-    const rowClass = 'hover:bg-slate-50 transition-colors cursor-pointer group border-l-4 border-l-slate-300';
+    const rowClass = 'cursor-pointer';
 
     tbody.insertAdjacentHTML('beforeend', `
       <tr data-kode="${v.kode}" class="${rowClass}">
@@ -751,9 +751,9 @@ function renderTable(data) {
 
   if (!data || data.length === 0) {
     tbody.innerHTML = `
-      <tr><td colspan="8" class="px-sm py-10 text-center text-on-surface-variant">
-        <span class="material-symbols-outlined" style="font-size:36px;">inbox</span><br>
-        Belum ada data penilaian untuk periode ini.
+      <tr><td colspan="9" class="px-6 py-12 text-center text-slate-400">
+        <span class="material-symbols-outlined text-[36px] mb-2 text-slate-300">inbox</span><br>
+        <span class="text-sm font-semibold">Belum ada data penilaian untuk periode ini.</span>
       </td></tr>`;
     if (count) count.textContent = 'Tidak ada data untuk periode ini.';
     return;
@@ -762,59 +762,66 @@ function renderTable(data) {
   tbody.innerHTML = '';
   data.forEach(item => {
     // Warna Background berdasarkan SKOR POIN
-    const getBgColor = (score, type) => {
+    const getCellClass = (score, type) => {
       score = parseFloat(score);
       if (type === 'qc' || type === 'ppic') {
-        if (score >= 30) return 'bg-green-100';
-        if (score >= 15) return 'bg-yellow-100';
-        return 'bg-red-100';
+        if (score >= 30) return 'heatmap-cell-good';
+        if (score >= 15) return 'heatmap-cell-fair';
+        return 'heatmap-cell-poor';
       }
       if (type === 'pch') {
-        if (score >= 25) return 'bg-green-100';
-        if (score >= 15) return 'bg-yellow-100';
-        return 'bg-red-100';
+        if (score >= 25) return 'heatmap-cell-good';
+        if (score >= 15) return 'heatmap-cell-fair';
+        return 'heatmap-cell-poor';
       }
       if (type === 'hse') {
-        if (score >= 10) return 'bg-green-100';
-        if (score >= 6) return 'bg-yellow-100';
-        return 'bg-red-100';
+        if (score >= 10) return 'heatmap-cell-good';
+        if (score >= 6) return 'heatmap-cell-fair';
+        return 'heatmap-cell-poor';
       }
       return '';
     };
 
-    const qcBg = getBgColor(item.qc_score ?? 0, 'qc');
-    const ppicBg = getBgColor(item.ppic_score ?? 0, 'ppic');
-    const pchBg = getBgColor(item.pch_score ?? 0, 'pch');
-    const hseBg = getBgColor(item.hse_score ?? 0, 'hse');
+    const qcBg = getCellClass(item.qc_score ?? 0, 'qc');
+    const ppicBg = getCellClass(item.ppic_score ?? 0, 'ppic');
+    const pchBg = getCellClass(item.pch_score ?? 0, 'pch');
+    const hseBg = getCellClass(item.hse_score ?? 0, 'hse');
 
     // Format Teks
-    const qcText = item.qc_ng_percent !== null ? `${parseFloat(item.qc_ng_percent).toFixed(2)}% (${item.qc_score ?? 0} Poin)` : '-';
-    const ppicText = item.ppic_ot_percent !== null ? `${parseFloat(item.ppic_ot_percent).toFixed(2)}% (${item.ppic_score ?? 0} Poin)` : '-';
-    const pchText = `${item.pch_score ?? 0} Poin`;
-    const hseText = `${item.hse_score ?? 0} Poin`;
+    const qcText = item.qc_ng_percent !== null ? `${parseFloat(item.qc_ng_percent).toFixed(2)}% (${item.qc_score ?? 0} Pts)` : '-';
+    const ppicText = item.ppic_ot_percent !== null ? `${parseFloat(item.ppic_ot_percent).toFixed(2)}% (${item.ppic_score ?? 0} Pts)` : '-';
+    const pchText = `${item.pch_score ?? 0} Pts`;
+    const hseText = `${item.hse_score ?? 0} Pts`;
 
     // Total dan Grade
     const totalColor = getScoreColor(item.total_score ?? 0, 100);
     let gradeBadge = '-';
-    if (item.grade === 'A') gradeBadge = `<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-md border border-green-200">A</span>`;
-    else if (item.grade === 'B') gradeBadge = `<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-md border border-yellow-200">B</span>`;
-    else if (item.grade === 'C') gradeBadge = `<span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-md border border-red-200">C</span>`;
+    if (item.grade === 'A') gradeBadge = `<span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-black rounded-lg border border-green-200/60">Grade A</span>`;
+    else if (item.grade === 'B') gradeBadge = `<span class="px-2.5 py-1 bg-yellow-50 text-yellow-700 text-xs font-black rounded-lg border border-yellow-200/60">Grade B</span>`;
+    else if (item.grade === 'C') gradeBadge = `<span class="px-2.5 py-1 bg-red-50 text-red-750 text-xs font-black rounded-lg border border-red-200/60">Grade C</span>`;
 
-    const rowClass = 'hover:bg-slate-50 transition-colors cursor-pointer group border-l-4 border-l-slate-300';
+    const rowClass = 'cursor-pointer';
 
     tbody.insertAdjacentHTML('beforeend', `
       <tr data-row-id="${item.id}" class="${rowClass}">
-        <td class="px-sm py-4 text-center">
-          <span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">zoom_in</span>
+        <td class="px-6 py-4 text-center">
+          <span class="material-symbols-outlined text-slate-300 group-hover:text-indigo-600 transition-colors">zoom_in</span>
         </td>
-        <td class="px-sm py-4 font-semibold">${item.nama_vendor ?? '-'}</td>
-        <td class="px-sm py-4 text-on-surface-variant text-sm">${item.jenis_bahan ?? '-'}</td>
-        <td class="px-sm py-4 text-center font-bold ${qcBg}">${qcText}</td>
-        <td class="px-sm py-4 text-center font-bold ${ppicBg}">${ppicText}</td>
-        <td class="px-sm py-4 text-center font-bold ${pchBg}">${pchText}</td>
-        <td class="px-sm py-4 text-center font-bold ${hseBg}">${hseText}</td>
-        <td class="px-sm py-4 text-center font-bold text-lg" style="color: ${totalColor}">${item.total_score ?? '-'}</td>
-        <td class="px-sm py-4 text-center">${gradeBadge}</td>
+        <td class="px-6 py-4">
+          <div class="font-bold text-slate-800 text-sm">${item.nama_vendor ?? '-'}</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Kode: ${item.kode_vendor ?? '-'}</div>
+        </td>
+        <td class="px-6 py-4 text-slate-500 text-sm">${item.jenis_bahan ?? '-'}</td>
+        <td class="px-6 py-4 text-center ${qcBg}">${qcText}</td>
+        <td class="px-6 py-4 text-center ${ppicBg}">${ppicText}</td>
+        <td class="px-6 py-4 text-center ${pchBg}">${pchText}</td>
+        <td class="px-6 py-4 text-center ${hseBg}">${hseText}</td>
+        <td class="px-6 py-4 text-center">
+          <span class="inline-block px-2.5 py-1 text-sm font-black rounded-lg" style="background-color: ${totalColor}15; color: ${totalColor}">
+            ${item.total_score ?? '-'}
+          </span>
+        </td>
+        <td class="px-6 py-4 text-center">${gradeBadge}</td>
       </tr>`);
   });
 
@@ -822,7 +829,7 @@ function renderTable(data) {
 }
 
 function getRowClass(grade) {
-  return 'hover:bg-slate-50 transition-colors cursor-pointer group border-l-4 border-l-slate-300';
+  return 'cursor-pointer';
 }
 
 function getScoreColor(value, max) {
@@ -856,10 +863,10 @@ function openSingleDetailModal(item) {
 
   // Convert ENUM PCH/HSE ke Teks Indah
   const formatEnum = (val) => {
-    if (!val) return '<span class="text-slate-400 font-medium">N/A</span>';
-    if (val === 'BAIK') return '<span class="px-2 py-0.5 bg-green-50 text-green-700 font-bold text-xs rounded border border-green-200">BAIK</span>';
-    if (val === 'CUKUP') return '<span class="px-2 py-0.5 bg-yellow-50 text-yellow-700 font-bold text-xs rounded border border-yellow-200">CUKUP</span>';
-    return '<span class="px-2 py-0.5 bg-red-50 text-red-700 font-bold text-xs rounded border border-red-200">KURANG</span>';
+    if (!val) return '<span class="px-2 py-0.5 bg-slate-50 text-slate-400 font-semibold text-xs rounded-lg border border-slate-200/50">N/A</span>';
+    if (val === 'BAIK') return '<span class="px-2.5 py-0.5 bg-green-50 text-green-700 font-bold text-xs rounded-lg border border-green-200/50">BAIK</span>';
+    if (val === 'CUKUP') return '<span class="px-2.5 py-0.5 bg-yellow-50 text-yellow-750 font-bold text-xs rounded-lg border border-yellow-200/50">CUKUP</span>';
+    return '<span class="px-2.5 py-0.5 bg-red-50 text-red-700 font-bold text-xs rounded-lg border border-red-200/50">KURANG</span>';
   };
 
   const modalHtml = `
@@ -1439,9 +1446,9 @@ function renderEvaluasiTable(dataArr, pAwal, pAkhir) {
   const active = dataArr.filter(d => d.status === 'success' && d.rata_rata);
 
   if (!active.length) {
-    tbody.innerHTML = `<tr><td colspan="10" class="px-sm py-10 text-center text-on-surface-variant">
-      <span class="material-symbols-outlined" style="font-size:36px">inbox</span><br>
-      Tidak ada data dalam rentang periode ini.
+    tbody.innerHTML = `<tr><td colspan="10" class="px-6 py-12 text-center text-slate-400">
+      <span class="material-symbols-outlined text-[36px] mb-2 text-slate-300">inbox</span><br>
+      <span class="text-sm font-semibold">Tidak ada data dalam rentang periode ini.</span>
     </td></tr>`;
     if (count) count.textContent = 'Tidak ada data untuk evaluasi berkala.';
     return;
@@ -1449,9 +1456,9 @@ function renderEvaluasiTable(dataArr, pAwal, pAkhir) {
 
   const fmt = (v, dec = 1) => (v !== null && v !== undefined) ? parseFloat(v).toFixed(dec) : '-';
   const gradeBadge = (g) => {
-    if (g === 'A') return `<span class="px-2 py-0.5 bg-green-100 text-green-800 text-[11px] font-bold rounded border border-green-200">A</span>`;
-    if (g === 'B') return `<span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[11px] font-bold rounded border border-yellow-200">B</span>`;
-    return `<span class="px-2 py-0.5 bg-red-100 text-red-800 text-[11px] font-bold rounded border border-red-200">C</span>`;
+    if (g === 'A') return `<span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-black rounded-lg border border-green-200/60">Grade A</span>`;
+    if (g === 'B') return `<span class="px-2.5 py-1 bg-yellow-50 text-yellow-700 text-xs font-black rounded-lg border border-yellow-200/60">Grade B</span>`;
+    return `<span class="px-2.5 py-1 bg-red-50 text-red-750 text-xs font-black rounded-lg border border-red-200/60">Grade C</span>`;
   };
 
   tbody.innerHTML = '';
@@ -1461,27 +1468,31 @@ function renderEvaluasiTable(dataArr, pAwal, pAkhir) {
     const totalColor = avgTotal >= 90 ? '#22c55e' : avgTotal >= 70 ? '#f59e0b' : '#ef4444';
 
     tbody.insertAdjacentHTML('beforeend', `
-      <tr class="hover:bg-violet-50/40 transition-colors group border-l-4 border-l-violet-400">
-        <td class="px-sm py-4 text-center">
-          <span class="material-symbols-outlined text-violet-300 group-hover:text-violet-600 transition-colors">event_repeat</span>
+      <tr class="cursor-pointer">
+        <td class="px-6 py-4 text-center">
+          <span class="material-symbols-outlined text-slate-300 group-hover:text-violet-650 transition-colors">event_repeat</span>
         </td>
-        <td class="px-sm py-4">
-          <div class="font-bold text-slate-800">${d.nama_vendor ?? '-'}</div>
-          <div class="text-[11px] text-slate-400">Kode: ${d.kode_vendor}</div>
+        <td class="px-6 py-4">
+          <div class="font-bold text-slate-800 text-sm">${d.nama_vendor ?? '-'}</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Kode: ${d.kode_vendor}</div>
         </td>
-        <td class="px-sm py-4 text-on-surface-variant text-sm">${d.jenis_bahan ?? '-'}</td>
-        <td class="px-sm py-4 text-center font-semibold">${fmt(r.avg_qc_score)} Pts</td>
-        <td class="px-sm py-4 text-center font-semibold">${fmt(r.avg_ppic_score)} Pts</td>
-        <td class="px-sm py-4 text-center font-semibold">${fmt(r.avg_pch_score)} Pts</td>
-        <td class="px-sm py-4 text-center font-semibold">${fmt(r.avg_hse_score)} Pts</td>
-        <td class="px-sm py-4 text-center font-bold text-lg" style="color:${totalColor}">${fmt(r.avg_total_score)}</td>
-        <td class="px-sm py-4 text-center">${gradeBadge(r.avg_grade)}</td>
-        <td class="px-sm py-4 text-center">
+        <td class="px-6 py-4 text-slate-500 text-sm">${d.jenis_bahan ?? '-'}</td>
+        <td class="px-6 py-4 text-center font-semibold text-slate-700 text-sm">${fmt(r.avg_qc_score)} Pts</td>
+        <td class="px-6 py-4 text-center font-semibold text-slate-700 text-sm">${fmt(r.avg_ppic_score)} Pts</td>
+        <td class="px-6 py-4 text-center font-semibold text-slate-700 text-sm">${fmt(r.avg_pch_score)} Pts</td>
+        <td class="px-6 py-4 text-center font-semibold text-slate-700 text-sm">${fmt(r.avg_hse_score)} Pts</td>
+        <td class="px-6 py-4 text-center">
+          <span class="inline-block px-2.5 py-1 text-sm font-black rounded-lg" style="background-color: ${totalColor}15; color: ${totalColor}">
+            ${fmt(r.avg_total_score)}
+          </span>
+        </td>
+        <td class="px-6 py-4 text-center">${gradeBadge(r.avg_grade)}</td>
+        <td class="px-6 py-4 text-center">
           <button
             onclick="openEvaluasiDetailModal('${d.kode_vendor}','${pAwal}','${pAkhir}')"
-            class="inline-flex items-center gap-1 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm active:scale-95">
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-bold rounded-lg border border-violet-200/60 transition-all duration-200 shadow-sm active:scale-95">
             <span class="material-symbols-outlined text-[14px]">open_in_new</span>
-            Lihat Selengkapnya
+            <span>Lihat Detail</span>
           </button>
         </td>
       </tr>`);
@@ -1544,17 +1555,19 @@ async function openEvaluasiDetailModal(kodeVendor, pAwal, pAkhir) {
     if (titleEl) titleEl.textContent = `Data Aktual: ${res.nama_vendor ?? kodeVendor}`;
 
     const fmt = (v, dec = 2) => (v !== null && v !== undefined) ? parseFloat(v).toFixed(dec) : '-';
-    const enumBadge = (val) => {
-      if (!val) return '<span class="text-slate-300">—</span>';
+    const enumBadge = (val, label = '') => {
+      if (!val) return '<span class="text-slate-350">—</span>';
+      const initial = val.charAt(0); // 'B', 'C', or 'K'
       const cls = val === 'BAIK' ? 'bg-green-50 text-green-700 border-green-200'
-        : val === 'CUKUP' ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-          : 'bg-red-50 text-red-700 border-red-200';
-      return `<span class="px-1.5 py-0.5 text-[10px] font-bold rounded border ${cls}">${val}</span>`;
+        : val === 'CUKUP' ? 'bg-yellow-50 text-yellow-750 border-yellow-200'
+          : 'bg-red-50 text-red-750 border-red-200';
+      const fullLabel = label ? `${label}: ${val}` : val;
+      return `<span class="w-5 h-5 flex items-center justify-center text-[10px] font-black rounded-full border shadow-sm cursor-help ${cls}" title="${fullLabel}">${initial}</span>`;
     };
     const gradeBadge = (g) => {
-      if (g === 'A') return `<span class="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-extrabold rounded-md border border-green-200">A</span>`;
-      if (g === 'B') return `<span class="px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-extrabold rounded-md border border-yellow-200">B</span>`;
-      return `<span class="px-2.5 py-1 bg-red-100 text-red-800 text-xs font-extrabold rounded-md border border-red-200">C</span>`;
+      if (g === 'A') return `<span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-black rounded-lg border border-green-200/60">Grade A</span>`;
+      if (g === 'B') return `<span class="px-2.5 py-1 bg-yellow-50 text-yellow-700 text-xs font-black rounded-lg border border-yellow-200/60">Grade B</span>`;
+      return `<span class="px-2.5 py-1 bg-red-50 text-red-750 text-xs font-black rounded-lg border border-red-200/60">Grade C</span>`;
     };
 
     // Baris data aktual
@@ -1572,31 +1585,35 @@ async function openEvaluasiDetailModal(kodeVendor, pAwal, pAkhir) {
         const qtyReject = row.qc_qty_reject ?? 0;
 
         rowsHtml += `
-          <tr class="hover:bg-violet-50/30 transition-colors border-b border-slate-100">
-            <td class="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap">${formatPeriode(row.periode)}</td>
+          <tr class="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
+            <td class="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap text-xs">${formatPeriode(row.periode)}</td>
             <td class="px-4 py-3 text-center">
-              <div class="font-bold text-slate-800">${fmt(row.qc_ng_percent)}%</div>
+              <div class="font-bold text-slate-800 text-sm">${fmt(row.qc_ng_percent)}%</div>
               <div class="text-[10px] text-slate-500 leading-tight mt-1">Terima: ${qtyTerima} <br> Reject: ${qtyReject}</div>
-              <div class="text-[11px] font-bold text-violet-600 mt-1 bg-violet-50 rounded-md inline-block px-2 py-0.5">${row.qc_score ?? 0} Pts</div>
+              <div class="text-[10px] font-bold text-violet-700 mt-1.5 bg-violet-100/65 rounded-md inline-block px-2 py-0.5 border border-violet-200/40">${row.qc_score ?? 0} Pts</div>
             </td>
             <td class="px-4 py-3 text-center">
-              <div class="font-bold text-slate-800">${fmt(row.ppic_ot_percent)}%</div>
+              <div class="font-bold text-slate-800 text-sm">${fmt(row.ppic_ot_percent)}%</div>
               <div class="text-[10px] text-slate-500 leading-tight mt-1">Ketepatan <br> Pengiriman</div>
-              <div class="text-[11px] font-bold text-violet-600 mt-1 bg-violet-50 rounded-md inline-block px-2 py-0.5">${row.ppic_score ?? 0} Pts</div>
+              <div class="text-[10px] font-bold text-violet-700 mt-1.5 bg-violet-100/65 rounded-md inline-block px-2 py-0.5 border border-violet-200/40">${row.ppic_score ?? 0} Pts</div>
             </td>
             <td class="px-4 py-3 text-center">
               <div class="text-[12px] font-bold text-slate-800">${row.pch_score ?? 0} Pts</div>
-              <div class="flex flex-wrap justify-center gap-1 mt-1.5">
-                ${enumBadge(row.pch_harga)}${enumBadge(row.pch_moq)}${enumBadge(row.pch_top)}${enumBadge(row.pch_pelayanan)}
+              <div class="flex justify-center gap-1 mt-1.5">
+                ${enumBadge(row.pch_harga, 'Harga')}${enumBadge(row.pch_moq, 'MOQ')}${enumBadge(row.pch_top, 'TOP')}${enumBadge(row.pch_pelayanan, 'Pelayanan')}
               </div>
             </td>
             <td class="px-4 py-3 text-center">
               <div class="text-[12px] font-bold text-slate-800">${row.hse_score ?? 0} Pts</div>
-              <div class="flex flex-wrap justify-center gap-1 mt-1.5">
-                ${enumBadge(row.hse_uji_emisi)}${enumBadge(row.hse_apd)}
+              <div class="flex justify-center gap-1 mt-1.5">
+                ${enumBadge(row.hse_uji_emisi, 'Uji Emisi')}${enumBadge(row.hse_apd, 'APD')}
               </div>
             </td>
-            <td class="px-4 py-3 text-center font-bold text-lg" style="color:${tc}">${row.total_score ?? '-'}</td>
+            <td class="px-4 py-3 text-center">
+              <span class="inline-block px-2.5 py-1 text-sm font-black rounded-lg" style="background-color: ${tc}15; color: ${tc}">
+                ${row.total_score ?? '-'}
+              </span>
+            </td>
             <td class="px-4 py-3 text-center">${gradeBadge(row.grade)}</td>
           </tr>`;
       });
@@ -1613,27 +1630,31 @@ async function openEvaluasiDetailModal(kodeVendor, pAwal, pAkhir) {
       const sumReject = r.sum_qc_qty_reject ?? 0;
 
       footerHtml = `
-        <tr class="bg-violet-50 border-t-2 border-violet-300 sticky bottom-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-          <td class="px-4 py-4 text-violet-800 text-xs font-black uppercase tracking-wider whitespace-nowrap">
+        <tr class="bg-violet-50/70 border-t-2 border-violet-300 sticky bottom-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+          <td class="px-4 py-4 text-violet-850 text-xs font-black uppercase tracking-wider whitespace-nowrap">
             RATA-RATA <br><span class="text-[10px] font-semibold text-violet-600">(${r.jumlah_bulan} bln)</span>
           </td>
           <td class="px-4 py-4 text-center">
-            <div class="font-black text-violet-800">${fmt(r.avg_qc_ng_percent)}%</div>
-            <div class="text-[10px] text-violet-600 font-medium leading-tight mt-1">Tot. Terima: ${sumTerima} <br> Tot. Reject: ${sumReject}</div>
-            <div class="text-[11px] font-bold text-white bg-violet-600 rounded-md inline-block px-2 py-0.5 mt-1">${fmt(r.avg_qc_score, 1)} Pts</div>
+            <div class="font-black text-violet-850 text-sm">${fmt(r.avg_qc_ng_percent)}%</div>
+            <div class="text-[10px] text-violet-600 font-semibold leading-tight mt-1">Tot. Terima: ${sumTerima} <br> Tot. Reject: ${sumReject}</div>
+            <div class="text-[10px] font-bold text-violet-750 bg-violet-100/70 rounded-md inline-block px-2 py-0.5 mt-1.5 border border-violet-200/50">${fmt(r.avg_qc_score, 1)} Pts</div>
           </td>
           <td class="px-4 py-4 text-center">
-            <div class="font-black text-violet-800">${fmt(r.avg_ppic_ot_percent)}%</div>
-            <div class="text-[10px] text-violet-600 font-medium mt-1">&nbsp;</div>
-            <div class="text-[11px] font-bold text-white bg-violet-600 rounded-md inline-block px-2 py-0.5 mt-1">${fmt(r.avg_ppic_score, 1)} Pts</div>
+            <div class="font-black text-violet-850 text-sm">${fmt(r.avg_ppic_ot_percent)}%</div>
+            <div class="text-[10px] text-violet-600 font-semibold mt-1">&nbsp;</div>
+            <div class="text-[10px] font-bold text-violet-750 bg-violet-100/70 rounded-md inline-block px-2 py-0.5 mt-1.5 border border-violet-200/50">${fmt(r.avg_ppic_score, 1)} Pts</div>
           </td>
           <td class="px-4 py-4 text-center">
-            <div class="text-[13px] font-black text-violet-800">${fmt(r.avg_pch_score, 1)} Pts</div>
+            <div class="text-[13px] font-black text-violet-850">${fmt(r.avg_pch_score, 1)} Pts</div>
           </td>
           <td class="px-4 py-4 text-center">
-            <div class="text-[13px] font-black text-violet-800">${fmt(r.avg_hse_score, 1)} Pts</div>
+            <div class="text-[13px] font-black text-violet-850">${fmt(r.avg_hse_score, 1)} Pts</div>
           </td>
-          <td class="px-4 py-4 text-center font-black text-2xl" style="color:${ac}">${fmt(r.avg_total_score, 1)}</td>
+          <td class="px-4 py-4 text-center">
+            <span class="inline-block px-3 py-1.5 text-sm font-black rounded-lg" style="background-color: ${ac}15; color: ${ac}">
+              ${fmt(r.avg_total_score, 1)}
+            </span>
+          </td>
           <td class="px-4 py-4 text-center">${gradeBadge(r.avg_grade)}</td>
         </tr>`;
     }

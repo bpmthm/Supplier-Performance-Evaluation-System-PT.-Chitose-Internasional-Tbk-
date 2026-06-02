@@ -94,43 +94,6 @@
       white-space: nowrap;
       animation: ticker 22s linear infinite
     }
-
-    /* Transisi mulus buat Sidebar dan Konten */
-    .spe-sidebar {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      width: 260px;
-      overflow: hidden;
-    }
-
-    .spe-wrapper {
-      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-left: 260px;
-    }
-
-    .spe-sidebar.minimized {
-      width: 80px;
-    }
-
-    .spe-sidebar.minimized .spe-sidebar-logo-title,
-    .spe-sidebar.minimized .spe-sidebar-logo-sub,
-    .spe-sidebar.minimized .spe-nav-section,
-    .spe-sidebar.minimized .spe-nav-item span:not(.material-symbols-outlined) {
-      display: none;
-    }
-
-    .spe-sidebar.minimized .spe-nav-item {
-      justify-content: center;
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    .spe-sidebar.minimized .spe-sidebar-logo {
-      justify-content: center;
-    }
-
-    .spe-wrapper.expanded {
-      margin-left: 80px;
-    }
   </style>
 </head>
 
@@ -159,15 +122,17 @@
           </div>
           <div class="kpi-number" data-kpi="total" id="kpi-total">—</div>
           <div class="kpi-label" id="kpi-total-label">Total Supplier</div>
+          <span class="kpi-trend" data-kpi-trend="total" style="color:#5b6af8;font-size:12px">Disini anda bisa melihat total daftar vedor yang sudah dinilai dengan lengkap beserta nilai dari divisi yang menginput</span>
         </div>
         <div class="kpi-card anim-fadeInUp d-2">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
             <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><span class="material-symbols-outlined"
                 style="color:#16a34a;font-size:20px">workspace_premium</span></div>
             <span class="badge badge-green">GRADE A</span>
-          </div>
+          </div>Grade C
           <div class="kpi-number" data-kpi="top" id="kpi-top" style="color:#16a34a">—</div>
           <div class="kpi-label">Top Performers</div>
+          <span class="kpi-trend" data-kpi-trend="top" style="color:#16a34a;font-size:12px">Top Performers adalah vendor yang memiliki nilai >80 pada 1 periode</span>
         </div>
         <div class="kpi-card anim-fadeInUp d-3">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
@@ -177,6 +142,7 @@
           </div>
           <div class="kpi-number" data-kpi="critical" id="kpi-critical" style="color:#e05252">—</div>
           <div class="kpi-label" id="kpi-critical-label">Grade C (Kurang)</div>
+          <span class="kpi-trend" data-kpi-trend="critical" style="color:#e05252;font-size:12px">Vendor dengan performa di bawah 60 dalam 1 periode</span>
         </div>
         <div class="kpi-card anim-fadeInUp d-4">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
@@ -186,6 +152,7 @@
           </div>
           <div class="kpi-number" data-kpi="pending" id="kpi-pending" style="color:#d97706">—</div>
           <div class="kpi-label">Belum Diinput</div>
+          <span class="kpi-trend" data-kpi-trend="pending" style="color:#d97706;font-size:12px">Vendor yang masih belum dinilai dengan lengkap (misalnya 1 dari 4 departemen belum menilai)</span>
         </div>
       </div>
 

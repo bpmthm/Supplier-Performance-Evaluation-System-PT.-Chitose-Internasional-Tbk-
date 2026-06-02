@@ -12,120 +12,89 @@
     rel="stylesheet" />
   <link rel="stylesheet" href="../css/spe.css" />
   <style>
+    /* Heatmap cell styles — soft translucent backgrounds, no loud borders */
+    .heatmap-cell-good {
+      background: rgba(34, 197, 94, 0.06);
+      color: #15803d;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 6px;
+    }
+
+    .heatmap-cell-fair {
+      background: rgba(245, 158, 11, 0.06);
+      color: #92400e;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 6px;
+    }
+
+    .heatmap-cell-poor {
+      background: rgba(239, 68, 68, 0.06);
+      color: #b91c1c;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 6px;
+    }
+
     .heatmap-cell {
       font-size: 12px;
-      font-weight: 650;
-      padding: 6px 10px;
-      border-radius: 8px;
+      font-weight: 600;
+      padding: 5px 8px;
+      border-radius: 6px;
       text-align: center;
       white-space: nowrap
     }
 
     .hm-a {
-      background: rgba(34, 197, 94, .12);
-      color: #16a34a
+      background: rgba(34, 197, 94, .07);
+      color: #16a34a;
+      border-radius: 6px
     }
 
     .hm-b {
-      background: rgba(245, 158, 11, .12);
-      color: #b45309
+      background: rgba(245, 158, 11, .07);
+      color: #b45309;
+      border-radius: 6px
     }
 
     .hm-c {
-      background: rgba(224, 82, 82, .12);
-      color: #dc2626
+      background: rgba(224, 82, 82, .07);
+      color: #dc2626;
+      border-radius: 6px
     }
 
     .hm-na {
-      background: rgba(148, 163, 184, .1);
-      color: #ffffff
+      background: rgba(148, 163, 184, .08);
+      color: #94a3b8;
+      border-radius: 6px
     }
 
-    .filter-bar {
-      background: #fff;
-      border: 1px solid rgba(148, 163, 184, .18);
-      border-radius: 16px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      flex-wrap: wrap
+    /* Legend color swatches */
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      flex-shrink: 0
     }
 
-    .tab-btn {
-      flex: 1;
-      padding: 7px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 550;
-      color: #64748b;
+    /* Sort header interactive */
+    .sort-th {
       cursor: pointer;
-      transition: all .18s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      border: none;
-      background: transparent;
-      font-family: inherit
+      transition: color .15s
     }
 
-    .tab-btn:hover {
-      color: #1e293b;
-      background: rgba(255, 255, 255, .5)
+    .sort-th:hover {
+      color: var(--primary)
     }
 
-    .tab-btn.active {
-      background: #fff;
-      color: #1e293b;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
-      font-weight: 650
+    .sort-th .material-symbols-outlined {
+      opacity: .35;
+      transition: opacity .15s
     }
 
-    /* Transisi mulus buat Sidebar dan Konten */
-    .spe-sidebar {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      width: 260px;
-      /* Lebar default */
-      overflow: hidden;
-      /* Biar teks gak mbleber pas mengecil */
-    }
-
-    .spe-wrapper {
-      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-left: 260px;
-      /* Jarak awal ngikutin lebar sidebar */
-    }
-
-    /* KELAS AJAIB BUAT MODE MINIMIZE */
-    .spe-sidebar.minimized {
-      width: 80px;
-      /* Lebar mengecil jadi segini doang */
-    }
-
-    /* Pas di-minimize, sembunyiin logo teks, teks menu, dan label footer */
-    .spe-sidebar.minimized .spe-sidebar-logo-title,
-    .spe-sidebar.minimized .spe-sidebar-logo-sub,
-    .spe-sidebar.minimized .spe-nav-section,
-    .spe-sidebar.minimized .spe-nav-item span:not(.material-symbols-outlined) {
-      display: none;
-    }
-
-    /* Pas di-minimize, ikon ditengahin */
-    .spe-sidebar.minimized .spe-nav-item {
-      justify-content: center;
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    .spe-sidebar.minimized .spe-sidebar-logo {
-      justify-content: center;
-    }
-
-    /* Margin konten utama ngikutin sidebar yang mengecil */
-    .spe-wrapper.expanded {
-      margin-left: 80px;
+    .sort-th:hover .material-symbols-outlined {
+      opacity: 1
     }
   </style>
 
@@ -143,238 +112,196 @@
       </div>
       <div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:8px">Akses Terbatas</div>
       <div style="font-size:13px;color:#64748b;max-width:340px;text-align:center">Halaman ini hanya dapat diakses oleh
-        role <strong>PCH</strong>. Hubungi administrator untuk mendapatkan akses.</div>
+        role <strong>PCH, MANAGER, BOD, atau ADMIN</strong>. Hubungi administrator untuk mendapatkan akses.</div>
       <a href="./dashboard.html" id="denied-back"
         style="margin-top:20px;padding:9px 22px;border-radius:10px;background:rgba(91,106,248,.08);color:#5b6af8;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(91,106,248,.2)">←
         Kembali ke Dashboard</a>
     </div>
+
     <div id="main-content">
-      <main class="flex-1 p-margin-page overflow-y-auto">
+      <div class="spe-content">
+
         <!-- Page Header & Actions -->
-        <div class="flex justify-between items-end mb-lg animate-fadeInUp">
+        <div class="anim-fadeInUp"
+          style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px">
           <div>
-            <h2
-              class="font-headline-xl text-headline-xl bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent mb-xs">
-              Master Rekap: Interactive Heatmap</h2>
-            <p class="font-body-md text-body-md text-on-surface-variant">Comprehensive supplier performance evaluation
-              based on key logistics metrics.</p>
+            <h1 class="section-title">Master Rekap: Interactive Heatmap</h1>
+            <p class="section-sub">Comprehensive supplier performance evaluation based on key logistics metrics.</p>
           </div>
-          <div class="flex items-center gap-3">
-            <button id="btn-export-excel"
-              class="flex items-center bg-white border border-green-500 text-green-700 px-4 h-10 rounded-DEFAULT font-label-sm text-label-sm uppercase hover:bg-green-50 transition-all duration-300 shadow-sm smooth-hover animate-fadeInUp"
-              style="animation-delay: 50ms;">
-              <span
-                class="material-symbols-outlined mr-2 text-[18px] group-hover:scale-110 transition-transform duration-300">download</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button id="btn-export-excel" class="btn btn-ghost">
+              <span class="material-symbols-outlined sym-sm">download</span>
               Export Excel
             </button>
-            <button
-              class="flex items-center bg-gradient-to-r from-primary to-indigo-600 text-on-primary px-4 h-10 rounded-DEFAULT font-label-sm text-label-sm uppercase hover:shadow-lg hover:shadow-primary/50 transition-all duration-300 shadow-sm smooth-hover animate-fadeInUp"
-              style="animation-delay: 100ms;">
-              <span
-                class="material-symbols-outlined mr-2 text-[18px] group-hover:scale-110 transition-transform duration-300">picture_as_pdf</span>
-              Print PDF Report
+            <button class="btn btn-primary">
+              <span class="material-symbols-outlined sym-sm">picture_as_pdf</span>
+              Print PDF
             </button>
           </div>
         </div>
 
         <!-- Tabs Switcher -->
-        <div class="flex space-x-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl max-w-2xl mb-6 animate-fadeInUp">
-          <button id="tab-monthly"
-            class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+        <div class="spe-tabs anim-fadeInUp d-1" style="max-width:480px;margin-bottom:20px">
+          <button id="tab-monthly" class="spe-tab active">
+            <span class="material-symbols-outlined sym-sm">calendar_month</span>
             <span>Rekap Bulanan</span>
           </button>
-          <button id="tab-evaluasi"
-            class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-600 hover:text-slate-800 flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-[18px]">event_repeat</span>
+          <button id="tab-evaluasi" class="spe-tab">
+            <span class="material-symbols-outlined sym-sm">event_repeat</span>
             <span>Evaluasi Berkala</span>
           </button>
         </div>
 
         <!-- Heatmap Legend & Filters -->
-        <div
-          class="bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl p-sm mb-lg flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm smooth-hover animate-fadeInUp"
-          style="animation-delay: 150ms;">
-          <div class="flex flex-wrap gap-x-6 gap-y-2 items-center">
-            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Performance Heatmap:</span>
-            <div class="flex items-center space-x-2">
-              <div class="w-4 h-4 rounded-sm bg-gradient-to-br from-error-container to-red-200 border border-error/20">
-              </div>
-              <span class="font-body-md text-body-md text-on-surface">Kurang (Poor)</span>
+        <div class="filter-bar anim-fadeInUp d-2" style="justify-content:space-between">
+          <!-- Legend -->
+          <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+            <span
+              style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2)">Heatmap:</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="legend-swatch" style="background:rgba(239,68,68,.15)"></div>
+              <span style="font-size:13px;color:var(--text)">Kurang</span>
             </div>
-            <div class="flex items-center space-x-2">
-              <div
-                class="w-4 h-4 rounded-sm bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-300/50">
-              </div>
-              <span class="font-body-md text-body-md text-on-surface">Cukup (Fair)</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="legend-swatch" style="background:rgba(245,158,11,.15)"></div>
+              <span style="font-size:13px;color:var(--text)">Cukup</span>
             </div>
-            <div class="flex items-center space-x-2">
-              <div class="w-4 h-4 rounded-sm bg-green-500/50 border border-green-500/50"></div>
-              <span class="font-body-md text-body-md text-on-surface">Baik (Good)</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="legend-swatch" style="background:rgba(34,197,94,.15)"></div>
+              <span style="font-size:13px;color:var(--text)">Baik</span>
             </div>
           </div>
 
-          <!-- Filters Section -->
-          <div class="flex flex-wrap items-center gap-4">
-            <!-- Filter Bulanan Form -->
-            <div id="filter-monthly-container" class="flex flex-wrap items-center gap-4">
-              <div class="flex items-center space-x-2">
-                <span class="text-sm text-slate-500 font-medium">Pilih Periode:</span>
-                <select data-select="periode" id="periode-select"
-                  class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer min-w-[140px]">
+          <!-- Filters -->
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+            <!-- Filter Bulanan -->
+            <div id="filter-monthly-container" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <label class="spe-label" style="margin-bottom:0;white-space:nowrap">Periode</label>
+                <select data-select="periode" id="periode-select" class="spe-select" style="width:auto;min-width:160px">
                   <!-- Diisi oleh JS -->
                 </select>
               </div>
             </div>
 
             <!-- Filter Evaluasi Berkala (Hidden by default) -->
-            <div id="filter-evaluasi-container" class="hidden flex flex-wrap items-center gap-3">
-              <div class="flex items-center space-x-2">
-                <span class="text-sm text-slate-500 font-medium">Dari:</span>
-                <select id="evaluasi-periode-awal"
-                  class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
+            <div id="filter-evaluasi-container" class="hidden"
+              style="display:none;flex-wrap:wrap;align-items:center;gap:12px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <label class="spe-label" style="margin-bottom:0;white-space:nowrap">Dari</label>
+                <select id="evaluasi-periode-awal" class="spe-select" style="width:auto;min-width:150px">
                   <!-- Diisi oleh JS -->
                 </select>
               </div>
-              <div class="flex items-center space-x-2">
-                <span class="text-sm text-slate-500 font-medium">Sampai:</span>
-                <select id="evaluasi-periode-akhir"
-                  class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer">
+              <div style="display:flex;align-items:center;gap:8px">
+                <label class="spe-label" style="margin-bottom:0;white-space:nowrap">Sampai</label>
+                <select id="evaluasi-periode-akhir" class="spe-select" style="width:auto;min-width:150px">
                   <!-- Diisi oleh JS -->
                 </select>
               </div>
-              <div class="flex items-center gap-2">
-                <button id="btn-load-evaluasi"
-                  class="bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1 transition-colors">
-                  <span class="material-symbols-outlined text-[16px]">event_repeat</span>
-                  <span>Tampilkan Evaluasi</span>
-                </button>
-              </div>
+              <button id="btn-load-evaluasi" class="btn btn-primary" style="padding:7px 14px;font-size:12px">
+                <span class="material-symbols-outlined sym-sm">event_repeat</span>
+                Tampilkan Evaluasi
+              </button>
             </div>
 
             <!-- Divider -->
-            <div class="h-6 w-px bg-slate-300 hidden md:block"></div>
+            <div style="width:1px;height:24px;background:var(--border)"></div>
 
             <!-- Shared Category Filter -->
-            <div class="flex items-center space-x-2">
-              <span class="text-sm text-slate-500 font-medium">Kategori:</span>
-              <select id="kategori-select"
-                class="border border-outline-variant rounded-md bg-surface-container-lowest text-body-md font-body-md px-4 py-1.5 focus:border-primary outline-none cursor-pointer min-w-[120px]">
+            <div style="display:flex;align-items:center;gap:8px">
+              <label class="spe-label" style="margin-bottom:0;white-space:nowrap">Kategori</label>
+              <select id="kategori-select" class="spe-select" style="width:auto;min-width:150px">
                 <option value="">Semua Kategori</option>
                 <!-- Diisi dari data vendor -->
               </select>
             </div>
 
             <!-- Shared Search Box -->
-            <div
-              class="flex items-center bg-white border border-outline-variant rounded-md px-3 py-1.5 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all min-w-[200px]">
-              <span class="material-symbols-outlined text-slate-400 text-[18px] mr-2">search</span>
-              <input type="text" id="search-heatmap" placeholder="Cari vendor..."
-                class="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-400">
+            <div style="position:relative;display:flex;align-items:center">
+              <span class="material-symbols-outlined"
+                style="position:absolute;left:10px;font-size:16px;color:var(--text3)">search</span>
+              <input type="text" id="search-heatmap" placeholder="Cari vendor..." class="spe-input"
+                style="width:220px;padding-left:32px">
             </div>
           </div>
         </div>
 
         <!-- Fusion Table Container -->
-        <div
-          class="bg-gradient-to-br from-surface-container-lowest to-surface-container-low border border-gray-200 rounded-xl overflow-hidden shadow-sm animate-fadeInUp"
-          style="animation-delay: 200ms;">
+        <div class="card-flat anim-fadeInUp d-3" style="overflow:hidden">
 
           <!-- Table 1: Rekap Bulanan -->
-          <table id="table-monthly" data-table="heatmap" class="w-full text-left border-collapse">
+          <table id="table-monthly" data-table="heatmap" class="spe-table">
             <thead>
-              <tr
-                class="bg-gradient-to-r from-surface-container-low to-surface-container-lowest border-b border-gray-200">
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase w-12"></th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Supplier Name
-                </th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Category</th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">QC
-                </th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PPIC
-                </th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">PCH
-                </th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">HSE
-                </th>
-                <th
-                  class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center cursor-pointer group hover:text-slate-800 transition-colors"
-                  id="sort-total-score">
-                  <div class="flex items-center justify-center gap-1">
-                    Total Score
-                    <span class="material-symbols-outlined text-[14px] opacity-50 group-hover:opacity-100"
+              <tr>
+                <th style="text-align:center;width:40px"></th>
+                <th>Supplier Name</th>
+                <th>Category</th>
+                <th style="text-align:center">QC</th>
+                <th style="text-align:center">PPIC</th>
+                <th style="text-align:center">PCH</th>
+                <th style="text-align:center">HSE</th>
+                <th class="sort-th" style="text-align:center" id="sort-total-score">
+                  <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                    <span>Total Score</span>
+                    <span class="material-symbols-outlined" style="font-size:14px"
                       id="icon-sort-score">unfold_more</span>
                   </div>
                 </th>
-                <th
-                  class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center cursor-pointer group hover:text-slate-800 transition-colors"
-                  id="sort-grade">
-                  <div class="flex items-center justify-center gap-1">
-                    Grade
-                    <span class="material-symbols-outlined text-[14px] opacity-50 group-hover:opacity-100"
+                <th class="sort-th" style="text-align:center" id="sort-grade">
+                  <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                    <span>Grade</span>
+                    <span class="material-symbols-outlined" style="font-size:14px"
                       id="icon-sort-grade">unfold_more</span>
                   </div>
                 </th>
               </tr>
             </thead>
-            <tbody id="heatmap-tbody" class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
+            <tbody id="heatmap-tbody">
               <!-- Loading state -->
               <tr id="loading-row">
-                <td colspan="8" class="px-sm py-10 text-center text-on-surface-variant">
-                  <div class="flex flex-col items-center gap-3">
-                    <span class="material-symbols-outlined text-[36px] animate-spin text-primary">autorenew</span>
-                    <span class="text-sm">Memuat data dari database...</span>
+                <td colspan="9" style="padding:40px 14px;text-align:center;color:var(--text3)">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+                    <span class="material-symbols-outlined"
+                      style="font-size:32px;color:var(--primary);animation:spinSlow 1s linear infinite">autorenew</span>
+                    <span style="font-size:13px;font-weight:500">Memuat data dari database...</span>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <!-- Table 3: Evaluasi Berkala (Hidden by default) -->
-          <table id="table-evaluasi" class="w-full text-left border-collapse hidden">
+          <!-- Table 2: Evaluasi Berkala (Hidden by default) -->
+          <table id="table-evaluasi" class="spe-table hidden">
             <thead>
-              <tr class="bg-gradient-to-r from-violet-50 to-surface-container-lowest border-b border-gray-200">
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase w-12"></th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Supplier Name
-                </th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase">Category</th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">
-                  Rata-rata
-                  QC</th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">
-                  Rata-rata
-                  PPIC</th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">
-                  Rata-rata
-                  PCH</th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">
-                  Rata-rata
-                  HSE</th>
-                <th
-                  class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center cursor-pointer group hover:text-slate-800 transition-colors"
-                  id="sort-eval-total-score">
-                  <div class="flex items-center justify-center gap-1">
-                    Avg Total
-                    <span class="material-symbols-outlined text-[14px] opacity-50 group-hover:opacity-100"
+              <tr>
+                <th style="text-align:center;width:40px"></th>
+                <th>Supplier Name</th>
+                <th>Category</th>
+                <th style="text-align:center">Rata-rata QC</th>
+                <th style="text-align:center">Rata-rata PPIC</th>
+                <th style="text-align:center">Rata-rata PCH</th>
+                <th style="text-align:center">Rata-rata HSE</th>
+                <th class="sort-th" style="text-align:center" id="sort-eval-total-score">
+                  <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                    <span>Avg Total</span>
+                    <span class="material-symbols-outlined" style="font-size:14px"
                       id="icon-sort-eval-score">unfold_more</span>
                   </div>
                 </th>
-                <th
-                  class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center cursor-pointer group hover:text-slate-800 transition-colors"
-                  id="sort-eval-grade">
-                  <div class="flex items-center justify-center gap-1">
-                    Avg Grade
-                    <span class="material-symbols-outlined text-[14px] opacity-50 group-hover:opacity-100"
+                <th class="sort-th" style="text-align:center" id="sort-eval-grade">
+                  <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                    <span>Avg Grade</span>
+                    <span class="material-symbols-outlined" style="font-size:14px"
                       id="icon-sort-eval-grade">unfold_more</span>
                   </div>
                 </th>
-                <th class="px-sm py-3 font-label-sm text-label-sm text-on-surface-variant uppercase text-center">Aksi
-                </th>
+                <th style="text-align:center">Aksi</th>
               </tr>
             </thead>
-            <tbody id="evaluasi-tbody" class="font-body-md text-body-md text-on-surface divide-y divide-gray-200">
+            <tbody id="evaluasi-tbody">
               <tr>
-                <td colspan="10" class="px-sm py-10 text-center text-on-surface-variant">
+                <td colspan="10" style="padding:40px 14px;text-align:center;color:var(--text3)">
                   Pilih rentang periode dan klik tombol <strong>Tampilkan Evaluasi</strong>.
                 </td>
               </tr>
@@ -384,20 +311,17 @@
         </div>
 
         <!-- Info count -->
-        <div class="mt-4 flex justify-between items-center text-body-sm text-on-surface-variant">
+        <div style="margin-top:14px;font-size:12px;color:var(--text2)">
           <span id="record-count">Memuat data...</span>
         </div>
-      </main>
-    </div>
-  </div>
 
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="../js/api.js"></script>
   <script src="../js/master-rekap.js"></script>
-  </div>
-  </div>
 
   <script>
     (function () {
@@ -413,7 +337,7 @@
       const role = getActiveRole();
       const denied = document.getElementById('access-denied');
       const mainel = document.getElementById('main-content');
-      if (role !== 'PCH') {
+      if (!['PCH', 'MANAGER', 'BOD', 'ADMIN'].includes(role)) {
         if (denied) denied.classList.add('show');
         if (mainel) mainel.style.display = 'none';
         const back = document.getElementById('denied-back');

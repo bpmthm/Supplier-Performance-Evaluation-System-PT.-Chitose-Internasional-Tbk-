@@ -205,51 +205,6 @@
     .icon-spinning {
       animation: spin .7s linear infinite;
     }
-
-    /* Transisi mulus buat Sidebar dan Konten */
-    .spe-sidebar {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      width: 260px;
-      /* Lebar default */
-      overflow: hidden;
-      /* Biar teks gak mbleber pas mengecil */
-    }
-
-    .spe-wrapper {
-      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-left: 260px;
-      /* Jarak awal ngikutin lebar sidebar */
-    }
-
-    /* KELAS AJAIB BUAT MODE MINIMIZE */
-    .spe-sidebar.minimized {
-      width: 80px;
-      /* Lebar mengecil jadi segini doang */
-    }
-
-    /* Pas di-minimize, sembunyiin logo teks, teks menu, dan label footer */
-    .spe-sidebar.minimized .spe-sidebar-logo-title,
-    .spe-sidebar.minimized .spe-sidebar-logo-sub,
-    .spe-sidebar.minimized .spe-nav-section,
-    .spe-sidebar.minimized .spe-nav-item span:not(.material-symbols-outlined) {
-      display: none;
-    }
-
-    /* Pas di-minimize, ikon ditengahin */
-    .spe-sidebar.minimized .spe-nav-item {
-      justify-content: center;
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    .spe-sidebar.minimized .spe-sidebar-logo {
-      justify-content: center;
-    }
-
-    /* Margin konten utama ngikutin sidebar yang mengecil */
-    .spe-wrapper.expanded {
-      margin-left: 80px;
-    }
   </style>
 </head>
 
