@@ -20,6 +20,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupFormInputs();
     setupButtons();
 
+    // === Auto-select dari URL params (dari Dashboard Pending) ===
+    const urlParams = new URLSearchParams(window.location.search);
+    const passedVendor = urlParams.get('vendor');
+    const passedPeriode = urlParams.get('periode');
+
+    if (passedVendor) {
+      // 1. Set periode dulu (sebelum load data vendor)
+      if (passedPeriode) {
+        const periodeSelect = document.querySelector('[data-input="periode-select"]');
+        if (periodeSelect) {
+          // Cari option yang cocok dengan periode dari URL
+          const matchOption = Array.from(periodeSelect.options).find(o => o.value === passedPeriode);
+          if (matchOption) {
+            periodeSelect.value = passedPeriode;
+            currentPeriode = passedPeriode;
+          }
+        }
+      }
+
+      // 2. Cari vendor dari allSuppliers berdasarkan kode_vendor
+      const matchedSupplier = allSuppliers.find(s =>
+        s.kode_vendor === passedVendor || String(s.id) === passedVendor
+      );
+
+      if (matchedSupplier) {
+        // 3. Set state & UI persis seperti user milih manual
+        const input = document.getElementById('supplier-search-input');
+        const clearBtn = document.getElementById('btn-clear-supplier');
+        const searchIcon = document.getElementById('supplier-search-icon');
+
+        currentSupplier = matchedSupplier.id;
+        if (input) input.value = `${matchedSupplier.kode_vendor} - ${matchedSupplier.nama_vendor}`;
+        if (clearBtn) clearBtn.classList.remove('hidden');
+        if (searchIcon) searchIcon.classList.add('hidden');
+
+        // 4. Load data penilaian & indikator periode
+        await updatePeriodeIndicators(currentSupplier);
+        await loadSupplierPenilaian(currentSupplier);
+        await tarikQtyOtomatis();
+      }
+    }
+
   } catch (error) {
     console.error('Error initializing input page:', error);
   }
@@ -563,29 +605,48 @@ function applyRoleAccess() {
 
   if (!activeRole || activeRole === 'GUEST') return;
 
+  // 1. Cari elemen bungkus utama (Grid Container)
+  // Query selector ini nyari div yang punya class grid dan pembagi kolom
+  const gridContainer = document.querySelector('.grid.md\\:grid-cols-2') || document.querySelector('.grid.gap-6');
+
+  // 2. Loop semua form berdasarkan judulnya (H3)
   const sections = document.querySelectorAll('h3');
+
   sections.forEach(h3 => {
     const title = h3.textContent.trim();
-    const card = h3.closest('.division-card');
+    
+    // Cari elemen bungkus luar (Card) dari masing-masing form
+    // Pake closest buat nyari div terdekat yang jadi kotak putihnya
+    const card = h3.closest('.bg-white') || h3.closest('.division-card'); 
     if (!card) return;
 
-    if (title.includes('QC') && activeRole !== 'QC') {
-      card.style.opacity = '0.5';
-      card.style.pointerEvents = 'none';
-    }
-    if (title.includes('PPIC') && activeRole !== 'PPIC') {
-      card.style.opacity = '0.5';
-      card.style.pointerEvents = 'none';
-    }
-    if (title.includes('Purchasing') && activeRole !== 'PCH') {
-      card.style.opacity = '0.5';
-      card.style.pointerEvents = 'none';
-    }
-    if (title.includes('Health') && activeRole !== 'HSE') {
-      card.style.opacity = '0.5';
-      card.style.pointerEvents = 'none';
+    // Kalo admin/manager yang login, biarin kebuka semua (opsional)
+    if (activeRole === 'ADMIN' || activeRole === 'MANAGER') return;
+
+    // 3. Cek form ini jatahnya siapa
+    let isMyCard = false;
+    if (title.includes('QC') && activeRole === 'QC') isMyCard = true;
+    if (title.includes('PPIC') && activeRole === 'PPIC') isMyCard = true;
+    if (title.includes('Purchasing') && activeRole === 'PCH') isMyCard = true;
+    if (title.includes('Health') && activeRole === 'HSE') isMyCard = true;
+
+    // 4. Eksekusi Jurus Menghilang
+    if (!isMyCard) {
+      card.style.display = 'none'; // Ilangin total dari layar
+    } else {
+      card.style.display = 'block'; // Munculin form jatahnya
     }
   });
+
+  // 5. Rombak Layout Pembungkus
+  // Kalo bukan admin/manager, kita bikin form yang nyisa jadi posisinya di tengah
+  if (activeRole !== 'ADMIN' && activeRole !== 'MANAGER' && gridContainer) {
+    // Hapus grid bawaan yang bikin kebagi dua
+    gridContainer.classList.remove('md:grid-cols-2', 'lg:grid-cols-2');
+    
+    // Tambahin class max-w-3xl (biar ga terlalu melar), mx-auto (biar ke tengah)
+    gridContainer.classList.add('max-w-3xl', 'mx-auto', 'grid-cols-1', 'w-full');
+  }
 }
 
 function filterPayloadByRole(data) {

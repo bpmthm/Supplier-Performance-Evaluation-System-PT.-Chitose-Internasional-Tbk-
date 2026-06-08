@@ -105,15 +105,34 @@
 
     <div class="spe-content">
 
-      <!-- Heading -->
-      <div class="anim-fadeInUp" style="margin-bottom:24px">
-        <h1 class="section-title" id="page-heading">Supplier Health Overview</h1>
-        <p class="section-sub" id="page-sub">Real-time ringkasan performa &amp; monitoring supplier.</p>
+      <!-- Heading & Filter -->
+      <div class="anim-fadeInUp flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 class="section-title" id="page-heading">Supplier Health Overview</h1>
+          <p class="section-sub" id="page-sub">Real-time ringkasan performa &amp; monitoring supplier.</p>
+        </div>
+
+        <!-- Filter Periode Dashboard -->
+        <div
+          class="flex items-center gap-3 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto">
+          <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-indigo-500">calendar_month</span>
+          </div>
+          <div class="flex flex-col pr-3">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Periode Data</label>
+            <select id="dashboard-periode"
+              class="text-sm font-semibold text-slate-700 bg-transparent border-none outline-none cursor-pointer p-0 appearance-none min-w-[120px]">
+              <!-- Opsi akan diisi oleh JS -->
+            </select>
+          </div>
+          <span class="material-symbols-outlined text-slate-400 text-[18px] mr-2 pointer-events-none">expand_more</span>
+        </div>
       </div>
 
       <!-- KPI Cards -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px">
-        <div class="kpi-card anim-fadeInUp d-1">
+
+        <div class="kpi-card anim-fadeInUp d-1 cursor-pointer" onclick="bukaModalKPI('total')">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
             <div class="kpi-icon" style="background:rgba(91,106,248,.1)"><span class="material-symbols-outlined"
                 style="color:#5b6af8;font-size:20px">factory</span></div>
@@ -122,29 +141,32 @@
           </div>
           <div class="kpi-number" data-kpi="total" id="kpi-total">—</div>
           <div class="kpi-label" id="kpi-total-label">Total Supplier</div>
-          <span class="kpi-trend" data-kpi-trend="total" style="color:#5b6af8;font-size:12px">Disini anda bisa melihat total daftar vedor yang sudah dinilai dengan lengkap beserta nilai dari divisi yang menginput</span>
+          <span class="kpi-trend" data-kpi-trend="total" style="color:#5b6af8;font-size:12px">Disini anda bisa melihat
+            total daftar vendor yang sudah memiliki data penilaian</span>
         </div>
-        <div class="kpi-card anim-fadeInUp d-2">
+        <div class="kpi-card anim-fadeInUp d-2 cursor-pointer" onclick="bukaModalKPI('top')">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
             <div class="kpi-icon" style="background:rgba(34,197,94,.1)"><span class="material-symbols-outlined"
                 style="color:#16a34a;font-size:20px">workspace_premium</span></div>
             <span class="badge badge-green">GRADE A</span>
-          </div>Grade C
+          </div>
           <div class="kpi-number" data-kpi="top" id="kpi-top" style="color:#16a34a">—</div>
           <div class="kpi-label">Top Performers</div>
-          <span class="kpi-trend" data-kpi-trend="top" style="color:#16a34a;font-size:12px">Top Performers adalah vendor yang memiliki nilai >80 pada 1 periode</span>
+          <span class="kpi-trend" data-kpi-trend="top" style="color:#16a34a;font-size:12px">Top Performers adalah vendor
+            yang memiliki nilai >80 pada 1 periode</span>
         </div>
-        <div class="kpi-card anim-fadeInUp d-3">
+        <div class="kpi-card anim-fadeInUp d-3 cursor-pointer" onclick="bukaModalKPI('critical')">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
             <div class="kpi-icon" style="background:rgba(224,82,82,.1)"><span class="material-symbols-outlined"
                 style="color:#e05252;font-size:20px">warning</span></div>
-            <span class="badge badge-red">PERHATIAN</span>
+            <span class="badge badge-red">GRADE C</span>
           </div>
           <div class="kpi-number" data-kpi="critical" id="kpi-critical" style="color:#e05252">—</div>
-          <div class="kpi-label" id="kpi-critical-label">Grade C (Kurang)</div>
-          <span class="kpi-trend" data-kpi-trend="critical" style="color:#e05252;font-size:12px">Vendor dengan performa di bawah 60 dalam 1 periode</span>
+          <div class="kpi-label" id="kpi-critical-label">PERLU PERHATIAN</div>
+          <span class="kpi-trend" data-kpi-trend="critical" style="color:#e05252;font-size:12px">Vendor dengan performa
+            di bawah 70 dalam 1 periode</span>
         </div>
-        <div class="kpi-card anim-fadeInUp d-4">
+        <div class="kpi-card anim-fadeInUp d-4 cursor-pointer" onclick="bukaModalKPI('pending')">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
             <div class="kpi-icon" style="background:rgba(245,158,11,.1)"><span class="material-symbols-outlined"
                 style="color:#d97706;font-size:20px">pending_actions</span></div>
@@ -152,44 +174,59 @@
           </div>
           <div class="kpi-number" data-kpi="pending" id="kpi-pending" style="color:#d97706">—</div>
           <div class="kpi-label">Belum Diinput</div>
-          <span class="kpi-trend" data-kpi-trend="pending" style="color:#d97706;font-size:12px">Vendor yang masih belum dinilai dengan lengkap (misalnya 1 dari 4 departemen belum menilai)</span>
+          <span class="kpi-trend" data-kpi-trend="pending" style="color:#d97706;font-size:12px">Vendor yang masih belum
+            dinilai dengan lengkap (misalnya 1 dari 4 departemen belum menilai)</span>
         </div>
       </div>
 
       <!-- Charts Row -->
-      <div style="display:grid;grid-template-columns:3fr 2fr;gap:18px;margin-bottom:24px">
-        <!-- Radar -->
-        <div class="card anim-fadeInUp d-3" style="padding:24px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-            <div>
-              <div style="font-size:15px;font-weight:650;color:#1e293b">Performa Divisi</div>
-              <div id="divisi-subtitle" style="font-size:12px;color:#64748b;margin-top:2px">Akumulasi skor seluruh
-                vendor pada periode berjalan</div>
-            </div>
-            <span class="badge badge-indigo">Periode Aktif</span>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+      
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm lg:col-span-2 anim-fadeInUp d-3">
+        <div class="flex justify-between items-center mb-5">
+          <div>
+            <div class="text-[15px] font-[650] text-slate-800">Performa per Divisi</div>
+            <div class="text-[12px] text-slate-500 mt-0.5">Rata-rata skor seluruh vendor bulan ini</div>
           </div>
-          <div id="divisi-chart" style="display:flex;flex-direction:column;gap:18px;padding:12px 0 20px">
-            <div style="text-align:center;padding:24px 0;color:#94a3b8;font-size:13px">
-              <span class="material-symbols-outlined"
-                style="font-size:28px;display:block;margin-bottom:6px">hourglass_empty</span>Memuat data...
-            </div>
-          </div>
+          <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold">Bar Chart</span>
         </div>
-
-        <!-- Top 5 -->
-        <div class="card anim-fadeInUp d-4" style="padding:24px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-            <div style="font-size:15px;font-weight:650;color:#1e293b">Top Performer</div>
-            <span class="badge badge-slate">5 Terbaik</span>
-          </div>
-          <div id="top-chart" data-chart="top-performers" style="display:flex;flex-direction:column;gap:14px">
-            <div style="text-align:center;padding:24px 0;color:#94a3b8;font-size:13px">
-              <span class="material-symbols-outlined"
-                style="font-size:28px;display:block;margin-bottom:6px">hourglass_empty</span>Memuat data...
-            </div>
+        <div id="divisi-chart" class="flex flex-col gap-4 py-2">
+          <div class="text-center py-8 text-slate-400 text-[13px]">
+            <span class="material-symbols-outlined text-[28px] block mb-2">hourglass_empty</span>Memuat data...
           </div>
         </div>
       </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm anim-fadeInUp d-4 flex flex-col">
+        <div class="flex justify-between items-center mb-2">
+          <div class="text-[15px] font-[650] text-slate-800">Distribusi Grade</div>
+          <span class="px-3 py-1 bg-slate-50 text-slate-500 border border-slate-200 rounded-lg text-xs font-bold">Total</span>
+        </div>
+        <div class="relative w-full flex-1 flex items-center justify-center min-h-[200px] mt-2">
+          <canvas id="gradeDonutChart"></canvas>
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
+            <span id="donut-total" class="text-4xl font-black text-slate-800 leading-none">0</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Supplier</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm lg:col-span-2 anim-fadeInUp d-5">
+        <div class="flex justify-between items-center mb-5">
+          <div class="text-[15px] font-[650] text-slate-800">Top Performers</div>
+          <span class="px-3 py-1 bg-slate-50 text-slate-600 border border-slate-200 rounded-lg text-xs font-bold">5 Terbaik</span>
+        </div>
+        <div id="top-chart" class="flex flex-col gap-3.5">
+          <div class="text-center py-8 text-slate-400 text-[13px]">
+            <span class="material-symbols-outlined text-[28px] block mb-2">hourglass_empty</span>Memuat data...
+          </div>
+        </div>
+      </div>
+
+      <div id="role-panel" class="anim-fadeInUp d-6 flex items-center"></div>
+    </div>
 
       <!-- Role-specific panel (filled by JS) -->
       <div id="role-panel" class="anim-fadeInUp d-5"></div>
@@ -213,6 +250,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/dashboard.js"></script>
   <script>

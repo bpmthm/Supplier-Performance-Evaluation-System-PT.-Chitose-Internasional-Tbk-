@@ -205,6 +205,40 @@
     .icon-spinning {
       animation: spin .7s linear infinite;
     }
+
+    /* ── Custom Tooltip Floating ───────────────────────── */
+    .custom-tooltip {
+      position: absolute;
+      width: 240px;
+      background: #0f172a;
+      color: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(6px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 100;
+      pointer-events: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .custom-tooltip::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 40px;
+      border-width: 5px 5px 0 5px;
+      border-style: solid;
+      border-color: #0f172a transparent transparent transparent;
+    }
+
+    .custom-tooltip.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
   </style>
 </head>
 
@@ -403,7 +437,7 @@
                 <span class="material-symbols-outlined" style="font-size:26px;color:#5b6af8">history</span>
               </div>
               <h3 style="font-size:14px;font-weight:750;color:#ffffff;margin-bottom:6px">Riwayat Input Harian</h3>
-              <p style="font-size:12px;color:#1f3c63;margin-bottom:16px;line-height:1.6">Lihat, cari, dan filter seluruh
+              <p style="font-size:12px;color:#ffffff;margin-bottom:16px;line-height:1.6">Lihat, cari, dan filter seluruh
                 data penerimaan material harian yang sudah dicatat.</p>
               <a href="./riwayat-input.html" class="btn-link-action"
                 style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 16px;background:#3c53ff90;color:#fff;font-size:13px;font-weight:700;border-radius:11px;text-decoration:none;box-shadow:0 2px 8px rgba(60,83,255,.2)">

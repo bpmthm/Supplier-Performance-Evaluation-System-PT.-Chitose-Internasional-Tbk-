@@ -123,8 +123,6 @@
       <div class="mb-lg animate-fadeInUp">
         <h1 style="font-size:22px;font-weight:750;letter-spacing:-.025em;color:#1e293b">
           Penilaian Supplier</h1>
-        <p style="font-size:13px;color:#64748b;margin-top:4px">Simulasi input form seluruh divisi untuk
-          menguji logic penilaian Backend.</p>
       </div>
 
       <div
@@ -158,9 +156,10 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mb-xl animate-fadeInUp" style="animation-delay: 200ms;">
+      <div id="form-grid-container"  class="grid grid-cols-0 lg:grid-cols-1 gap-gutter mb-xl animate-fadeInUp"
+        style="animation-delay: 230ms;">
 
-        <div class="division-card">
+        <div id="qc-card" class="division-card">
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-blue-100 text-blue-700 rounded-lg"><span
@@ -198,7 +197,7 @@
           </div>
         </div>
 
-        <div class="division-card">
+        <div id="ppic-card" class="division-card">
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-amber-100 text-amber-700 rounded-lg"><span
@@ -255,7 +254,7 @@
               Menunggu File</div>
           </div>
         </div>
-        <div class="division-card">
+        <div id="purchasing-card" class="division-card">
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg"><span
@@ -375,8 +374,7 @@
               Menunggu Input</div>
           </div>
         </div>
-        <div
-          class="division-card bg-surface-container-lowest border border-surface-variant rounded-xl p-6 flex flex-col shadow-sm smooth-hover">
+        <div id="hse-card" class="division-card bg-surface-container-lowest border border-surface-variant rounded-xl p-6 flex flex-col shadow-sm smooth-hover">
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2 bg-rose-100 text-rose-700 rounded-lg"><span
@@ -469,8 +467,6 @@
     </main>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../js/input.js"></script>
 
   <!-- ===== MODAL SUBMIT RESULT ===== -->
   <div id="submit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
