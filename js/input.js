@@ -652,7 +652,7 @@ function applyRoleAccess() {
 function filterPayloadByRole(data) {
   const activeRole = getActiveRole();
 
-  if (!activeRole || activeRole === 'GUEST') return data;
+  if (!activeRole || activeRole === 'GUEST') return {};
 
   const filtered = {
     supplier_id: data.supplier_id,
@@ -663,17 +663,25 @@ function filterPayloadByRole(data) {
   if (activeRole === 'QC') {
     if (data.qc_qty_terima !== undefined) filtered.qc_qty_terima = data.qc_qty_terima;
     if (data.qc_qty_reject !== undefined) filtered.qc_qty_reject = data.qc_qty_reject;
-    if (data.qc_ng_percent !== undefined) filtered.qc_ng_percent = data.qc_ng_percent;
-    if (data.qc_score !== undefined) filtered.qc_score = data.qc_score;
   } else if (activeRole === 'PPIC') {
     if (data.ppic_ot_percent !== undefined) filtered.ppic_ot_percent = data.ppic_ot_percent;
-    if (data.ppic_score !== undefined) filtered.ppic_score = data.ppic_score;
   } else if (activeRole === 'PCH') {
-    ['pch_harga', 'pch_moq', 'pch_pelayanan', 'pch_top', 'pch_score'].forEach(key => {
+    ['pch_harga', 'pch_moq', 'pch_pelayanan', 'pch_top'].forEach(key => {
       if (data[key] !== undefined) filtered[key] = data[key];
     });
   } else if (activeRole === 'HSE') {
-    ['hse_uji_emisi', 'hse_apd', 'hse_score'].forEach(key => {
+    ['hse_uji_emisi', 'hse_apd'].forEach(key => {
+      if (data[key] !== undefined) filtered[key] = data[key];
+    });
+  } else if (activeRole === 'ADMIN' || activeRole === 'MANAGER') {
+    // Admin/Manager can write all fields, but still strip calculated scores
+    const allowed = [
+      'qc_qty_terima', 'qc_qty_reject',
+      'ppic_ot_percent',
+      'pch_harga', 'pch_moq', 'pch_top', 'pch_pelayanan',
+      'hse_uji_emisi', 'hse_apd'
+    ];
+    allowed.forEach(key => {
       if (data[key] !== undefined) filtered[key] = data[key];
     });
   }
@@ -838,7 +846,7 @@ function showSubmitModal(ppicResult = null) {
   const rows = [
     { label: 'Quality Control (QC)', icon: 'analytics', color: 'blue', score: qcScore, max: 30, detail: qcDetail },
     { label: 'PPIC / Delivery', icon: 'inventory_2', color: 'amber', score: ppicScore, max: 30, detail: ppicDetail },
-    { label: 'Purchasing', icon: 'payments', color: 'emerald', score: pchScore, max: 30, detail: '' },
+    { label: 'Purchasing', icon: 'payments', color: 'emerald', score: pchScore, max: 25, detail: '' },
     { label: 'Health & Safety', icon: 'health_and_safety', color: 'rose', score: formData.hse_score ?? 0, max: 10, detail: '' },
   ];
 

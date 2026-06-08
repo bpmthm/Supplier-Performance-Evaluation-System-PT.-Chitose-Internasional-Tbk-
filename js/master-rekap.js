@@ -971,7 +971,7 @@ function openSingleDetailModal(item) {
                     </span>
                     <span class="font-bold text-slate-800">Purchasing (PCH)</span>
                   </div>
-                  <span class="text-sm font-black text-amber-600">${item.pch_score ?? 0} <span class="text-xs text-slate-400 font-medium">/ 30 Pts</span></span>
+                  <span class="text-sm font-black text-amber-600">${item.pch_score ?? 0} <span class="text-xs text-slate-400 font-medium">/ 25 Pts</span></span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div class="p-3 bg-slate-50 rounded-xl flex flex-col justify-between gap-1.5">
@@ -1038,6 +1038,47 @@ function openSingleDetailModal(item) {
             </div>
 
           </div>
+
+          <!-- Performance Analysis Section -->
+          <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col gap-4 mt-6">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-650 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">psychology</span>
+              </span>
+              <span class="font-bold text-slate-800">Analisis Performa Supplier</span>
+            </div>
+            
+            <div id="analisis-loading" class="text-xs text-slate-400 flex items-center gap-2">
+              <span class="animate-spin h-4 w-4 border-2 border-indigo-600 border-t-transparent rounded-full"></span>
+              Sedang merangkai analisis performa...
+            </div>
+            
+            <div id="analisis-content" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div class="p-4 bg-white rounded-xl border border-slate-100">
+                <div class="font-bold text-emerald-600 mb-2 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">trending_up</span> Kelebihan / Kekuatan
+                </div>
+                <ul id="analisis-strengths" class="list-disc pl-4 space-y-1 text-slate-600">
+                </ul>
+              </div>
+              
+              <div class="p-4 bg-white rounded-xl border border-slate-100">
+                <div class="font-bold text-rose-600 mb-2 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">trending_down</span> Kelemahan / Hambatan
+                </div>
+                <ul id="analisis-weaknesses" class="list-disc pl-4 space-y-1 text-slate-600">
+                </ul>
+              </div>
+              
+              <div class="md:col-span-2 p-4 bg-indigo-50/50 rounded-xl border border-indigo-150">
+                <div class="font-bold text-indigo-900 mb-1 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">gavel</span> Rekomendasi Tindak Lanjut
+                </div>
+                <p id="analisis-recommendation" class="text-slate-700 italic leading-relaxed"></p>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Footer -->
@@ -1052,6 +1093,36 @@ function openSingleDetailModal(item) {
   `;
 
   document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  // Load analysis dynamically
+  getAnalisisPerforma(item.supplier_id, item.periode).then(res => {
+    const loadingEl = document.getElementById('analisis-loading');
+    const contentEl = document.getElementById('analisis-content');
+    if (loadingEl) loadingEl.remove();
+    if (contentEl) {
+      contentEl.classList.remove('hidden');
+      
+      const strengthsUl = document.getElementById('analisis-strengths');
+      const weaknessesUl = document.getElementById('analisis-weaknesses');
+      const recP = document.getElementById('analisis-recommendation');
+      
+      if (strengthsUl && res.strengths) {
+        strengthsUl.innerHTML = res.strengths.map(s => `<li>${s}</li>`).join('') || '<li>Tidak ada kelebihan spesifik terdeteksi.</li>';
+      }
+      if (weaknessesUl && res.weaknesses) {
+        weaknessesUl.innerHTML = res.weaknesses.map(w => `<li>${w}</li>`).join('') || '<li>Tidak ada kelemahan spesifik terdeteksi.</li>';
+      }
+      if (recP) {
+        recP.textContent = res.recommendation || '-';
+      }
+    }
+  }).catch(err => {
+    console.error(err);
+    const loadingEl = document.getElementById('analisis-loading');
+    if (loadingEl) {
+      loadingEl.innerHTML = `<span class="text-red-500 font-bold">Gagal memuat analisis performa dari server.</span>`;
+    }
+  });
 
   // Pasang event listeners untuk close modal
   const closeModal = () => {
@@ -1253,7 +1324,7 @@ function openCompareDetailModal(kodeVendor, itemA, itemB) {
                   <td colspan="4" class="px-4 py-2 text-xs uppercase tracking-wider">Purchasing (PCH)</td>
                 </tr>
                 <tr>
-                  <td class="px-4 py-3 pl-8 text-slate-500">Poin PCH (Max 30)</td>
+                  <td class="px-4 py-3 pl-8 text-slate-500">Poin PCH (Max 25)</td>
                   <td class="px-4 py-3 text-center bg-slate-50/50 font-semibold">${itemA ? itemA.pch_score : '-'}</td>
                   <td class="px-4 py-3 text-center bg-indigo-50/30 font-bold">${itemB ? itemB.pch_score : '-'}</td>
                   <td class="px-4 py-3 text-center">${getAverageSpan(itemA?.pch_score, itemB?.pch_score)}</td>

@@ -358,6 +358,27 @@ async function getDetailEvaluasi(kodeVendor, periodeAwal, periodeAkhir) {
 }
 
 /**
+ * Ambil analisis performa vendor (kelebihan, kelemahan, rekomendasi)
+ * @param {number} supplierId - ID supplier di database
+ * @param {string} periode - Periode (YYYY-MM)
+ */
+async function getAnalisisPerforma(supplierId, periode) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/penilaian/analisis/${supplierId}?periode=${periode}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching performance analysis:', error);
+    return {
+      status: 'error',
+      strengths: [],
+      weaknesses: [],
+      recommendation: 'Gagal mengambil analisis performa dari server.'
+    };
+  }
+}
+
+/**
  * Get all Qc Daily entries
  */
 async function getQcDailyList() {
