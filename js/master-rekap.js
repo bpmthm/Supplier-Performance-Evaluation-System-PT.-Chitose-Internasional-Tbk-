@@ -1732,6 +1732,35 @@ async function openEvaluasiDetailModal(kodeVendor, pAwal, pAkhir) {
 
     const body = document.getElementById('evaluasi-modal-body');
     if (body) {
+      // Build insight HTML from backend response
+      const insight = res.insight || {};
+      const insightHtml = `
+        <div class="p-5 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/60 to-violet-50/40 flex flex-col gap-4">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm">
+              <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+            </span>
+            <div>
+              <span class="font-bold text-slate-800 text-sm">Smart Insight Analysis</span>
+              <span class="text-[10px] text-slate-400 ml-2 bg-slate-100 px-2 py-0.5 rounded-full font-semibold border border-slate-200">Pseudo-AI</span>
+            </div>
+          </div>
+          <div class="text-[13px] text-slate-700 space-y-3 leading-relaxed">
+            <div class="flex gap-2.5 items-start">
+              <span class="text-base mt-0.5 flex-shrink-0">📊</span>
+              <span id="insight-ringkasan">${insight.ringkasan || '-'}</span>
+            </div>
+            <div class="flex gap-2.5 items-start">
+              <span class="text-base mt-0.5 flex-shrink-0">⚠️</span>
+              <span id="insight-anomali">${insight.anomali || '-'}</span>
+            </div>
+            <div class="flex gap-2.5 items-start">
+              <span class="text-base mt-0.5 flex-shrink-0">💡</span>
+              <span id="insight-rekomendasi">${insight.rekomendasi || '-'}</span>
+            </div>
+          </div>
+        </div>`;
+
       body.innerHTML = `
         <div class="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-600">
           <span class="bg-slate-100 px-3 py-1.5 rounded-lg font-semibold border border-slate-200">Kode Vendor: <span class="text-slate-800">${kodeVendor}</span></span>
@@ -1741,25 +1770,179 @@ async function openEvaluasiDetailModal(kodeVendor, pAwal, pAkhir) {
             Periode: ${formatPeriode(pAwal)} — ${formatPeriode(pAkhir)}
           </span>
         </div>
-        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-          <div class="max-h-[55vh] overflow-y-auto">
-            <table class="w-full text-left border-collapse text-sm">
-              <thead class="sticky top-0 z-10 shadow-sm">
-                <tr class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[11px] font-black uppercase tracking-wider">
-                  <th class="px-4 py-3.5 whitespace-nowrap border-r border-violet-500/30">Periode</th>
-                  <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30 w-40">QC (Quality Control)</th>
-                  <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30 w-36">PPIC (Delivery)</th>
-                  <th class="px-4 py-3.5 text-center border-r border-violet-500/30">PCH (Purchasing)</th>
-                  <th class="px-4 py-3.5 text-center border-r border-violet-500/30">HSE (Safety)</th>
-                  <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30">Total Score</th>
-                  <th class="px-4 py-3.5 text-center">Grade</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 bg-white">${rowsHtml}</tbody>
-              <tfoot>${footerHtml}</tfoot>
-            </table>
+
+        <!-- Chart Section -->
+        <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm mb-5">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px]">monitoring</span>
+            </span>
+            <span class="font-bold text-slate-800 text-sm">Tren Performa Vendor</span>
+          </div>
+          <div class="relative" style="height: 320px">
+            <canvas id="evaluasi-trend-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Smart Insight Section -->
+        ${insightHtml}
+
+        <!-- Collapsible Data Table -->
+        <div class="mt-5">
+          <button id="toggle-detail-table" class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors text-sm font-semibold text-slate-700 group">
+            <span class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-slate-500">table_chart</span>
+              Lihat Detail Tabel Data Aktual
+            </span>
+            <span class="material-symbols-outlined text-[18px] text-slate-400 transition-transform duration-300 group-[.open]:rotate-180" id="toggle-icon">expand_more</span>
+          </button>
+          <div id="detail-table-wrapper" class="hidden mt-3 border border-slate-200 rounded-xl overflow-hidden shadow-sm animate-fadeInUp">
+            <div class="max-h-[45vh] overflow-y-auto">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead class="sticky top-0 z-10 shadow-sm">
+                  <tr class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[11px] font-black uppercase tracking-wider">
+                    <th class="px-4 py-3.5 whitespace-nowrap border-r border-violet-500/30">Periode</th>
+                    <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30 w-40">QC (Quality Control)</th>
+                    <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30 w-36">PPIC (Delivery)</th>
+                    <th class="px-4 py-3.5 text-center border-r border-violet-500/30">PCH (Purchasing)</th>
+                    <th class="px-4 py-3.5 text-center border-r border-violet-500/30">HSE (Safety)</th>
+                    <th class="px-4 py-3.5 text-center whitespace-nowrap border-r border-violet-500/30">Total Score</th>
+                    <th class="px-4 py-3.5 text-center">Grade</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">${rowsHtml}</tbody>
+                <tfoot>${footerHtml}</tfoot>
+              </table>
+            </div>
           </div>
         </div>`;
+
+      // Toggle detail table visibility
+      const toggleBtn = document.getElementById('toggle-detail-table');
+      const tableWrapper = document.getElementById('detail-table-wrapper');
+      if (toggleBtn && tableWrapper) {
+        toggleBtn.addEventListener('click', () => {
+          tableWrapper.classList.toggle('hidden');
+          toggleBtn.classList.toggle('open');
+        });
+      }
+
+      // Render Chart.js trend chart
+      if (res.grafik?.length > 0 && typeof Chart !== 'undefined') {
+        const ctx = document.getElementById('evaluasi-trend-chart')?.getContext('2d');
+        if (ctx) {
+          const labels = res.grafik.map(r => {
+            const [y, m] = r.periode.split('-');
+            const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+            return months[parseInt(m) - 1] + ' ' + y;
+          });
+
+          const datasets = [
+            {
+              label: 'Nilai QC',
+              data: res.grafik.map(item => item.qc_raw),
+              maxScore: 30,
+              backgroundColor: 'rgba(54, 162, 235, 0.8)', // Biru
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Nilai PPIC',
+              data: res.grafik.map(item => item.ppic_raw),
+              maxScore: 30,
+              backgroundColor: 'rgba(255, 206, 86, 0.8)', // Kuning
+              borderColor: 'rgba(255, 206, 86, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Nilai PCH',
+              data: res.grafik.map(item => item.pch_raw),
+              maxScore: 25,
+              backgroundColor: 'rgba(75, 192, 192, 0.8)', // Hijau Tosca
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Nilai HSE',
+              data: res.grafik.map(item => item.hse_raw),
+              maxScore: 10,
+              backgroundColor: 'rgba(255, 99, 132, 0.8)', // Merah Muda
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+            }
+          ];
+
+          // Register datalabels plugin
+          if (typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+          }
+
+          new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    color: '#475569', // Slate-600 for light theme
+                    font: { family: "'Inter', sans-serif", size: 11, weight: '600' }
+                  }
+                },
+                datalabels: {
+                  color: '#fff',
+                  font: {
+                    weight: 'bold',
+                    size: 11
+                  },
+                  formatter: function(value) {
+                    return value > 0 ? value : '';
+                  }
+                },
+                tooltip: {
+                  backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                  titleFont: { family: "'Inter', sans-serif", size: 13, weight: '700' },
+                  bodyFont: { family: "'Inter', sans-serif", size: 12 },
+                  padding: 12,
+                  cornerRadius: 8,
+                  callbacks: {
+                    label: function(context) {
+                      const label = context.dataset.label || '';
+                      const val = context.raw;
+                      const max = context.dataset.maxScore;
+                      return ` ${label}: ${val}/${max} Pts`;
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  stacked: true,
+                  grid: { display: false },
+                  ticks: { font: { family: "'Inter', sans-serif", size: 11, weight: '600' }, color: '#64748b' }
+                },
+                y: {
+                  stacked: true,
+                  beginAtZero: true,
+                  max: 100,
+                  grid: {
+                    color: '#e2e8f0',
+                    borderDash: [5, 5],
+                    drawBorder: false
+                  },
+                  ticks: {
+                    font: { family: "'Inter', sans-serif", size: 11 },
+                    color: '#94a3b8',
+                    stepSize: 20
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
     }
   } catch (err) {
     console.error('openEvaluasiDetailModal error:', err);
@@ -1772,9 +1955,8 @@ async function openEvaluasiDetailModal(kodeVendor, pAwal, pAkhir) {
   }
 }
 
-// ==========================================
+
 // FITUR BARU: SEARCH, FILTER, SORT, EXPORT
-// ==========================================
 
 function setupFiltersAndSearch() {
   const searchInput = document.getElementById('search-heatmap');

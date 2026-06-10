@@ -241,6 +241,16 @@ function renderTable() {
             </td>
             <td class="px-5 py-3.5 text-xs text-slate-500">${formatDate(tglTerima)}</td>
             <td class="px-5 py-3.5 text-xs text-slate-500 max-w-[180px] whitespace-normal">${ketDisplay}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-right">
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="editRecord(${item.id})" class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-1.5 rounded-md transition-colors" title="Edit">
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                    <button onclick="deleteRecord(${item.id})" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition-colors" title="Hapus">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                </div>
+            </td>
         `;
 
         // Row click → open detail panel
@@ -436,7 +446,105 @@ function createPageBtn(text, targetPage, isDisabled, isActive = false, isIcon = 
     return btn;
 }
 
-// ─── Expose globals for inline HTML onclick ───────────────────────────────────
+
+// FITUR CRUD (EDIT & DELETE) QC DAILY
+
+// FUNGSI DELETE
+window.deleteRecord = async function(id) {
+    const result = await Swal.fire({
+        title: 'Yakin mau hapus?',
+        text: "Data yang dihapus tidak bisa dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/qc-daily/${id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error('Gagal menghapus data');
+
+            Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+            await fetchRiwayatData(); // Otomatis refresh tabel
+        } catch (error) {
+            console.error(error);
+            Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data.', 'error');
+        }
+    }
+};
+
+// FUNGSI MUNCULIN MODAL EDIT
+window.editRecord = function(id) {
+    const data = allData.find(item => item.id == id);
+    if (!data) return;
+
+    document.getElementById('edit_id').value = data.id;
+    document.getElementById('edit_supplier_id').value = data.supplier_id;
+    document.getElementById('edit_tanggal').value = data.tanggal_terima;
+    document.getElementById('edit_sj').value = data.no_surat_jalan;
+    document.getElementById('edit_mat_code').value = data.material_code;
+    document.getElementById('edit_mat_desc').value = data.material_desc;
+    document.getElementById('edit_qty_masuk').value = data.qty_masuk;
+    document.getElementById('edit_qty_reject').value = data.qty_reject;
+
+    document.getElementById('editModal').classList.remove('hidden');
+};
+
+// FUNGSI TUTUP MODAL
+window.closeEditModal = function() {
+    document.getElementById('editModal').classList.add('hidden');
+};
+
+// FUNGSI SUBMIT FORM EDIT (PUT)
+window.submitEditForm = async function(e) {
+    e.preventDefault();
+    
+    const btnSave = document.getElementById('btnSaveEdit');
+    const originalText = btnSave.innerHTML;
+    btnSave.disabled = true;
+    btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin text-[18px]">autorenew</span> Menyimpan...`;
+
+    const id = document.getElementById('edit_id').value;
+    
+    const payload = {
+        tanggal_terima: document.getElementById('edit_tanggal').value,
+        supplier_id: document.getElementById('edit_supplier_id').value,
+        no_surat_jalan: document.getElementById('edit_sj').value,
+        material_code: document.getElementById('edit_mat_code').value,
+        material_desc: document.getElementById('edit_mat_desc').value,
+        qty_masuk: document.getElementById('edit_qty_masuk').value,
+        qty_reject: document.getElementById('edit_qty_reject').value
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/qc-daily/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('Gagal update data');
+
+        closeEditModal();
+        Swal.fire('Berhasil!', 'Data berhasil diupdate.', 'success');
+        await fetchRiwayatData(); // Otomatis refresh tabel
+    } catch (error) {
+        console.error(error);
+        Swal.fire('Error!', 'Gagal menyimpan perubahan.', 'error');
+    } finally {
+        btnSave.disabled = false;
+        btnSave.innerHTML = originalText;
+    }
+};
+
+// Expose globals for inline HTML onclick
 window.closeDetailPanel = closeDetailPanel;
 window.openDetailPanel  = openDetailPanel;
 window.fetchRiwayatData = fetchRiwayatData;
