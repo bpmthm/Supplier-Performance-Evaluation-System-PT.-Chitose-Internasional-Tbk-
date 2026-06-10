@@ -94,7 +94,7 @@ function getActiveRole() {
   return 'GUEST';
 }
 
-// Transparently intercept window.fetch to inject Authorization Bearer headers
+// Transparently intercept window.fetch to inject Authorization Bearer headers and handle 401
 const originalFetch = window.fetch;
 window.fetch = async function (resource, options = {}) {
   const token = localStorage.getItem('jwt_token');
@@ -118,7 +118,17 @@ window.fetch = async function (resource, options = {}) {
       }
     }
   }
-  return originalFetch(resource, options);
+  
+  const response = await originalFetch(resource, options);
+  
+  // Global 401 Interceptor
+  if (response.status === 401 && urlStr && urlStr.includes(API_BASE_URL)) {
+    console.warn("API returned 401 Unauthorized. Redirecting to login...");
+    localStorage.removeItem('jwt_token');
+    window.location.href = PORTAL_CI3_URL;
+  }
+  
+  return response;
 };
 
 
@@ -595,4 +605,71 @@ async function loadNavbar() {
 document.addEventListener('DOMContentLoaded', () => {
     loadSidebar();
     loadNavbar();
+    setupNumberInputsSanitization();
 });
+
+// --- GLOBAL UX UTILS ---
+function setupNumberInputsSanitization() {
+    const numberInputs = document.querySelectorAll('input[type="number"]');
+    numberInputs.forEach(input => {
+        input.setAttribute('min', '0');
+        input.addEventListener('input', function() {
+            if (this.value !== '') {
+                let val = Math.abs(parseFloat(this.value));
+                if (isNaN(val)) val = '';
+                this.value = val;
+            }
+        });
+        
+        input.addEventListener('keydown', function(e) {
+            if (['e', 'E', '-', '+'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+    });
+}
+
+// Global guardPage function to replace duplicate role access control in each JS file
+function guardPage(allowedRoles, pageName = 'Halaman Ini') {
+  const activeRole = getActiveRole();
+  const hasAccess = activeRole && allowedRoles.includes(activeRole);
+  
+  if (!hasAccess) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const main = document.querySelector('main');
+      if (main) {
+        main.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-full min-h-[70vh] text-center animate-fadeInUp">
+            <div class="relative mb-6">
+              <div class="absolute inset-0 bg-red-200 rounded-full blur-xl opacity-50 animate-pulse"></div>
+              <div class="relative w-28 h-28 bg-gradient-to-br from-red-50 to-red-100 rounded-full flex items-center justify-center shadow-md border-[6px] border-white">
+                <span class="material-symbols-outlined text-[56px] text-red-500" style="font-variation-settings: 'FILL' 1;">gpp_bad</span>
+              </div>
+            </div>
+            
+            <h1 class="font-headline-xl text-[36px] font-bold text-slate-800 mb-3 tracking-tight bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Akses Ditolak</h1>
+            
+            <p class="text-slate-500 text-[15px] max-w-md mb-10 leading-relaxed">
+              Maaf, Anda tidak memiliki izin untuk melihat halaman ini. Akses ke <strong>${pageName}</strong> secara eksklusif dibatasi untuk divisi <strong class="text-slate-700">${allowedRoles.join(', ')}</strong>.
+            </p>
+            
+            <a href="dashboard.html" 
+               class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white font-semibold rounded-2xl overflow-hidden shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 transition-all duration-300 hover:-translate-y-1">
+              <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <span class="material-symbols-outlined text-[20px] relative z-10 transition-transform duration-300 group-hover:-translate-x-1">arrow_back</span>
+              <span class="relative z-10">Kembali ke Dashboard</span>
+            </a>
+          </div>
+        `;
+      }
+      
+      const activeNavs = document.querySelectorAll('.nav-item.active');
+      activeNavs.forEach(nav => nav.classList.remove('active', 'text-white'));
+      
+      if (typeof forwardRoleToNavLinks === 'function') {
+        forwardRoleToNavLinks();
+      }
+    });
+  }
+  return hasAccess;
+}

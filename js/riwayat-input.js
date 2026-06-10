@@ -4,10 +4,10 @@
  *        interactive detail panel, smooth animations.
  */
 
-let allData = [];
 let filteredData = [];
 let currentPage = 1;
 const ITEMS_PER_PAGE = 25;
+let currentPagination = { total: 0, limit: ITEMS_PER_PAGE, page: 1, total_pages: 1 };
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -30,8 +30,17 @@ function setDefaultMonthFilter() {
 async function fetchRiwayatData() {
     showLoadingState();
     try {
-        // api.js sudah auto-inject Authorization header via fetch override
-        const response = await fetch(`${API_BASE_URL}/qc-daily`);
+        const keyword = (document.getElementById('search-input')?.value || '').trim();
+        const bulan   = document.getElementById('filter-bulan')?.value || '';
+        
+        const params = new URLSearchParams({
+            page: currentPage,
+            limit: ITEMS_PER_PAGE,
+            search: keyword,
+            bulan: bulan
+        });
+
+        const response = await fetch(`${API_BASE_URL}/qc-daily?${params.toString()}`);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -39,12 +48,12 @@ async function fetchRiwayatData() {
 
         const result = await response.json();
 
-        // Backend CI4 respond() returns the array directly (no wrapper)
-        allData      = Array.isArray(result) ? result : (result.data || []);
-        filteredData = [...allData];
+        filteredData = result.data || [];
+        currentPagination = result.pagination || { total: 0, limit: ITEMS_PER_PAGE, page: 1, total_pages: 1 };
+        const stats = result.stats || { total_penerimaan: 0, qty_masuk: 0, qty_reject: 0, ng_rate: 0 };
 
-        applyFilters(); // langsung apply filter bulan default
-        updateStats(filteredData);
+        updateStats(stats);
+        renderTable();
 
     } catch (error) {
         console.error('Gagal menarik data riwayat:', error);
@@ -91,11 +100,11 @@ function calcNgRate(item) {
 }
 
 // ─── Stats Cards ──────────────────────────────────────────────────────────────
-function updateStats(data) {
-    const total   = data.length;
-    const qtyIn   = data.reduce((s, i) => s + parseInt(i.qty_masuk  || 0), 0);
-    const qtyRej  = data.reduce((s, i) => s + parseInt(i.qty_reject || 0), 0);
-    const ngRate  = qtyIn > 0 ? ((qtyRej / qtyIn) * 100).toFixed(2) : '0.00';
+function updateStats(stats) {
+    const total   = stats.total_penerimaan || 0;
+    const qtyIn   = stats.qty_masuk || 0;
+    const qtyRej  = stats.qty_reject || 0;
+    const ngRate  = (stats.ng_rate || 0).toFixed(2);
 
     animateCounter('stat-total-penerimaan', total);
     animateCounter('stat-qty-masuk', qtyIn);
@@ -131,30 +140,8 @@ function setupEventListeners() {
 }
 
 function applyFilters() {
-    const keyword = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
-    const bulan   = document.getElementById('filter-bulan')?.value || '';
-
-    filteredData = allData.filter(item => {
-        const supplier = getSupplierName(item).toLowerCase();
-        const komponen = getMaterialDesc(item).toLowerCase();
-        const kode     = getMaterialCode(item).toLowerCase();
-        const noSj     = (item.no_surat_jalan || '').toLowerCase();
-        const tgl      = getTanggal(item);
-
-        const matchKeyword = !keyword || keyword.length < 2 ||
-            supplier.includes(keyword) ||
-            komponen.includes(keyword) ||
-            kode.includes(keyword) ||
-            noSj.includes(keyword);
-
-        const matchBulan = !bulan || tgl.startsWith(bulan);
-
-        return matchKeyword && matchBulan;
-    });
-
     currentPage = 1;
-    updateStats(filteredData);
-    renderTable();
+    fetchRiwayatData();
 }
 
 function debounce(fn, delay) {
@@ -168,9 +155,7 @@ function renderTable() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    const start       = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end         = start + ITEMS_PER_PAGE;
-    const pageItems   = filteredData.slice(start, end);
+    const pageItems = filteredData;
 
     if (pageItems.length === 0) {
         tbody.innerHTML = `
@@ -264,7 +249,9 @@ function renderTable() {
         tbody.appendChild(tr);
     });
 
-    updatePaginationInfo(start + 1, Math.min(end, filteredData.length), filteredData.length);
+    const startIdx = (currentPagination.page - 1) * currentPagination.limit + 1;
+    const endIdx   = startIdx + pageItems.length - 1;
+    updatePaginationInfo(pageItems.length > 0 ? startIdx : 0, endIdx, currentPagination.total);
     renderPaginationControls();
 }
 
@@ -404,7 +391,7 @@ function renderPaginationControls() {
     const container  = document.getElementById('pagination-container');
     if (!container) return;
     container.innerHTML = '';
-    const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+    const totalPages = currentPagination.total_pages || 1;
     if (totalPages <= 1) return;
 
     container.appendChild(createPageBtn('chevron_left', currentPage - 1, currentPage === 1, false, true));
@@ -439,7 +426,7 @@ function createPageBtn(text, targetPage, isDisabled, isActive = false, isIcon = 
     if (!isDisabled && !isActive) {
         btn.onclick = () => {
             currentPage = targetPage;
-            renderTable();
+            fetchRiwayatData();
             document.getElementById('table-body')?.closest('.overflow-y-auto')?.scrollTo({ top: 0, behavior: 'smooth' });
         };
     }

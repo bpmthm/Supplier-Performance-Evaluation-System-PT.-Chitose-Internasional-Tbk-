@@ -7,55 +7,10 @@
  * - Show recent inputs history feed
  */
 
-const activeRole = getActiveRole();
-const allowedRoles = ['QC'];
+const hasAccess = guardPage(['QC'], 'Input Daily QC');
 
 let selectedMaterial = null; // Cache chosen material
 let allSuppliers    = [];    // Cache supplier list
-
-// ---- IIFE: Role check SEBELUM DOM selesai ----
-(function enforceRoleAccess() {
-  if (!activeRole || !allowedRoles.includes(activeRole)) {
-    document.addEventListener('DOMContentLoaded', () => {
-      const main = document.querySelector('main');
-      if (main) {
-        main.innerHTML = `
-          <div class="flex flex-col items-center justify-center h-full min-h-[70vh] text-center animate-fadeInUp">
-            <div class="relative mb-6">
-              <div class="absolute inset-0 bg-red-200 rounded-full blur-xl opacity-50 animate-pulse"></div>
-              <div class="relative w-28 h-28 bg-gradient-to-br from-red-50 to-red-100 rounded-full flex items-center justify-center shadow-md border-[6px] border-white">
-                <span class="material-symbols-outlined text-[56px] text-red-500" style="font-variation-settings: 'FILL' 1;">gpp_bad</span>
-              </div>
-            </div>
-            
-            <h1 class="font-headline-xl text-[36px] font-bold text-slate-800 mb-3 tracking-tight bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Akses Ditolak</h1>
-            
-            <p class="text-slate-500 text-[15px] max-w-md mb-10 leading-relaxed">
-              Maaf, Anda tidak memiliki izin untuk melihat halaman ini. Akses ke halaman <strong>Input Daily QC</strong> secara eksklusif dibatasi untuk divisi <strong class="text-slate-700">Quality Control (QC)</strong>.
-            </p>
-            
-            <a href="dashboard.html" 
-               class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 text-white font-semibold rounded-2xl overflow-hidden shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 transition-all duration-300 hover:-translate-y-1">
-              <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span class="material-symbols-outlined text-[20px] relative z-10 transition-transform duration-300 group-hover:-translate-x-1">arrow_back</span>
-              <span class="relative z-10">Kembali ke Dashboard</span>
-            </a>
-          </div>
-        `;
-      }
-
-      // Reset nav styling
-      const navDaily = document.getElementById('nav-daily');
-      if (navDaily) {
-        navDaily.className = "text-slate-400 hover:text-white mx-2 px-4 py-2 flex items-center gap-3 hover:bg-slate-800 transition-all duration-150 active:scale-95 origin-left";
-      }
-
-      // Tetap forward role ke nav links agar jika user klik link di sidebar parameter ?role= tidak hilang
-      forwardRoleToNavLinks();
-    });
-    return;
-  }
-})();
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!activeRole || !allowedRoles.includes(activeRole)) return;
