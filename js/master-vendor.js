@@ -488,6 +488,11 @@ function renderTablePaginated(data, startIdx) {
            Aktifkan
          </button>`;
 
+    const btnEdit = `<button onclick="openEditModal(${vendor.id}, '${vendor.kode_vendor}', '${vendor.nama_vendor.replace(/'/g, "\\'")}', '${vendor.jenis_bahan}', ${vendor.top_days || 0})" class="edit-btn inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-lg border border-indigo-200 hover:border-indigo-300 cursor-pointer">
+         <span class="material-symbols-outlined text-[14px]">edit</span>
+         Edit
+       </button>`;
+
     const rowOpacity = isActive ? '' : 'opacity-60';
 
     tbody.insertAdjacentHTML('beforeend', `
@@ -501,6 +506,7 @@ function renderTablePaginated(data, startIdx) {
         <td class="px-sm py-4 text-center">
           <div class="flex items-center justify-center flex-wrap gap-1">
             ${statusBadge}
+            ${btnEdit}
             ${toggleBtn}
           </div>
         </td>
@@ -587,14 +593,14 @@ function renderSapResults(data) {
         <div class="font-bold text-slate-700 text-sm">${item.VENDOR_CODE}</div>
         <div class="text-xs text-slate-500">${item.VENDOR_NAME}</div>
       `;
-      li.onclick = () => selectSapVendor(item.VENDOR_CODE, item.VENDOR_NAME);
+      li.onclick = () => selectSapVendor(item.VENDOR_CODE, item.VENDOR_NAME, item.TOP_DAYS);
       resultBox.appendChild(li);
     });
   }
   resultBox.classList.remove('hidden');
 }
 
-function selectSapVendor(kode, nama) {
+function selectSapVendor(kode, nama, topDays) {
   selectedSapVendor = { vendor_code: kode, vendor_name: nama };
 
   // Tutup dropdown, isi input form
@@ -604,6 +610,13 @@ function selectSapVendor(kode, nama) {
   // Tunjukin preview kotak biru
   document.getElementById('preview-kode').textContent = kode;
   document.getElementById('preview-nama').textContent = nama;
+  
+  // Set nilai TOP Days di input
+  const topDaysInput = document.getElementById('top_days');
+  if (topDaysInput) {
+    topDaysInput.value = topDays !== undefined && topDays !== null ? topDays : '';
+  }
+
   document.getElementById('sap-selected-preview').classList.remove('hidden');
 
   // Nyalain tombol simpan
@@ -612,6 +625,10 @@ function selectSapVendor(kode, nama) {
 
 async function submitSyncSap() {
   if (!selectedSapVendor) return;
+
+  const topDaysInput = document.getElementById('top_days');
+  const topDays = topDaysInput ? parseInt(topDaysInput.value) || 0 : 0;
+  selectedSapVendor.top_days = topDays;
 
   const btnSubmit = document.getElementById('btn-submit-sync');
   btnSubmit.disabled = true;
@@ -632,7 +649,6 @@ async function submitSyncSap() {
     const result = await response.json();
 
     if (!response.ok) {
-      // Nangkap error validasi dari CI4 (Misal: Vendor udah ada)
       throw new Error(result.messages?.error || result.message || 'Gagal menyimpan vendor');
     }
 
@@ -646,5 +662,66 @@ async function submitSyncSap() {
     showToast(error.message, 'error');
     btnSubmit.disabled = false;
     btnSubmit.innerHTML = `<span class="material-symbols-outlined text-[18px]">save</span> Simpan ke Lokal`;
+  }
+}
+
+// --- Modal Edit Vendor Operations ---
+function openEditModal(id, code, name, jenis, topDays) {
+  document.getElementById('modal-edit-vendor').classList.remove('hidden');
+  document.getElementById('modal-edit-vendor').classList.add('flex');
+
+  document.getElementById('edit-vendor-id').value = id;
+  document.getElementById('edit-vendor-code').value = code;
+  document.getElementById('edit-vendor-name').value = name;
+  document.getElementById('edit-jenis-bahan').value = jenis;
+  document.getElementById('edit-top-days').value = topDays || 0;
+}
+
+function closeEditModal() {
+  document.getElementById('modal-edit-vendor').classList.add('hidden');
+  document.getElementById('modal-edit-vendor').classList.remove('flex');
+}
+
+async function submitEditVendor() {
+  const id = document.getElementById('edit-vendor-id').value;
+  const jenisBahan = document.getElementById('edit-jenis-bahan').value;
+  const topDays = document.getElementById('edit-top-days').value;
+
+  const btnSubmit = document.getElementById('btn-submit-edit');
+  btnSubmit.disabled = true;
+  btnSubmit.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">autorenew</span> Menyimpan...`;
+
+  try {
+    const token = localStorage.getItem('jwt_token') || '';
+
+    const response = await fetch(`${API_BASE_URL}/supplier/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        jenis_bahan: jenisBahan,
+        top_days: parseInt(topDays) || 0
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Gagal menyimpan perubahan vendor');
+    }
+
+    showToast('Data vendor berhasil diupdate!', 'success');
+    closeEditModal();
+
+    // Refresh data
+    await loadVendorData();
+
+  } catch (error) {
+    showToast(error.message, 'error');
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = `<span class="material-symbols-outlined text-[18px]">save</span> Simpan Perubahan`;
   }
 }

@@ -1,6 +1,6 @@
 // --- KONFIGURASI URL ---
 const PORTAL_CI3_URL = 'http://localhost:8080';
-const API_BASE_URL   = 'http://localhost:8082/api';
+const API_BASE_URL   = 'http://localhost:8084/api';
 
 // Helper to remove a query parameter from the URL address bar cleanly
 function cleanUrlParameter(paramName) {

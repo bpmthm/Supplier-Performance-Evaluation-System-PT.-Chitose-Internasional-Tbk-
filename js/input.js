@@ -259,6 +259,33 @@ function populateSupplierSearch(suppliers) {
     if (clearBtn) clearBtn.classList.remove('hidden');
     if (searchIcon) searchIcon.classList.add('hidden');
 
+    // Auto-calculate PCH TOP
+    const topDays = parseInt(s.top_days) || 0;
+    let statusTOP = 'KURANG';
+    let labelTOP = 'KURANG (< 30 Hari)';
+    if (topDays >= 60) {
+      statusTOP = 'BAIK';
+      labelTOP = 'BAIK (>= 60 Hari)';
+    } else if (topDays >= 30) {
+      statusTOP = 'CUKUP';
+      labelTOP = 'CUKUP (30 - 59 Hari)';
+    }
+    formData.pch_top = statusTOP;
+    
+    const topDisplay = document.getElementById('pch_top');
+    const topDaysDisplay = document.getElementById('pch_top_days_display');
+    if (topDisplay) {
+      topDisplay.textContent = labelTOP;
+      topDisplay.className = `inline-flex items-center px-3 py-1 rounded-lg border text-xs font-bold ${
+        statusTOP === 'BAIK' ? 'bg-green-100 text-green-700 border-green-200' :
+        statusTOP === 'CUKUP' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+        'bg-red-100 text-red-700 border-red-200'
+      }`;
+    }
+    if (topDaysDisplay) {
+      topDaysDisplay.textContent = `Jumlah hari TOP: ${topDays} Hari`;
+    }
+
     // Trigger actions
     await updatePeriodeIndicators(currentSupplier);
     await loadSupplierPenilaian(currentSupplier);
@@ -514,10 +541,11 @@ function updateFormFeedback() {
   }
   formData.ppic_score = ppicScore;
 
-  // --- Calculate PCH (Maks 25: Harga 10 + MOQ 10 + Pelayanan 5) ---
+  // --- Calculate PCH (Maks 30: Harga 10 + MOQ 10 + TOP 5 + Pelayanan 5) ---
   let pchScore = 0;
   if (formData.pch_harga === 'BAIK') pchScore += 10; else if (formData.pch_harga === 'CUKUP') pchScore += 5; else if (formData.pch_harga === 'KURANG') pchScore += 3;
   if (formData.pch_moq === 'BAIK') pchScore += 10; else if (formData.pch_moq === 'CUKUP') pchScore += 5; else if (formData.pch_moq === 'KURANG') pchScore += 3;
+  if (formData.pch_top === 'BAIK') pchScore += 5; else if (formData.pch_top === 'CUKUP') pchScore += 3; else if (formData.pch_top === 'KURANG') pchScore += 1;
   if (formData.pch_pelayanan === 'BAIK') pchScore += 5; else if (formData.pch_pelayanan === 'CUKUP') pchScore += 3; else if (formData.pch_pelayanan === 'KURANG') pchScore += 1;
   formData.pch_score = pchScore;
 
@@ -549,7 +577,7 @@ function updateFormFeedback() {
   // --- UPDATE BADGES (UI) ---
   updateBadge('qc', ng, qcScore, 30);
   updateBadgePpic(ot, ppicScore); // PPIC punya logic badge sendiri
-  updateBadge('pch', (formData.pch_harga || formData.pch_moq || formData.pch_pelayanan) ? 'isi' : null, pchScore, 25);
+  updateBadge('pch', (formData.pch_harga || formData.pch_moq || formData.pch_top || formData.pch_pelayanan) ? 'isi' : null, pchScore, 30);
   updateBadge('hse', (formData.hse_uji_emisi || formData.hse_apd) ? 'isi' : null, hseScore, 10);
 }
 
@@ -771,13 +799,37 @@ function populateFormData(penilaian) {
   if (ppicInput) ppicInput.value = penilaian.ppic_ot_percent !== null ? penilaian.ppic_ot_percent : '';
   formData.ppic_ot_percent = penilaian.ppic_ot_percent !== null ? parseFloat(penilaian.ppic_ot_percent) : null;
 
-  // Radio Buttons (termasuk pch_top yang sebelumnya tidak di-restore)
-  const radioGroups = ['pch_harga', 'pch_moq', 'pch_top', 'pch_pelayanan', 'hse_uji_emisi', 'hse_apd'];
+  // Radio Buttons (excluding pch_top)
+  const radioGroups = ['pch_harga', 'pch_moq', 'pch_pelayanan', 'hse_uji_emisi', 'hse_apd'];
   radioGroups.forEach(name => {
     formData[name] = penilaian[name] || null;
     const radios = document.querySelectorAll(`input[name="${name}"]`);
     radios.forEach(r => { r.checked = (r.value === penilaian[name]); });
   });
+
+  // Display pch_top from loaded database record or current supplier
+  const currentSupplierObj = allSuppliers.find(s => s.id === currentSupplier);
+  const topDays = currentSupplierObj ? (parseInt(currentSupplierObj.top_days) || 0) : 0;
+  
+  formData.pch_top = penilaian.pch_top || (topDays >= 60 ? 'BAIK' : (topDays >= 30 ? 'CUKUP' : 'KURANG'));
+  
+  let labelTOP = 'KURANG (< 30 Hari)';
+  if (formData.pch_top === 'BAIK') labelTOP = 'BAIK (>= 60 Hari)';
+  else if (formData.pch_top === 'CUKUP') labelTOP = 'CUKUP (30 - 59 Hari)';
+
+  const topDisplay = document.getElementById('pch_top');
+  const topDaysDisplay = document.getElementById('pch_top_days_display');
+  if (topDisplay) {
+    topDisplay.textContent = labelTOP;
+    topDisplay.className = `inline-flex items-center px-3 py-1 rounded-lg border text-xs font-bold ${
+      formData.pch_top === 'BAIK' ? 'bg-green-100 text-green-700 border-green-200' :
+      formData.pch_top === 'CUKUP' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+      'bg-red-100 text-red-700 border-red-200'
+    }`;
+  }
+  if (topDaysDisplay) {
+    topDaysDisplay.textContent = `Jumlah hari TOP: ${topDays} Hari`;
+  }
 
   updateFormFeedback();
 }
@@ -789,6 +841,42 @@ function resetForm() {
   if (qcNgDisplay) qcNgDisplay.value = `0.00%`;
 
   formData = { supplier_id: currentSupplier, periode: currentPeriode };
+  
+  if (currentSupplier) {
+    const currentSupplierObj = allSuppliers.find(s => s.id === currentSupplier);
+    const topDays = currentSupplierObj ? (parseInt(currentSupplierObj.top_days) || 0) : 0;
+    formData.pch_top = topDays >= 60 ? 'BAIK' : (topDays >= 30 ? 'CUKUP' : 'KURANG');
+    
+    let labelTOP = 'KURANG (< 30 Hari)';
+    if (formData.pch_top === 'BAIK') labelTOP = 'BAIK (>= 60 Hari)';
+    else if (formData.pch_top === 'CUKUP') labelTOP = 'CUKUP (30 - 59 Hari)';
+
+    const topDisplay = document.getElementById('pch_top');
+    const topDaysDisplay = document.getElementById('pch_top_days_display');
+    if (topDisplay) {
+      topDisplay.textContent = labelTOP;
+      topDisplay.className = `inline-flex items-center px-3 py-1 rounded-lg border text-xs font-bold ${
+        formData.pch_top === 'BAIK' ? 'bg-green-100 text-green-700 border-green-200' :
+        formData.pch_top === 'CUKUP' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+        'bg-red-100 text-red-700 border-red-200'
+      }`;
+    }
+    if (topDaysDisplay) {
+      topDaysDisplay.textContent = `Jumlah hari TOP: ${topDays} Hari`;
+    }
+  } else {
+    formData.pch_top = null;
+    const topDisplay = document.getElementById('pch_top');
+    const topDaysDisplay = document.getElementById('pch_top_days_display');
+    if (topDisplay) {
+      topDisplay.textContent = '-';
+      topDisplay.className = 'inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200';
+    }
+    if (topDaysDisplay) {
+      topDaysDisplay.textContent = 'Jumlah hari TOP: -';
+    }
+  }
+
   updateFormFeedback();
 }
 
@@ -846,7 +934,7 @@ function showSubmitModal(ppicResult = null) {
   const rows = [
     { label: 'Quality Control (QC)', icon: 'analytics', color: 'blue', score: qcScore, max: 30, detail: qcDetail },
     { label: 'PPIC / Delivery', icon: 'inventory_2', color: 'amber', score: ppicScore, max: 30, detail: ppicDetail },
-    { label: 'Purchasing', icon: 'payments', color: 'emerald', score: pchScore, max: 25, detail: '' },
+    { label: 'Purchasing', icon: 'payments', color: 'emerald', score: pchScore, max: 30, detail: '' },
     { label: 'Health & Safety', icon: 'health_and_safety', color: 'rose', score: formData.hse_score ?? 0, max: 10, detail: '' },
   ];
 
